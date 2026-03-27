@@ -44,20 +44,25 @@ export default defineConfig({
 			],
 			customCss: ['./src/styles/calimero.css'],
 			head: [
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'preconnect',
-						href: 'https://fonts.googleapis.com',
-					},
-				},
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'stylesheet',
-						href: 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap',
-					},
-				},
+				// Fonts
+				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+				{ tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap' } },
+				// Open Graph
+				{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+				{ tag: 'meta', attrs: { property: 'og:site_name', content: 'Calimero Docs' } },
+				{ tag: 'meta', attrs: { property: 'og:title', content: 'Calimero Docs' } },
+				{ tag: 'meta', attrs: { property: 'og:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { property: 'og:url', content: 'https://docs.calimero.network' } },
+				{ tag: 'meta', attrs: { property: 'og:image', content: 'https://docs.calimero.network/og-image.png' } },
+				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+				{ tag: 'meta', attrs: { property: 'og:image:alt', content: 'Calimero Docs' } },
+				// Twitter / X card
+				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+				{ tag: 'meta', attrs: { name: 'twitter:site', content: '@CalimeroNetwork' } },
+				{ tag: 'meta', attrs: { name: 'twitter:title', content: 'Calimero Docs' } },
+				{ tag: 'meta', attrs: { name: 'twitter:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { name: 'twitter:image', content: 'https://docs.calimero.network/og-image.png' } },
 			],
 			sidebar: [
 				{
