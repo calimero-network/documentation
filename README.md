@@ -1,49 +1,50 @@
-# Starlight Starter Kit: Basics
+# Calimero Docs
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Official documentation site for the [Calimero network](https://calimero.network), built with [Astro Starlight](https://starlight.astro.build).
 
-```
-npm create astro@latest -- --template starlight
-```
+Live at **[docs.calimero.network](https://docs.calimero.network)**
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Contents
 
-## 🚀 Project Structure
+- **Core Concepts** — architecture, contexts, identity, nodes, and applications
+- **Build** — Rust SDK, JavaScript SDK, app examples, and the app registry
+- **Run & Integrate** — node operations, CLI, Desktop, client SDKs, Merobox, and Calimero Cloud
+- **Privacy & Security** — TEE, KMS, and attestation
+- **Reference** — API and JSON-RPC reference
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Local development
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+```bash
+npm install
+npm run dev        # dev server at localhost:4321
+npm run build      # production build to ./dist
+npm run preview    # preview production build locally
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+## Project structure
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+```
+src/
+├── assets/          # images and icons
+├── components/      # custom Astro components
+├── content/
+│   └── docs/        # all documentation pages (.md)
+├── pages/           # custom pages (e.g. 404)
+└── styles/          # global CSS overrides
+astro.config.mjs     # Starlight config, sidebar, and nav
+```
 
-Static assets, like favicons, can be placed in the `public/` directory.
+## Contributing
 
-## 🧞 Commands
+All docs live as Markdown files under `src/content/docs/`. To add or edit a page:
 
-All commands are run from the root of the project, from a terminal:
+1. Create or edit a `.md` file in the relevant section folder
+2. Add it to the sidebar in `astro.config.mjs` if it's a new page
+3. Run `npm run dev` to preview locally
+4. Open a pull request
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Built with
 
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+- [Astro](https://astro.build)
+- [Starlight](https://starlight.astro.build)
+- [astro-mermaid](https://github.com/sjwall/astro-mermaid) — diagram support

@@ -1,0 +1,64 @@
+---
+const stats = [
+  { value: 'Local-first', label: 'no cloud lock-in' },
+  { value: 'Rust + JS', label: 'native SDKs' },
+  { value: 'P2P sync', label: 'across peers' },
+  { value: 'Static search', label: 'ships with the site' },
+];
+---
+
+<div class="stat-bar">
+  {stats.map((s) => (
+    <div class="stat-item">
+      <span class="stat-value">{s.value}</span>
+      <span class="stat-label">{s.label}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .stat-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background: #111113;
+    animation: fade-up 0.35s 0.1s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.8rem 1rem;
+    border-right: 1px solid #27272a;
+    gap: 0.15rem;
+    transition: background 0.12s ease;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item:hover { background: rgba(255, 255, 255, 0.02); }
+
+  .stat-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #b8ff44;
+    letter-spacing: -0.01em;
+  }
+  .stat-label {
+    font-size: 0.6875rem;
+    color: #52525b;
+  }
+
+  @media (max-width: 640px) {
+    .stat-bar { grid-template-columns: 1fr 1fr; }
+    .stat-item:nth-child(2) { border-right: none; }
+    .stat-item:nth-child(1),
+    .stat-item:nth-child(2) { border-bottom: 1px solid #27272a; }
+  }
+</style>
