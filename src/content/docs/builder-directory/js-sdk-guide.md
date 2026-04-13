@@ -252,8 +252,7 @@ $: meroctl --node node1 context identity list --context 9MYohRkkpT1QXtBGAcXYeB7y
 # Call methods
 # Calling getCount to verify that the counter value is 0
 $: meroctl --node node1 call getCount \
-  --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9 \
-  --as E9X7upjmMoZB5FL79JSuxUY2i873DvZ5f7QkLcSat89e
+  --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9
 > ...
 > "result": {
 >    "output": "0"
@@ -262,18 +261,16 @@ $: meroctl --node node1 call getCount \
 
 # Calling increment which will increase the counter value to 1
 $: meroctl --node node1 call increment \
- --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9 \
- --as E9X7upjmMoZB5FL79JSuxUY2i873DvZ5f7QkLcSat89e
+ --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9
 > +-------------------+---------+
 > | Response          | Status  |
 > +=============================+
 > | JSON-RPC Response | Success |
 > +-------------------+---------+
 
-# Callin getCount to verify that the counter value is 1
+# Calling getCount to verify that the counter value is 1
 $: meroctl --node node1 call getCount \
-  --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9 \
-  --as E9X7upjmMoZB5FL79JSuxUY2i873DvZ5f7QkLcSat89e
+  --context 9MYohRkkpT1QXtBGAcXYeB7yTtWNeFrVieK47tV4TSx9
 > ...
 > "result": {
 >     "output": "1"

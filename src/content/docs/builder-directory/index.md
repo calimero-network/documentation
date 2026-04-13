@@ -586,7 +586,7 @@ Now the AI builds your React frontend to interact with the Rust backend.
 After the Rust code is written, the AI runs:
 
 ```bash
-cargo build --target wasm32-unknown-unknown --release
+cargo build --target wasm32-unknown-unknown --profile app-release
 npx calimero-abi-codegen -i logic/res/abi.json -o app/src/api/AbiClient.ts
 ```
 
@@ -879,9 +879,9 @@ This is why the first step after `pnpm network:bootstrap` is always to grab the 
 ```json
 {
   "scripts": {
-    "logic:build": "cd logic && cargo build --target wasm32-unknown-unknown --release",
+    "logic:build": "cd logic && cargo build --target wasm32-unknown-unknown --profile app-release",
     "logic:watch": "watchexec -w logic/src 'pnpm logic:build && pnpm logic:sync'",
-    "logic:sync": "cp logic/target/wasm32-unknown-unknown/release/*.wasm workflows/",
+    "logic:sync": "cp logic/target/wasm32-unknown-unknown/app-release/*.wasm workflows/",
     "app:generate-client": "calimero-abi-codegen -i logic/res/abi.json -o app/src/api/",
     "app:dev": "cd app && pnpm dev",
     "network:bootstrap": "merobox --workflow workflows/local-network.yml",

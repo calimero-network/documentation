@@ -198,80 +198,41 @@ $: meroctl --node node1 context alias get demoalias
 > +--------------+----------------------------------------------+
 ```
 
-### Context Invitations
+### Multi-Node Context Participation (Namespaces)
 
-Invite specific node identity inside context or generate an open invitation:
+Multi-node context participation uses **namespaces** — root groups that associate an application with its member network. The old `context invite` / `context join` commands no longer exist; use `namespace invite` / `namespace join` instead.
 
 ```bash
-# First from invitee node (node2) we create new identity that will be used in invitation from inviter node (node1)
-$: meroctl --node <NODE_ID> context identity generate
-$: meroctl --node node2 context identity generate
-> +-----------------------------------------+----------------------------------------------+
-> | Context Identity Generated              | Public Key                                   |
-> +========================================================================================+
-> | Successfully generated context identity | 3aagVkceXvNvEemP1NQsKY5WGwk7fC9W62tD5PtfDgPj |
-> +-----------------------------------------+----------------------------------------------+
-# We will run the command again as we need 2 identities for showing both simple invitation and open invitation
-$: meroctl --node node2 context identity generate
-> +-----------------------------------------+----------------------------------------------+
-> | Context Identity Generated              | Public Key                                   |
-> +========================================================================================+
-> | Successfully generated context identity | EYf2aVV9oQ47xmYVrwqKwHfUzoMFKxy7gVc2jQVwYEDt |
-> +-----------------------------------------+----------------------------------------------+
+# ── Node 1: Create a namespace (associates the application and initialises the context) ──
+$: meroctl --node <NODE_ID> namespace create --application-id <APP_ID>
+$: meroctl --node node1 namespace create --application-id BPKKsDeN8ZbqTK7nWnxg1HG3ZLtkk1MjYwo8FLkNQCvb
+> ╭──────────────────────┬──────────────────────────────────────────────╮
+> │ Namespace ID         │ A1fXGKB47azFyRjD5WvrFgacVi1bGaT43kBUgU8a9skv │
+> ╰──────────────────────┴──────────────────────────────────────────────╯
 
-# Now from inviter node we create 2 contexts and for one we will use simple invitation and for other open invtation
-$: meroctl --node node1 context create --protocol near --application-id BPKKsDeN8ZbqTK7nWnxg1HG3ZLtkk1MjYwo8FLkNQCvb
-> +-------------------+----------------------------------------------+
-> | Context Created   | Value                                        |
-> +==================================================================+
-> | Context ID        | A1fXGKB47azFyRjD5WvrFgacVi1bGaT43kBUgU8a9skv |
-> |-------------------+----------------------------------------------|
-> | Member Public Key | H1mK8HsfB8NKdoR8hdoc3BAMdy6wJMsea9eFvgpCTHxS |
-> +-------------------+----------------------------------------------+
-# And again for another context
-$: meroctl --node node1 context create --protocol near --application-id BPKKsDeN8ZbqTK7nWnxg1HG3ZLtkk1MjYwo8FLkNQCvb
-> +-------------------+----------------------------------------------+
-> | Context Created   | Value                                        |
-> +==================================================================+
-> | Context ID        | 5t6awrTf5SpeuZq2xu6KrG7EsRV2Bwbd8mXdrL4ZVGj7 |
-> |-------------------+----------------------------------------------|
-> | Member Public Key | 6c2DkQ7e5JReEXJGcoJu3FaURUA1M79RiJQKHfcTXU1p |
-> +-------------------+----------------------------------------------+
+# ── Node 1: Generate an invitation payload for another node ──
+$: meroctl --node <NODE_ID> namespace invite <NAMESPACE_ID>
+$: meroctl --node node1 namespace invite A1fXGKB47azFyRjD5WvrFgacVi1bGaT43kBUgU8a9skv
+> {
+>   "invitation": {
+>     "namespace_id": "A1fXGKB47azFyRjD5WvrFgacVi1bGaT43kBUgU8a9skv",
+>     ...
+>   }
+> }
 
-# Generate simple invitation for a specific node identity
-$: meroctl --node <NODE_ID> conext invite <INVITEE_ID> --context <CONTEXT_ID> --as <INVITER_ID>
-$: meroctl --node node1 context invite 3aagVkceXvNvEemP1NQsKY5WGwk7fC9W62tD5PtfDgPj --context 5t6awrTf5SpeuZq2xu6KrG7EsRV2Bwbd8mXdrL4ZVGj7 --as 6c2DkQ7e5JReEXJGcoJu3FaURUA1M79RiJQKHfcTXU1p
-> Invitation Created Successfully
-> 
-> Invitation Payload:
-> FuNUfDCArA7DVrufGjxYZT9H...C14YYGyxaKsxw [truncated]
-> ...
+# ── Node 2: Join the namespace with the invitation JSON ──
+$: meroctl --node <NODE_ID> namespace join <NAMESPACE_ID> '<INVITATION_JSON>'
+$: meroctl --node node2 namespace join A1fXGKB47azFyRjD5WvrFgacVi1bGaT43kBUgU8a9skv '{"invitation":{...}}'
+> ╭───────────────────────────────╮
+> │ Successfully joined namespace │
+> ╰───────────────────────────────╯
 
-# Generate an open invitation for a context
-$: meroctl --node <NODE_ID> context invite-by-open-invitation --context <CONTEXT_ID> --as <INVITER_ID>
-$: meroctl --node node1 context invite-by-open-invitation --context 5t6awrTf5SpeuZq2xu6KrG7EsRV2Bwbd8mXdrL4ZVGj7 --as 6c2DkQ7e5JReEXJGcoJu3FaURUA1M79RiJQKHfcTXU1p
-> Open Invitation Created Successfully
-> 
-> Open Invitation Payload:
-> '{"invitation":{"inviter_identity":[83,67,36,101,211,66,17,153,95,105,246,80,213,6,7,188,225,170,123,105,54,237,86,62,36,36,40,24,161,98,133,171],"context_id":[72,133,175,43,80,67,164,165,28,20,178,44,244,37,15,82,239,106,14,14,176,60,81,209,76,182,137,33,104,185,31,38],"expiration_height":1000000999,"secret_salt":[1,110,24,146,16,162,27,233,156,58,66,175,251,136,170,24,222,233,119,228,77,133,244,70,241,205,156,146,50,64,47,19],"protocol":"near","network":"testnet","contract_id":"v0-6.config.calimero-context.testnet"},"inviter_signature":"ebb8cd05fc84dc8ef12978ac3c2ab89c727076f70a2384a8c5e14cbc9bda3c5b146b244ee0646f3c019ce079cd2c31c0679200bb744bbda4eb0c34c58746ec0d"}'
-
-# Join a simple invitation bounded to inviter identity
-$: meroctl --node <NODE_ID> context join <INVITATION_PAYLOAD>
-$: meroctl --node node2 context join FuNUfDCArA7DVrufGjxYZT9H2tKmKXHkPTpZA7zbfef5bCK6nZ6Km5aZ9SHj2AzFiFTB9t74Er1QCyZRVehCqqn9BGLaf8B2JDtavm7t3f8eTw6FxzbapPAdtQwZQWYQm6dR8QP1VRSs72DPMuV8Xf85PdNC14YYGyxaKsxw
-> +-----------------------------+
-> | Context Joined              |
-> +=============================+
-> | Successfully joined context |
-> +-----------------------------+
-
-# Join an open invitation for a context
-$: meroctl --node <NODE_ID> context join-by-open-invitation --as <INVITEE_ID> <INVITATION_PAYLOAD_JSON>
-$: meroctl --node node2 context join-by-open-invitation --as EYf2aVV9oQ47xmYVrwqKwHfUzoMFKxy7gVc2jQVwYEDt '{"invitation":{"inviter_identity":[83,67,36,101,211,66,17,153,95,105,246,80,213,6,7,188,225,170,123,105,54,237,86,62,36,36,40,24,161,98,133,171],"context_id":[72,133,175,43,80,67,164,165,28,20,178,44,244,37,15,82,239,106,14,14,176,60,81,209,76,182,137,33,104,185,31,38],"expiration_height":1000000999,"secret_salt":[1,110,24,146,16,162,27,233,156,58,66,175,251,136,170,24,222,233,119,228,77,133,244,70,241,205,156,146,50,64,47,19],"protocol":"near","network":"testnet","contract_id":"v0-6.config.calimero-context.testnet"},"inviter_signature":"ebb8cd05fc84dc8ef12978ac3c2ab89c727076f70a2384a8c5e14cbc9bda3c5b146b244ee0646f3c019ce079cd2c31c0679200bb744bbda4eb0c34c58746ec0d"}'
-> +-----------------------------+
-> | Context Joined              |
-> +=============================+
-> | Successfully joined context |
-> +-----------------------------+
+# ── Node 2: Join a specific context within the namespace ──
+$: meroctl --node <NODE_ID> group join-context <CONTEXT_ID>
+$: meroctl --node node2 group join-context 5t6awrTf5SpeuZq2xu6KrG7EsRV2Bwbd8mXdrL4ZVGj7
+> ╭────────────────────────────╮
+> │ Successfully joined context │
+> ╰────────────────────────────╯
 ```
 
 ### Calling Methods (`call`)
@@ -282,14 +243,12 @@ Execute application methods:
 # Call a mutation method
 $: meroctl --node <NODE_ID> call <METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 
 # With Values
 $: meroctl --node node1 call add_item \
  --context H6Q7qGQY3h4P8HiX2eHtRiR2jZrauovvDhGnymt9nxak \
- --args '{"key": "hello", "value": "world"}' \
- --as FvjDfnCbQdgAT88K1VMQjQ7APpNMJspWC7RqqZHtdqoS
+ --args '{"key": "hello", "value": "world"}'
 > 🔍 JSON-RPC Request to http://127.0.0.1:2528/jsonrpc: {
 > ...
 > +-------------------+---------+
@@ -301,14 +260,12 @@ $: meroctl --node node1 call add_item \
 # Call a view method (read-only)
 $: meroctl --node <NODE_ID> call <METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 
 # With values
 $: meroctl --node node1 call get_item \
   --context H6Q7qGQY3h4P8HiX2eHtRiR2jZrauovvDhGnymt9nxak \
-  --args '{"key": "hello"}' \
-  --as FvjDfnCbQdgAT88K1VMQjQ7APpNMJspWC7RqqZHtdqoS
+  --args '{"key": "hello"}'
 > 🔍 meroctl call output: {
 >   jsonrpc: 2.0,
 >   id: null,

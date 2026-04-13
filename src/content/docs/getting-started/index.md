@@ -303,23 +303,26 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-calimero-sdk = { git = "https://github.com/calimero-network/core", branch = "master" }
-calimero-storage = { git = "https://github.com/calimero-network/core", branch = "master" }
+calimero-sdk     = "0.10"
+calimero-storage = "0.10"
 
 [build-dependencies]
-calimero-wasm-abi = { git = "https://github.com/calimero-network/core", branch = "master" }
-serde_json = "1.0.113"
+calimero-wasm-abi = "0.10"
+serde_json        = "1.0"
 
 [profile.app-release]
-inherits = "release"
-opt-level = "z"
-lto = true
-codegen-units = 1
-strip = true
+inherits        = "release"
+codegen-units   = 1
+opt-level       = "z"
+lto             = true
+debug           = false
+strip           = "symbols"
+panic           = "abort"
+overflow-checks = true
 
 [profile.app-profiling]
 inherits = "release"
-debug = true
+debug    = true
 ```
 
 **3. Write your application in `src/lib.rs`:**
@@ -593,14 +596,12 @@ $: meroctl --node node1 context identity list --context H6Q7qGQY3h4P8HiX2eHtRiR2
 # Meroctl - call a mutation command
 $: meroctl --node <NODE_ID> call <METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 
 # Command with values from previous steps
 $: meroctl --node node1 call add_item \
  --context H6Q7qGQY3h4P8HiX2eHtRiR2jZrauovvDhGnymt9nxak \
- --args '{"key": "hello", "value": "world"}' \
- --as FvjDfnCbQdgAT88K1VMQjQ7APpNMJspWC7RqqZHtdqoS
+ --args '{"key": "hello", "value": "world"}'
 > 🔍 JSON-RPC Request to http://127.0.0.1:2528/jsonrpc: {
 > ...
 > +-------------------+---------+
@@ -612,14 +613,12 @@ $: meroctl --node node1 call add_item \
 # Meroctl - call a view command
 $: meroctl --node <NODE_ID> call <METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 
 # Command with values from previous steps
 $: meroctl --node node1 call get_item \
   --context H6Q7qGQY3h4P8HiX2eHtRiR2jZrauovvDhGnymt9nxak \
-  --args '{"key": "hello"}' \
-  --as FvjDfnCbQdgAT88K1VMQjQ7APpNMJspWC7RqqZHtdqoS
+  --args '{"key": "hello"}'
 > 🔍 meroctl call output: {
 >   jsonrpc: 2.0,
 >   id: null,

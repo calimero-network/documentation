@@ -793,22 +793,27 @@ cd my-calimero-app
 
 ```bash
 # Add dependencies to Cargo.toml
-[dependencies]
-# Use latest release or specified version
-calimero-sdk =  { git = "https://github.com/calimero-network/core", branch = "master" }
-calimero-storage =  { git = "https://github.com/calimero-network/core", branch = "master" }
-calimero-sdk-macros =  { git = "https://github.com/calimero-network/core", branch = "master" }
-borsh = { version = "1.0", features = ["derive"] }
-
-[build-dependencies]
-# Use latest release or specified version
-calimero-wasm-abi = { git = "https://github.com/calimero-network/core", branch = "master" }
-
 [lib]
 crate-type = ["cdylib"]
 
-[dependencies.calimero-sdk]
-features = ["macro"]
+[dependencies]
+calimero-sdk             = "0.10"
+calimero-storage         = "0.10"
+calimero-storage-macros  = "0.10"
+
+[build-dependencies]
+calimero-wasm-abi = "0.10"
+serde_json        = "1.0"
+
+[profile.app-release]
+inherits        = "release"
+codegen-units   = 1
+opt-level       = "z"
+lto             = true
+debug           = false
+strip           = "symbols"
+panic           = "abort"
+overflow-checks = true
 ```
 
 Create build.rs 
@@ -866,12 +871,11 @@ $: rustup target add wasm32-unknown-unknown
 > info: component 'rust-std' for target 'wasm32-unknown-unknown' is up to date
 
 # Build WASM binary
-$: cargo build --target wasm32-unknown-unknown --release
->    Updating git repository `https://github.com/calimero-network/core`
+$: cargo build --target wasm32-unknown-unknown --profile app-release
 >    Updating crates.io index
 > ...
-> Finished `release` profile [optimized] target(s) in 25.67s
-# Output: target/wasm32-unknown-unknown/release/my_calimero_app.wasm
+> Finished `app-release` profile [optimized] target(s) in 25.67s
+# Output: target/wasm32-unknown-unknown/app-release/my_calimero_app.wasm
 ```
 
 ### Extract ABI

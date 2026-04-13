@@ -43,50 +43,35 @@ A context is created when an application is installed and initialized. See [`cor
 - Context creator becomes the first member
 - Context ID is generated (unique identifier)
 
-### 2. Invitation Flow
+### 2. Joining a Context (Namespace Model)
 
-Context creators can invite other identities to join:
-
-```bash
-# Generate identity for invitee (node2)
-$: meroctl identity create --node node2
-> +-----------------------------------------+----------------------------------------------+
-> | Context Identity Generated              | Public Key                                   |
-> +========================================================================================+
-> | Successfully generated context identity | AjP3UxusUZQY8i79WVsfVdrURpNQdD1gAcXq1RZqU9qN |
-> +-----------------------------------------+----------------------------------------------+
-
-# Create invitation (node1)
-$: meroctl --node <NODE_ID> context invite <INVITE_IDENTITY> --context <CONTEXT_ID> --as <INVITER_IDENTITY>
-
-# With real values
-$: meroctl --node node1 context invite AjP3UxusUZQY8i79WVsfVdrURpNQdD1gAcXq1RZqU9qN --context FfHXVWRqbSc2wrU2tEeuLQxFcmcpcfZd8Qk9yQFkm7W7 --as AvHDmLVfAdU2z2n1NsaVxQFBSDZvywAwxhnmnYhZHzHR
-...
-```
-
-meroctl --node node1 context invite AjP3UxusUZQY8i79WVsfVdrURpNQdD1gAcXq1RZqU9qN --context FfHXVWRqbSc2wrU2tEeuLQxFcmcpcfZd8Qk9yQFkm7W7 --as AvHDmLVfAdU2z2n1NsaVxQFBSDZvywAwxhnmnYhZHzHR
-
-
-**Invitation contains:**
-- Context ID
-- Grantee public key
-- Permissions (read/write/execute)
-- Expiration (optional)
-
-### 3. Joining a Context
-
-Invited members can join using the invitation:
+Multi-node participation uses **namespaces** — root groups that combine an application with its member network. The `namespace create` command creates both the namespace and its associated context.
 
 ```bash
-# Join context using invitation
-meroctl context join \
-  --context-id <CONTEXT_ID> \
-  --invitation <INVITATION_DATA>
+# ── Node 1: Create a namespace with the application ──
+$: meroctl --node node1 namespace create --application-id <APP_ID>
+> ╭──────────────────────┬──────────────────────────────────────────────╮
+> │ Namespace ID         │ FfHXVWRqbSc2wrU2tEeuLQxFcmcpcfZd8Qk9yQFkm7W7 │
+> ╰──────────────────────┴──────────────────────────────────────────────╯
+
+# ── Node 1: Generate invitation JSON for another node ──
+$: meroctl --node node1 namespace invite FfHXVWRqbSc2wrU2tEeuLQxFcmcpcfZd8Qk9yQFkm7W7
+> {
+>   "invitation": { ... }
+> }
+
+# ── Node 2: Join using the invitation payload ──
+$: meroctl --node node2 namespace join FfHXVWRqbSc2wrU2tEeuLQxFcmcpcfZd8Qk9yQFkm7W7 '<INVITATION_JSON>'
+> ╭───────────────────────────────╮
+> │ Successfully joined namespace │
+> ╰───────────────────────────────╯
+
+# ── Node 2: Join a specific context within the namespace ──
+$: meroctl --node node2 group join-context <CONTEXT_ID>
 ```
 
-**What happens:**
-- Invitation is validated
-- Member is added to context membership
+**What happens after joining:**
+- Member is added to namespace membership
 - Member receives current state snapshot
 - Member can now call methods and receive updates
 
@@ -141,16 +126,14 @@ Each protocol provides:
 ```bash
 $: meroctl --node <NODE_ID> call <QUERY_METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 ```
 
 **Mutate state:**
 ```bash
 $: meroctl --node <NODE_ID> call <MUTATE_METHOD_NAME> \
   --context <CONTEXT_ID> \
-  --args <ARGS_IN_JSON> \
-  --as <IDENTITY_PUBLIC_KEY>
+  --args <ARGS_IN_JSON>
 ```
 
 **Subscribe to events:**
@@ -167,9 +150,9 @@ See [`core/crates/meroctl/README.md`](https://github.com/calimero-network/core/b
 $: meroctl --node <NODE_ID> context ls
 ```
 
-**Revoke access:**
+**Manage member capabilities:**
 ```bash
-meroctl --node <NODE_ID> context identity revoke <MEMBER_ALIAS> <CAPABILITY> --as <REVOKER_ALIAS> --context <CONTEXT_ALIAS>
+meroctl --node <NODE_ID> group members set-caps <GROUP_ID> <MEMBER_IDENTITY> <CAPABILITIES>
 ```
 
 Revoking access removes the member but preserves state history.

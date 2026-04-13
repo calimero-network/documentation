@@ -249,7 +249,7 @@ The Python client SDK (`calimero-client-py`) provides Python bindings built with
 - **High performance** - Built with Rust and PyO3 for optimal performance
 - **Comprehensive API** - Full access to Calimero Network functionality
 - **Type safety** - Strongly typed Python bindings
-- **Async support** - Built-in async/await support
+- **Synchronous API** - All methods are synchronous from Python's perspective; the Tokio runtime is managed internally by the Rust bindings
 - **Easy installation** - Simple `pip install`
 
 ### Installation
@@ -263,27 +263,22 @@ $: pip install calimero-client-py
 ### Quick Start
 
 ```python
-import asyncio
-from calimero_client_py import create_connection, create_client, AuthMode
+from calimero_client_py import create_connection, create_client
 
-async def main():
-    # Create connection
-    connection = create_connection(
-        api_url="http://localhost:2528",
-        node_name="node1",
-    )
+# Create connection
+connection = create_connection(
+    api_url="http://localhost:2528",
+    node_name="node1",
+)
 
-    client = create_client(connection)
-    
-    contexts = client.list_contexts()
-    print(f"✓ Found contexts: {contexts}")
+client = create_client(connection)
 
-    applications = client.list_applications()
-    print(f"✓ Found applications: {applications}")
+# All methods are synchronous — no await needed
+contexts = client.list_contexts()
+print(f"✓ Found contexts: {contexts}")
 
-
-if __name__ == "__main__":
-    asyncio.run(main())
+applications = client.list_applications()
+print(f"✓ Found applications: {applications}")
 ```
 
 ### Authentication
@@ -722,7 +717,7 @@ try {
 | **Language** | Rust | Python | TypeScript/JavaScript |
 | **Performance** | High (native) | High (Rust bindings) | Good (JavaScript) |
 | **Authentication** | ⚠️ Planned | ⚠️ Planned | ✅ Full support |
-| **Async Support** | ✅ Tokio | ✅ asyncio | ✅ Native |
+| **Async Support** | ✅ Tokio | ✅ Sync (Tokio internal) | ✅ Native |
 | **Type Safety** | ✅ Rust types | ✅ Python types | ✅ TypeScript |
 | **React Components** | ❌ | ❌ | ✅ |
 | **WebSocket** | ✅ | ✅ | ✅ |

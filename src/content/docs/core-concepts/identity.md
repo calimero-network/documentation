@@ -108,9 +108,9 @@ After authentication, Calimero issues JWT tokens containing:
 - Each context has separate client keys
 - Keys can be revoked independently
 
-**Revoke access:**
+**Manage member capabilities:**
 ```bash
-$: meroctl --node <NODE_ID> context identity revoke <MEMBER_ALIAS> <CAPABILITY> --as <REVOKER_ALIAS> --context <CONTEXT_ALIAS>
+$: meroctl --node <NODE_ID> group members set-caps <GROUP_ID> <MEMBER_IDENTITY> <CAPABILITIES>
 ```
 
 See [`core/crates/meroctl/README.md`](https://github.com/calimero-network/core/blob/master/crates/meroctl/README.md) for key management commands.
