@@ -9,13 +9,14 @@ It does not replace Calimero’s general privacy model. Instead, it strengthens 
 
 ## What lives in `mero-tee`
 
-From the repository README, the project includes:
-
 | Component | Purpose |
 | --- | --- |
-| `mero-kms-phala` | KMS-related service designed to run with Phala-backed secure execution |
-| `node-image-gcp` | Build assets for GCP-hosted node images |
-| `attestation-verifier` | Logic for verifying attestation evidence |
+| `mero-kms-phala` | KMS service that validates TDX attestations and releases storage encryption keys to `merod` nodes running in Phala CVMs |
+| `mero-tee/` | GCP Packer build pipeline for locked `merod` node images with TDX attestation (debug, debug-read-only, locked-read-only profiles) |
+| `fleet-sidecar` | systemd service baked into read-only fleet node images; waits for `merod` readiness, reads its own peer ID and MRTD, polls MDMA for group assignments, and joins each via `meroctl tee fleet-join` — confirms back to MDMA only when the join exits 0 |
+| `attestation-verifier/` | Public web tool for verifying KMS and node attestations via Intel Trust Authority |
+
+The fleet sidecar (image v2.3.45 / merod v0.10.1-rc.44) now sends the node's MRTD alongside its peer ID in the `should-join` poll, enabling MDMA to enforce MRTD-gated admission. Join confirmations are retried until confirmed.
 
 ## Why it exists
 
@@ -78,7 +79,25 @@ If you are operating hosted or managed secure services, you likely do need to un
 
 ## Release and verification
 
-The repo explicitly points users to **release verification** guidance and an external architecture reference. That is a strong signal that secure deployment here is expected to be:
+Two artifact families are published per version:
+
+- **`mero-kms-vX.Y.Z`** — KMS binaries, attestation policies, compatibility map, Sigstore signatures
+- **`mero-tee-vX.Y.Z`** — `published-mrtds.json`, release provenance, SBOM, checksums, Sigstore signatures
+
+Verify release assets:
+
+```bash
+scripts/release/verify-release-assets.sh X.Y.Z
+```
+
+Generate a pinned `merod` KMS config from a signed release policy:
+
+```bash
+scripts/policy/generate-merod-kms-phala-attestation-config.sh \
+  --profile locked-read-only X.Y.Z https://<kms-url>/
+```
+
+That is a strong signal that secure deployment here is expected to be:
 
 - version-aware,
 - artifact-aware,

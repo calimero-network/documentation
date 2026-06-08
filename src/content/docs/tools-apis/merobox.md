@@ -35,20 +35,51 @@ merobox stop --all
 
 ## Workflow model
 
-Merobox includes a workflow engine with validation and many built-in step types.
+Merobox includes a workflow engine with validation and 35+ built-in step types.
 
-Examples include:
+**Core lifecycle:**
+- `install_application` — install a WASM app on a node
+- `create_context` — create a new context for an app
+- `create_identity` — generate a context identity
+- `join_context` — join a context on another node
+- `call` — execute an application method
+- `delete_context` — remove a context
 
-- `install_application`
-- `create_context`
-- `create_identity`
-- `join_context`
-- `call`
-- `parallel`
-- `repeat`
-- `wait`
-- `wait_for_sync`
-- `script`
+**Namespace & group management:**
+- `create_namespace`, `delete_namespace`
+- `create_namespace_invitation`, `join_namespace`
+- `create_group_in_namespace`, `delete_group`
+- `add_group_members`, `remove_group_members`
+- `get_group_info`
+- `detach_context_from_group`
+- `get_context_metadata`, `set_group_metadata`, `set_member_metadata`
+
+**Upgrade & migration:**
+- `upgrade_group` — upgrade a group to a new app version (`cascade: true` available)
+- `cascade_namespace_application` — cascade an upgrade across a namespace
+- `get_cascade_status` — query per-descendant migration status
+- `assert_cascade_complete` — assert that a cascade migration has finished
+- `abort_migration` — logically abort an in-flight namespace migration
+
+**Authentication:**
+- `login` — authenticate against a node's embedded auth router and cache the JWT
+- `refresh` — refresh a cached JWT
+- `ws_connect` — connect a WebSocket client and optionally send a message; use `unauthenticated: true` for negative tests
+- `ws_subscribe` — subscribe to context events over WebSocket
+
+**Network & topology:**
+- `connect_node`, `disconnect_node`
+- `partition_peers` — surgically partition libp2p peer connections (keeps RPC open)
+- `heal_peers` — restore a previous partition
+- `create_mesh` — connect nodes in a full mesh
+
+**Flow control:**
+- `parallel` — run steps concurrently
+- `repeat` — repeat a step N times
+- `wait` — sleep for a fixed duration
+- `wait_for_sync` — poll with adaptive backoff until contexts converge
+- `script` — run an arbitrary Python snippet
+- `assert` — assert a condition on a captured output
 
 That makes it a strong bridge between **one-off scripts** and a **full test harness**.
 
@@ -94,6 +125,49 @@ From the source repo:
 - and connect to **remote nodes** with credentials or API keys.
 
 That flexibility makes Merobox useful both for local experiments and for more advanced staging or support workflows.
+
+## NAT topology
+
+Merobox supports simulating NAT network conditions for testing peer reachability in challenging environments:
+
+```yaml
+steps:
+  - name: "Partition node-1 from node-2"
+    type: partition_peers
+    node: "node-1"
+    targets: ["node-2"]
+
+  - name: "Restore connectivity"
+    type: heal_peers
+    node: "node-1"
+    targets: ["node-2"]
+```
+
+This is useful for testing gossip-based sync, key recovery, and migration convergence under network partitions. See `workflow-examples/workflow-nat-topology-cone-example.yml` for a full example.
+
+## WebSocket auth testing
+
+The `login`, `refresh`, `ws_connect`, and `ws_subscribe` steps enable end-to-end auth testing against nodes running with embedded auth:
+
+```yaml
+steps:
+  - name: "Authenticate"
+    type: login
+    node: calimero-node-1
+    username: alice
+    password: password123
+
+  - name: "WebSocket connects with a valid token"
+    type: ws_connect
+    node: calimero-node-1
+    message: "ping"
+
+  - name: "WebSocket without a token is rejected"
+    type: ws_connect
+    node: calimero-node-1
+    unauthenticated: true
+    expected_failure: true
+```
 
 ## Near sandbox integration
 

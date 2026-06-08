@@ -14,7 +14,7 @@ Merobox is the easiest way to run local networks. See [`merobox/README.md`](http
 # Install merobox
 $: pipx install merobox
 > Installing to existing venv 'merobox'
->  installed package merobox 0.2.13, installed using Python 3.13.3
+>  installed package merobox 0.6.36, installed using Python 3.13.3
 >  These apps are now globally available:  merobox
 > done! ✨ 🌟 ✨
 

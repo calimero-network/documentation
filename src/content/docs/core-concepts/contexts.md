@@ -157,12 +157,27 @@ meroctl --node <NODE_ID> group members set-caps <GROUP_ID> <MEMBER_IDENTITY> <CA
 
 Revoking access removes the member but preserves state history.
 
+## Application Migration
+
+A namespace can be upgraded to a new application version. Core (v0.11+) tracks migration state per-context and provides visibility into the process.
+
+**Key migration concepts:**
+
+- **Context version** — each context records which app version it is running; displayed via `meroctl namespace ls` or the admin API
+- **`AppVersionChanged` event** — emitted when a context's application version changes; subscribe via SSE/WebSocket to react to upgrades in real time
+- **`authored_remaining` counter** — how many of a member's authored entries have not yet been migrated; drives UX around "safe to disconnect"
+- **Migration check** — before committing a migration, core validates that the new WASM can process the existing state
+- **Logical abort** — an in-flight migration can be aborted via `meroctl` or the Python client, which rolls back the pending target and cascades to descendants
+
+**Cascade migration** propagates an upgrade through an entire namespace subtree at once. Use `get_cascade_status` to inspect per-descendant progress and `assert_cascade_complete` (in merobox workflows) to block until convergence.
+
 ## Best Practices
 
 1. **One Context Per Use Case**: Create separate contexts for different purposes (e.g., one per team, one per project)
 2. **Minimize Members**: Only invite necessary members to reduce sync overhead
 3. **Use Private Storage**: Store secrets and node-local data in private storage, not CRDT state
 4. **Context Naming**: Use descriptive context IDs or metadata for easier management
+5. **Monitor Migrations**: Subscribe to `AppVersionChanged` events or poll `get_cascade_status` when running cascade upgrades
 
 ## Deep Dives
 
@@ -170,7 +185,8 @@ For detailed context documentation:
 
 - **Context Management**: [`core/crates/context/README.md`](https://github.com/calimero-network/core/blob/master/crates/context/README.md) - Lifecycle and operations
 - **Identity & Permissions**: [Identity](/core-concepts/identity/) - Cryptographic identities and access control
-- **Merobox Workflows**: [`merobox` README](https://github.com/calimero-network/merobox#readme) - Automated context creation and management
+- **Merobox Workflows**: [`merobox` README](https://github.com/calimero-network/merobox#readme) - Automated context creation, migration, and cascade management
+- **Client SDKs**: [Client SDKs](/tools-apis/client-sdks/) - `get_cascade_status`, `abort_migration`, and metadata record APIs
 
 ## Related Topics
 

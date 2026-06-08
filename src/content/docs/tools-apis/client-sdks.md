@@ -7,13 +7,15 @@ Client SDKs that let you interact with Calimero nodes from code using Python, Ru
 
 ## Overview
 
-Calimero provides three client SDKs for different language ecosystems:
+Calimero provides client SDKs for different language ecosystems:
 
-| SDK | Language | Repository | Authentication Support | Primary Use Cases |
-| --- | --- | --- | --- | --- |
-| **Rust Client** | Rust | [`core/crates/client`](https://github.com/calimero-network/core/tree/master/crates/client) | Full support | Sidecar tools, CLI utilities, developer tools |
-| **Python Client** | Python | [`calimero-client-py`](https://github.com/calimero-network/calimero-client-py) | Full support | Automation scripts, monitoring tools, developer tools |
-| **JavaScript Client** | TypeScript/JavaScript | [`calimero-client-js`](https://github.com/calimero-network/calimero-client-js) | Full support | Web apps, browser extensions, Node.js tools |
+| SDK | Language | Repository | Primary Use Cases |
+| --- | --- | --- | --- |
+| **Rust Client** | Rust | [`core/crates/client`](https://github.com/calimero-network/core/tree/master/crates/client) | Sidecar tools, CLI utilities, developer tools |
+| **Python Client** | Python | [`calimero-client-py`](https://github.com/calimero-network/calimero-client-py) | Automation scripts, monitoring tools, developer tools |
+| **mero-js** | TypeScript | [`mero-js`](https://github.com/calimero-network/mero-js) | Pure-TS admin SDK, no React dependency, Node.js tools |
+| **mero-react** | TypeScript/React | [`mero-react`](https://github.com/calimero-network/mero-react) | React apps, hooks-based admin UI |
+| **calimero-client-js** | TypeScript/JavaScript | [`calimero-client-js`](https://github.com/calimero-network/calimero-client-js) | Web apps, browser extensions, full auth flows |
 
 ## Use Cases
 
@@ -44,6 +46,240 @@ Automated workflows for DevOps:
 - **Release automation** - Scripts for packaging and releasing
 - **Health monitoring** - Automated health checks and alerts
 - **Data migration** - Scripts for migrating data between nodes
+
+## mero-js SDK
+
+`@calimero-network/mero-js` (v2.x) is the **primary pure-TypeScript admin SDK** for Calimero. It has no React dependency and works in Node.js, browsers, and any framework. `mero-react` wraps it with React hooks.
+
+### Features
+
+- **No framework dependency** — plain TypeScript, works anywhere
+- **Full admin API** — namespaces, groups, members, contexts, metadata, capabilities
+- **Capability helpers** — bitmask constants mirroring core's `MemberCapabilities`
+- **SSE & WebSocket** — real-time event subscriptions
+- **Cloud client** — enable/disable HA
+
+### Installation
+
+```bash
+npm install @calimero-network/mero-js
+# or
+pnpm add @calimero-network/mero-js
+```
+
+### Quick Start
+
+```typescript
+import { createMeroJs } from '@calimero-network/mero-js';
+
+const mero = createMeroJs({
+  nodeUrl: 'http://localhost:2528',
+  accessToken: 'YOUR_JWT',
+});
+
+// List namespaces
+const namespaces = await mero.admin.listNamespaces();
+
+// List subgroups of a group
+const subs = await mero.admin.listSubgroups('GROUP_ID');
+```
+
+### Capability Constants
+
+The SDK exports `CAPABILITIES` — a bitmask constant object matching core's `MemberCapabilities` — plus three helper functions:
+
+```typescript
+import {
+  CAPABILITIES,
+  hasCap,
+  withCap,
+  withoutCap,
+} from '@calimero-network/mero-js';
+
+// Check if a member has a specific capability
+const canInvite = hasCap(member.capabilities, CAPABILITIES.CAN_INVITE_MEMBERS);
+const canManage = hasCap(member.capabilities, CAPABILITIES.MANAGE_MEMBERS);
+
+// Build a bitmask
+const mask = withCap(0, CAPABILITIES.CAN_INVITE_MEMBERS);
+const restricted = withoutCap(mask, CAPABILITIES.CAN_CREATE_SUBGROUP);
+```
+
+**Available capability bits:**
+
+| Constant | Bit | Description |
+| --- | --- | --- |
+| `CAN_CREATE_CONTEXT` | 0 | Create contexts within a group |
+| `CAN_INVITE_MEMBERS` | 1 | Invite new members |
+| `CAN_JOIN_OPEN_SUBGROUPS` | 2 | Self-join open subgroups |
+| `MANAGE_MEMBERS` | 3 | Add/remove members |
+| `MANAGE_APPLICATION` | 4 | Change the group application |
+| `CAN_CREATE_SUBGROUP` | 5 | Create child groups |
+| `CAN_DELETE_SUBGROUP` | 6 | Delete child groups |
+| `CAN_MANAGE_VISIBILITY` | 7 | Set subgroup visibility |
+| `CAN_MANAGE_METADATA` | 8 | Write metadata records |
+
+> **Note:** Bits 9+ are unassigned — do not use them for application data; a future core release may claim them.
+
+### Admin API — New Methods (v2.x)
+
+#### `joinSubgroupInheritance(groupId)`
+
+Materialises inherited membership in an open subgroup. Returns whether the call had to publish a `MemberJoinedOpen` op (`wasInherited: true`) or the caller was already a direct member (`wasInherited: false`).
+
+```typescript
+const result = await mero.admin.joinSubgroupInheritance('GROUP_ID');
+console.log(result.wasInherited); // true | false
+```
+
+#### Metadata Records
+
+Generic key/value metadata records for groups, members, and contexts:
+
+```typescript
+// Group metadata
+await mero.admin.setGroupMetadata('GROUP_ID', { name: 'Lobby', data: { color: 'blue' } });
+const groupMeta = await mero.admin.getGroupMetadata('GROUP_ID');
+
+// Member metadata
+await mero.admin.setMemberMetadata('GROUP_ID', 'MEMBER_ID', { name: 'Alice' });
+const memberMeta = await mero.admin.getMemberMetadata('GROUP_ID', 'MEMBER_ID');
+
+// Context metadata
+await mero.admin.setContextMetadata('GROUP_ID', 'CONTEXT_ID', { data: { key: 'value' } });
+const ctxMeta = await mero.admin.getContextMetadata('GROUP_ID', 'CONTEXT_ID');
+```
+
+#### Subgroup Visibility
+
+```typescript
+const visibility = await mero.admin.getSubgroupVisibility('GROUP_ID');
+// Returns: 'open' | 'closed' | 'private'
+```
+
+> **Breaking change (v2.0):** The enum `DefaultVisibility` was renamed to `SubgroupVisibility` to match core. Update any code that imports `DefaultVisibility`.
+
+### Related Documentation
+
+- **Repository**: [`calimero-network/mero-js`](https://github.com/calimero-network/mero-js)
+- **NPM**: [`@calimero-network/mero-js`](https://www.npmjs.com/package/@calimero-network/mero-js)
+
+---
+
+## mero-react SDK
+
+`@calimero-network/mero-react` (v2.x) wraps `mero-js` with React hooks. Use it for React/Next.js applications that need admin UI.
+
+### Installation
+
+```bash
+pnpm add @calimero-network/mero-react @calimero-network/mero-js
+```
+
+### Available Hooks
+
+All hooks follow the pattern: `{ result, loading, error, action }` where `result` is the data and `action` is the async function to call.
+
+**Group management:**
+
+```typescript
+import {
+  useNamespaceGroups,
+  useSubgroups,
+  useGroupInfo,
+  useGroupMetadata,
+  useSetGroupMetadata,
+  useSetSubgroupVisibility,
+  useSubgroupVisibility,
+  useUpdateGroupSettings,
+  useDeleteGroup,
+  useNestGroup,
+  useUnnestGroup,
+  useCreateGroupInNamespace,
+} from '@calimero-network/mero-react';
+```
+
+**Member management:**
+
+```typescript
+import {
+  useGroupMembers,
+  useMemberMetadata,
+  useSetMemberMetadata,
+  useSetDefaultCapabilities,
+  useDefaultCapabilities,
+  useJoinSubgroupInheritance,
+  useGroupInvitations,
+} from '@calimero-network/mero-react';
+```
+
+**Namespace & context management:**
+
+```typescript
+import {
+  useNamespace,
+  useNamespaceGroups,
+  useCreateNamespace,
+  useCreateNamespaceInvitation,
+  useJoinNamespace,
+  useDeleteNamespace,
+  useSetContextMetadata,
+  useDeleteContext,
+  useJoinContext,
+  useJoinGroup,
+} from '@calimero-network/mero-react';
+```
+
+**Example — join via subgroup inheritance:**
+
+```typescript
+import { useJoinSubgroupInheritance } from '@calimero-network/mero-react';
+
+function JoinButton({ groupId }: { groupId: string }) {
+  const { joinSubgroupInheritance, loading, error } = useJoinSubgroupInheritance();
+
+  const handleJoin = async () => {
+    const result = await joinSubgroupInheritance(groupId);
+    if (result?.wasInherited) {
+      console.log('Joined via inheritance');
+    }
+  };
+
+  return <button onClick={handleJoin} disabled={loading}>Join</button>;
+}
+```
+
+**Example — group metadata:**
+
+```typescript
+import { useGroupMetadata, useSetGroupMetadata } from '@calimero-network/mero-react';
+
+function GroupEditor({ groupId }: { groupId: string }) {
+  const { metadata, loading } = useGroupMetadata(groupId);
+  const { setGroupMetadata } = useSetGroupMetadata();
+
+  return (
+    <div>
+      <p>Name: {metadata?.name}</p>
+      <button onClick={() => setGroupMetadata(groupId, { name: 'New Name' })}>
+        Rename
+      </button>
+    </div>
+  );
+}
+```
+
+> **Breaking changes (v2.0):**
+> - `useSetGroupAlias` and `useSetMemberAlias` are **removed** — use `useSetGroupMetadata` and `useSetMemberMetadata` instead.
+> - All group creation/invitation APIs changed `alias` field to `name`.
+> - Invitation responses use `groupName` instead of `groupAlias`.
+
+### Related Documentation
+
+- **Repository**: [`calimero-network/mero-react`](https://github.com/calimero-network/mero-react)
+- **NPM**: [`@calimero-network/mero-react`](https://www.npmjs.com/package/@calimero-network/mero-react)
+
+---
 
 ## Rust Client SDK
 
@@ -257,7 +493,7 @@ The Python client SDK (`calimero-client-py`) provides Python bindings built with
 ```bash
 $: pip install calimero-client-py
 > ...
-> Successfully installed calimero-client-py-0.3.0
+> Successfully installed calimero-client-py-0.6.18
 ```
 
 ### Quick Start
@@ -368,6 +604,79 @@ info = client.get_blob_info(blob_id)
 client.delete_blob(blob_id)
 ```
 
+### Group & Namespace Management
+
+```python
+# Namespaces
+namespaces = client.list_namespaces()
+ns = client.get_namespace(namespace_id)
+client.create_namespace(application_id="<APP_ID>", upgrade_policy="manual", name="My Namespace")
+invitation = client.create_namespace_invitation(namespace_id, expires_in_secs=3600)
+client.join_namespace(namespace_id, invitation_json)
+client.delete_namespace(namespace_id)
+
+# Groups
+subgroups = client.list_subgroups(group_id)
+info = client.get_group_info(group_id)
+client.create_group_in_namespace(namespace_id, name="Sub Group")
+client.reparent_group(group_id, new_parent_id)
+client.delete_group(group_id)
+
+# Members
+members = client.list_group_members(group_id)
+client.add_group_members(group_id, '[{"memberPublicKey": "KEY", "role": "admin"}]')
+client.remove_group_members(group_id, '["MEMBER_ID"]')
+client.update_member_role(group_id, member_id, "admin")
+
+# Capabilities
+caps = client.get_member_capabilities(group_id, member_id)
+client.set_member_capabilities(group_id, member_id, 7)          # bitmask
+client.set_default_capabilities(group_id, 7)
+client.set_member_auto_follow(group_id, member_id, True)
+
+# Visibility & subgroup join
+client.set_subgroup_visibility(group_id, "open")   # "open" | "closed" | "private"
+client.join_subgroup_inheritance(group_id)          # materialise inherited open-subgroup membership
+
+# Leave
+client.leave_context(context_id)
+client.leave_group(group_id)
+client.leave_namespace(namespace_id)
+```
+
+### Metadata Records
+
+Generic metadata records for groups, members, and contexts (v0.6.x+):
+
+```python
+# Group metadata
+client.set_group_metadata(group_id, '{"name": "Lobby", "data": {"color": "blue"}}')
+meta = client.get_group_metadata(group_id)
+
+# Member metadata
+client.set_member_metadata(group_id, member_id, '{"name": "Alice"}')
+meta = client.get_member_metadata(group_id, member_id)
+
+# Context metadata
+client.set_context_metadata(group_id, context_id, '{"data": {"key": "value"}}')
+meta = client.get_context_metadata(group_id, context_id)
+```
+
+### Migration
+
+Methods for managing namespace application migrations (v0.6.17+):
+
+```python
+# Check cascade migration status across a namespace subtree
+status = client.get_cascade_status(namespace_id)
+
+# Logically abort an in-flight migration (idempotent)
+client.abort_migration(namespace_id)
+
+# Upgrade a group to a new application version, optionally cascading
+client.upgrade_group(group_id, application_id, cascade=True)
+```
+
 ### Error Handling
 
 ```python
@@ -388,11 +697,11 @@ except ClientError as e:
 
 - **Repository**: [`calimero-network/calimero-client-py`](https://github.com/calimero-network/calimero-client-py)
 - **PyPI Package**: [`calimero-client-py`](https://pypi.org/project/calimero-client-py/)
-- **README**: [`calimero-client-py/README.md`](https://github.com/calimero-network/calimero-client-py/blob/master/README.md)
+- **Changelog**: [`CHANGELOG.md`](https://github.com/calimero-network/calimero-client-py/blob/master/CHANGELOG.md)
 
-## JavaScript Client SDK
+## calimero-client-js (Legacy Web SDK)
 
-The JavaScript client SDK (`calimero-client-js`) provides TypeScript/JavaScript bindings with full authentication support. Ideal for web applications, browser extensions, and Node.js tools.
+`@calimero-network/calimero-client` (`calimero-client-js`) is the **legacy web-focused SDK** providing full authentication flows, UI components, and the `apiClient` singleton for browser apps. For new projects building admin tooling or Node.js scripts, consider using `mero-js` or `mero-react` above.
 
 ### Features
 
@@ -401,6 +710,8 @@ The JavaScript client SDK (`calimero-client-js`) provides TypeScript/JavaScript 
 - **TypeScript support** - Full type definitions
 - **React components** - Pre-built UI components for authentication
 - **Browser & Node.js** - Works in both environments
+- **Package management** - List and query package registry
+- **Group management** - Full namespace/group/member admin via `apiClient.node()`
 
 ### Installation
 
@@ -651,19 +962,40 @@ The `Admin API` allows you to call node functionalities. These can be: fetch con
 import {
   apiClient,
 } from "@calimero-network/calimero-client";
-// fetch all contexts on the node
+
+// Contexts
 const contexts = await apiClient.node().getContexts();
-// fetch all installed applications
+const context = await apiClient.node().getContext(contextId);
+await apiClient.node().createContext({ applicationId: "<APP_ID>", protocol: "near" });
+await apiClient.node().deleteContext(contextId);
+await apiClient.node().joinContext(contextId);
+
+// Applications
 const applications = await apiClient.node().getInstalledApplications();
-// install applicaion on the node from a hosted URL
-const installationResponse = await apiClient.node().installApplication("<APPLICATION_URL_PATH>");
-// fetch all root keys on the node
+await apiClient.node().installApplication("<APPLICATION_URL_PATH>");
+await apiClient.node().uninstallApplication(appId);
+
+// Package registry
+const packages = await apiClient.node().listPackages();
+const versions = await apiClient.node().listPackageVersions("package-name");
+const latest = await apiClient.node().getLatestPackageVersion("package-name");
+
+// Namespaces & Groups
+const namespaces = await apiClient.node().listNamespaces();
+const ns = await apiClient.node().getNamespace(namespaceId);
+await apiClient.node().createNamespace({ applicationId: "<APP_ID>", upgradePolicy: "manual" });
+const invitation = await apiClient.node().createNamespaceInvitation(namespaceId, { expiresInSecs: 3600 });
+await apiClient.node().joinNamespace(namespaceId, invitationJson);
+const groups = await apiClient.node().listNamespaceGroups(namespaceId);
+await apiClient.node().createGroupInNamespace(namespaceId, { name: "Sub Group" });
+const members = await apiClient.node().listGroupMembers(groupId);
+await apiClient.node().addGroupMembers(groupId, [{ memberPublicKey: "KEY", role: "admin" }]);
+await apiClient.node().removeGroupMembers(groupId, ["MEMBER_ID"]);
+
+// Root/client keys
 const rootKeys = await apiClient.admin().getRootKeys();
-// fetch all client keys on  the node
-const rootKeys = await apiClient.admin().getClientKeys();
-// revoke client key
-const rootKeys = await apiClient.admin().revokeClientKey("<ROOT_KEY_ID>","<CLIENT_ID>");
-...
+const clientKeys = await apiClient.admin().getClientKeys();
+await apiClient.admin().revokeClientKey("<ROOT_KEY_ID>", "<CLIENT_ID>");
 ```
 
 ### Error Handling
@@ -712,44 +1044,50 @@ try {
 
 ## Comparison
 
-| Feature | Rust Client | Python Client | JavaScript Client |
-| --- | --- | --- | --- |
-| **Language** | Rust | Python | TypeScript/JavaScript |
-| **Performance** | High (native) | High (Rust bindings) | Good (JavaScript) |
-| **Authentication** | ⚠️ Planned | ⚠️ Planned | ✅ Full support |
-| **Async Support** | ✅ Tokio | ✅ Sync (Tokio internal) | ✅ Native |
-| **Type Safety** | ✅ Rust types | ✅ Python types | ✅ TypeScript |
-| **React Components** | ❌ | ❌ | ✅ |
-| **WebSocket** | ✅ | ✅ | ✅ |
-| **SSE** | ✅ | ✅ | ✅ |
-| **Best For** | CLI tools, sidecars | Scripts, automation | Web apps, browsers |
+| Feature | Rust Client | Python Client | mero-js | mero-react | calimero-client-js |
+| --- | --- | --- | --- | --- | --- |
+| **Language** | Rust | Python | TypeScript | TypeScript/React | TypeScript |
+| **Performance** | High (native) | High (Rust bindings) | Good | Good | Good |
+| **Authentication** | ✅ Full support | ✅ Full support | ✅ JWT | ✅ JWT | ✅ JWT + wallet |
+| **Async Support** | ✅ Tokio | ✅ Sync (Tokio internal) | ✅ Native | ✅ Native | ✅ Native |
+| **Type Safety** | ✅ Rust types | ✅ Python types | ✅ TypeScript | ✅ TypeScript | ✅ TypeScript |
+| **React Components** | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Capability Helpers** | ❌ | ❌ | ✅ | ✅ (via mero-js) | ❌ |
+| **Metadata API** | ❌ | ✅ | ✅ | ✅ | ❌ |
+| **Migration API** | ❌ | ✅ | ✅ | ✅ | ❌ |
+| **WebSocket / SSE** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Best For** | CLI tools, sidecars | Scripts, automation, CI | Node.js tools, admin SDK | React admin UI | Web apps, auth flows |
 
 ## Choosing the Right SDK
 
 **Choose Rust Client if:**
-
 - Building command-line tools or sidecar services
 - Need maximum performance
 - Already using Rust in your stack
-- Building developer utilities
 
 **Choose Python Client if:**
+- Building automation scripts, monitoring, or CI/CD pipelines
+- Driving merobox workflows programmatically
+- Need migration management (`get_cascade_status`, `abort_migration`)
 
-- Building automation scripts or monitoring tools
-- Working with Python-based tooling
-- Need quick prototyping
-- Building CI/CD pipelines
+**Choose mero-js if:**
+- Building TypeScript/Node.js tools without a framework
+- Need capability helpers or metadata records
+- Integrating with non-React frameworks
 
-**Choose JavaScript Client if:**
+**Choose mero-react if:**
+- Building React or Next.js admin UIs
+- Want hooks for group, namespace, and member management
 
-- Building web applications or browser extensions
-- Need authentication flows
-- Want React components
-- Building user-facing applications
+**Choose calimero-client-js if:**
+- Building web applications with full auth flows
+- Need `CalimeroConnectButton` or wallet-based login
+- Working with the existing `apiClient` singleton pattern
 
 ## Related Topics
 
 - [meroctl CLI](/tools-apis/meroctl-cli/) - Command-line interface for Calimero
+- [Merobox](/tools-apis/merobox/) - YAML workflow orchestration (uses calimero-client-py internally)
 - [Introduction](/intro/) - Understanding Calimero's core concepts
 - [Contexts](/core-concepts/contexts/) - Working with contexts
 - [Identity](/core-concepts/identity/) - Authentication and identity management
