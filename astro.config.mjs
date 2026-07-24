@@ -94,14 +94,8 @@ export default defineConfig({
 						{ label: 'Identity', slug: 'core-concepts/identity' },
 						{ label: 'Applications', slug: 'core-concepts/applications' },
 						{ label: 'Nodes', slug: 'core-concepts/nodes' },
-						{
-							label: 'Privacy, Verifiability & Security',
-							collapsed: true,
-							items: [
-								{ label: 'Overview', slug: 'privacy-verifiability-security' },
-								{ label: 'mero-tee, KMS & Attestation', slug: 'privacy-verifiability-security/mero-tee' },
-							],
-						},
+						{ label: 'Privacy & Security', slug: 'privacy-verifiability-security' },
+						{ label: 'mero-tee, KMS & Attestation', slug: 'privacy-verifiability-security/mero-tee' },
 					],
 				},
 				{
@@ -111,16 +105,10 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'builder-directory' },
 						{ label: 'Examples', slug: 'examples' },
 						{ label: 'Core App Examples', slug: 'examples/core-apps-examples' },
-						{
-							label: 'App Directory & Registry',
-							collapsed: true,
-							items: [
-								{ label: 'Overview', slug: 'app-directory' },
-								{ label: 'Registry Overview', slug: 'app-directory/registry-overview' },
-								{ label: 'Registry API & CLI', slug: 'app-directory/registry-api-and-cli' },
-								{ label: 'Organizations & Ownership', slug: 'app-directory/organizations-and-ownership' },
-							],
-						},
+						{ label: 'App Directory & Registry', slug: 'app-directory' },
+						{ label: 'Registry Overview', slug: 'app-directory/registry-overview' },
+						{ label: 'Registry API & CLI', slug: 'app-directory/registry-api-and-cli' },
+						{ label: 'Organizations & Ownership', slug: 'app-directory/organizations-and-ownership' },
 					],
 				},
 				{
@@ -149,15 +137,9 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'operator-track' },
 						{ label: 'Run a Local Network', slug: 'operator-track/run-a-local-network' },
 						{ label: 'Monitoring', slug: 'operator-track/monitor-and-debug' },
-						{
-							label: 'Calimero Cloud & MDMA',
-							collapsed: true,
-							items: [
-								{ label: 'Overview', slug: 'calimero-cloud' },
-								{ label: 'Cloud Dashboard & Plans', slug: 'calimero-cloud/cloud-dashboard' },
-								{ label: 'Operator Architecture', slug: 'calimero-cloud/operator-architecture' },
-							],
-						},
+						{ label: 'Calimero Cloud & MDMA', slug: 'calimero-cloud' },
+						{ label: 'Cloud Dashboard & Plans', slug: 'calimero-cloud/cloud-dashboard' },
+						{ label: 'Operator Architecture', slug: 'calimero-cloud/operator-architecture' },
 					],
 				},
 				{
