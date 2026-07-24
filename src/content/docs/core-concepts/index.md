@@ -22,7 +22,7 @@ Understanding Calimero's core concepts is essential for building and operating a
 **Key concepts:**
 - State isolation model (shared CRDT state vs private storage)
 - Invitation and membership flow
-- Multi-chain integration (NEAR, Ethereum, ICP, etc.)
+- Optional external anchoring for verifiable checkpoints
 
 [Learn more →](/core-concepts/contexts/)
 
@@ -30,14 +30,14 @@ Understanding Calimero's core concepts is essential for building and operating a
 
 **Identity** in Calimero uses cryptographic keys for access control:
 
-- **Root Keys**: Master identities (from blockchain wallets or username / password combination)
-- **Client Keys**: Derived keys for specific contexts
-- **Authentication**: Wallet-based authentication (NEAR)
+- **Root Keys**: Master identities (created from a keypair or a username / password combination)
+- **Client Keys**: Per-device keys delegated by a root identity for specific contexts
+- **Authentication**: Signed operations plus JWT tokens for API access
 
 **Key concepts:**
 
-- Hierarchical key management
-- Wallet adapters and integration
+- Hierarchical keypair identity (root delegates per-device client keys)
+- Every operation is signed
 - JWT tokens for API authentication
 
 [Learn more →](/core-concepts/identity/)
@@ -95,8 +95,8 @@ flowchart LR
     NODE[Node<br/>merod]
     CTX1[Context A<br/>App + State]
     CTX2[Context B<br/>App + State]
-    ID1[Identity A<br/>alice.near]
-    ID2[Identity B<br/>bob.near]
+    ID1[Identity A<br/>alice]
+    ID2[Identity B<br/>bob]
     
     NODE --> CTX1
     NODE --> CTX2

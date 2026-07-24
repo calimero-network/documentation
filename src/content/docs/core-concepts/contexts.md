@@ -11,7 +11,7 @@ Contexts provide:
 
 - **State Isolation**: Each context maintains its own CRDT-backed state, completely separate from other contexts
 - **Member Management**: Invite-only access control with cryptographic identities
-- **Multi-Chain Support**: Each context can be associated with a blockchain protocol (NEAR, Ethereum, ICP, etc.)
+- **Optional External Anchoring**: A context can optionally anchor a proof or checkpoint to an external ledger for verifiable, tamper-evident state
 - **Lifecycle Management**: Create, invite members, join, and manage contexts independently
 
 ## Context Lifecycle
@@ -104,21 +104,14 @@ flowchart LR
 
 See [`core/crates/storage/README.md`](https://github.com/calimero-network/core/blob/master/crates/storage/README.md) for CRDT implementation details.
 
-## Multi-Chain Integration
+## Optional External Anchoring
 
-Contexts can be associated with blockchain protocols:
+Contexts operate fully peer-to-peer and do not require any external ledger. Where verifiability matters, a context can **optionally anchor a proof or checkpoint to an external ledger** so that participants (or third parties) can independently verify state without trusting a single operator.
 
-| Protocol | Use Case | Identity Source |
-| --- | --- | --- |
-| **NEAR** | NEAR-based applications | NEAR account IDs |
-| **Ethereum** | Ethereum dApps | Ethereum addresses |
-| **ICP** | Internet Computer apps | ICP principals |
-| **Stellar** | Stellar-based apps | Stellar accounts |
-
-Each protocol provides:
-- **Identity verification**: Cryptographic proof of ownership
-- **Cross-chain attestations**: Verifiable claims about on-chain state
-- **Relayer integration**: Bridge between Calimero and blockchain
+Anchoring is opt-in and provides:
+- **Identity verification**: Cryptographic proof of ownership via signed operations
+- **Verifiable checkpoints**: A tamper-evident commitment to context state at a point in time
+- **Independent audit**: External parties can confirm a checkpoint without accessing private context data
 
 ## Context Operations
 

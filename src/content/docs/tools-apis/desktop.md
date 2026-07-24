@@ -51,7 +51,7 @@ When a user opens an app from Desktop, it passes authentication tokens directly 
 https://your-app-frontend.com/#access_token=...&refresh_token=...&node_url=...&application_id=...
 ```
 
-Apps built with [`@calimero-network/calimero-client`](https://github.com/calimero-network/calimero-client-js) read these values automatically from `window.location.hash` and skip the manual auth flow.
+Apps built with [mero.js](https://calimero-network.github.io/mero-js/) read these values automatically from `window.location.hash` and skip the manual auth flow.
 
 **Hash parameters passed by Desktop:**
 
@@ -62,7 +62,7 @@ Apps built with [`@calimero-network/calimero-client`](https://github.com/calimer
 | `node_url` | URL of the local node the app should connect to |
 | `application_id` | The installed application's ID on the node |
 
-If your app uses `calimero-client`, SSO works out of the box — no extra integration needed. If you're building a custom frontend, read these four values from the hash on startup and use them to initialize your node connection.
+If your app uses mero.js, SSO works out of the box — no extra integration needed. If you're building a custom frontend, read these four values from the hash on startup and use them to initialize your node connection.
 
 ---
 

@@ -1,0 +1,104 @@
+---
+title: How Calimero compares
+description: An honest look at Calimero next to Holepunch, Nostr, blockchains, IPFS, Matrix, and CRDT libraries like Automerge and Yjs.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Calimero borrows ideas from a lot of prior art. This page places it next to the
+projects people most often compare it to — what they share, and where Calimero
+is different.
+
+## At a glance
+
+| Project | Core idea | Consistency | Privacy default | App layer? |
+| --- | --- | --- | --- | --- |
+| **Calimero** | CRDT shared state + WASM apps over P2P | Causal, converges without consensus | End-to-end encrypted, private | **Yes** — runtime + apps |
+| **Holepunch** | P2P primitives (append-only logs, DHT) | App-defined | Encrypted transport | No — you build it |
+| **Nostr** | Relays broadcasting signed events | Eventual, last-write-ish | Mostly public | No — mostly social |
+| **Blockchains** | Global ledger via consensus | Total order, global | Public by default | Smart contracts |
+| **IPFS** | Content-addressed storage + transport | Immutable content | Public by default | No — storage/transport |
+| **Matrix** | Federated servers, E2EE rooms | Per-room event graph | E2EE messaging | No — messaging |
+| **Automerge / Yjs** | CRDT data-structure libraries | Causal, converges | In-process (you wire it) | No — a library |
+
+## Holepunch (Hypercore, Hyperswarm, Pears)
+
+Holepunch is the closest neighbor: genuinely serverless, device-to-device P2P.
+It gives you superb **primitives** — Hypercore (append-only signed logs),
+Hyperswarm (DHT-based peer discovery), Hyperdrive (a filesystem).
+
+The difference is altitude. Holepunch hands you logs and a swarm; you build the
+data model, conflict resolution, access control, and identity yourself. Calimero
+is the layer above: **mutable CRDT shared state**, a **WASM app runtime**,
+**membership and access control**, and an **optional hosted/TEE node tier** for
+when a purely device-only model isn't reliable enough (mobile that sleeps,
+users who want an always-on presence). If you want raw P2P Lego, Holepunch is
+excellent; if you want an application platform, that's Calimero.
+
+## Nostr
+
+Nostr is beautifully simple: clients publish **signed events** to **relays**,
+and other clients read them back. It excels at open, censorship-resistant social
+feeds. But relays store-and-forward mostly **public** events, and there's no
+strong consistency model — it's a broadcast bus, not shared mutable state.
+
+Calimero is the opposite trade: **private, encrypted contexts** with
+**causal-consistent shared state** and **computation** (WASM), rather than a
+public firehose of notes. Nostr answers "how do I broadcast a signed message";
+Calimero answers "how does a group share and evolve state together, privately."
+
+## Blockchains
+
+A blockchain's whole purpose is **global consensus** among mutually distrusting
+parties — a single total order everyone can verify. That guarantee is real and
+sometimes exactly what you need, but it costs throughput, money, and privacy
+(everything is public and re-executed by everyone).
+
+Calimero deliberately gives up global consensus. There is **no global state and
+no fee** — each context is its own private world that converges via CRDTs. When
+a specific fact *does* need public verifiability, Calimero can **anchor a proof**
+to an external ledger, without putting the data itself on-chain. Use a blockchain
+for a trustless global ledger; use Calimero for private, local-first
+coordination.
+
+## IPFS / libp2p
+
+IPFS is **content-addressed storage**: immutable blobs identified by their hash,
+distributed over libp2p. It's a great substrate for static, verifiable content —
+but it doesn't give you *mutable application state* or a place to run logic.
+
+Calimero actually uses **libp2p** for transport too, so they share DNA at the
+network layer. The difference is what sits on top: Calimero adds mutable,
+converging CRDT state and a runtime, where IPFS stops at "here is a file, by
+its hash."
+
+## Matrix
+
+Matrix federates **homeservers** that host **E2EE rooms** and exchange a
+per-room event graph. Conceptually a Calimero **context** rhymes with a Matrix
+room — a private group with an event history.
+
+The divergence: Matrix is purpose-built for **messaging**, and rooms live on
+servers you federate with. Calimero contexts are **programmable** (a room is a
+WASM app), and the state is owned by the members' nodes rather than a homeserver.
+Matrix is a protocol for chat; Calimero is a protocol for arbitrary shared-state
+apps.
+
+## Automerge / Yjs
+
+Automerge and Yjs are the CRDT libraries a lot of local-first apps are built on,
+and they're excellent at the one job: **converging data structures** inside your
+process. But they're a *library* — you still have to provide the network,
+persistence, identity, access control, encryption, and multi-language clients.
+
+Calimero is the **batteries-included** version of that story: the CRDTs are
+there, but so is a node, a sync protocol, hierarchical identity, per-context
+encryption and key rotation, an app runtime, and clients for JS, Python, Kotlin,
+and Swift. If you want a CRDT type in your app, reach for Automerge/Yjs; if you
+want a whole platform around CRDTs, that's Calimero.
+
+<Aside type="note">
+Comparisons are about emphasis, not winners. These projects overlap and even
+compose — Calimero runs on libp2p, and can anchor proofs to a blockchain. The
+question is which layer of the problem you want handed to you.
+</Aside>

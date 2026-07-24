@@ -15,7 +15,7 @@ $: merobox logs node1 --follow
 > ....
 
 # List contexts
-$: meroctl --node node1 context list
+$: meroctl --node node1 context ls
 > +--------------+----------------+---------------------+
 > | Context ID   | Application ID | Root Hash           |
 > +=====================================================+

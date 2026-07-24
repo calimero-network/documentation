@@ -75,6 +75,16 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Vision',
+					collapsed: false,
+					items: [
+						{ label: 'Why Calimero', slug: 'vision/why-calimero' },
+						{ label: 'Architecture at a Glance', slug: 'vision/architecture' },
+						{ label: 'The Ecosystem', slug: 'vision/ecosystem' },
+						{ label: 'How Calimero Compares', slug: 'vision/comparison' },
+					],
+				},
+				{
 					label: 'Build',
 					collapsed: false,
 					items: [

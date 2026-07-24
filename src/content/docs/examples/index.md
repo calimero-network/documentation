@@ -1,58 +1,37 @@
 ---
 title: "Examples"
-description: "Learn Calimero by exploring working examples. All examples include source code, README files, and Merobox workflow configurations."
+description: "A catalog of working Calimero example apps. Each includes source, a README, and merobox workflows — clone one and adapt its patterns."
 ---
 
-Learn Calimero by exploring working examples. All examples include source code, README files, and Merobox workflow configurations.
+Learn Calimero by exploring working examples. Each has source code, a README, and merobox workflow configs so you can run it locally.
 
-## Core Apps Examples
+## Reference apps in Core
 
-**[Core Apps Examples](/examples/core-apps-examples/)** — Reference implementations from `core/apps` demonstrating SDK patterns and CRDT usage.
+The `core/apps` directory holds small, focused reference implementations that demonstrate SDK patterns and CRDT usage. See [Core Apps Examples](/examples/core-apps-examples/) for one-paragraph descriptions of each, or browse the source:
 
-These examples live in [`calimero-network/core/apps`](https://github.com/calimero-network/core/tree/master/apps):
+| Example | Demonstrates | Repo |
+| --- | --- | --- |
+| kv-store | Basic CRDT key-value storage, events | [core/apps/kv-store](https://github.com/calimero-network/core/tree/master/apps/kv-store) |
+| kv-store-with-handlers | Event handlers on peer nodes | [core/apps/kv-store-with-handlers](https://github.com/calimero-network/core/tree/master/apps/kv-store-with-handlers) |
+| blobs | File/blob storage with content addressing | [core/apps/blobs](https://github.com/calimero-network/core/tree/master/apps/blobs) |
+| collaborative-editor | RGA CRDT for collaborative text | [core/apps/collaborative-editor](https://github.com/calimero-network/core/tree/master/apps/collaborative-editor) |
+| private-data | Node-local private storage | [core/apps/private-data](https://github.com/calimero-network/core/tree/master/apps) |
+| team-metrics | Nested CRDT structures | [core/apps/team-metrics-macro](https://github.com/calimero-network/core/tree/master/apps/team-metrics-macro) |
+| xcall-example | Cross-context calls | [core/apps/xcall-example](https://github.com/calimero-network/core/tree/master/apps/xcall-example) |
 
-- **kv-store** - Basic CRDT operations, key-value storage
-- **blobs** - File/blob management with content addressing
-- **collaborative-editor** - Text collaboration with RGA CRDT
-- **private-data** - Private storage patterns
-- **team-metrics** - Nested CRDT structures
-- **xcall-example** - Cross-context communication
+## Full applications
 
-**Quick start:**
-```bash
-$: cd core/apps/kv-store && chmod +x build.sh && ./build.sh
-> ...
-> Finished `app-release` profile [optimized] target(s) in 14.04s
+- **Battleships** — a multiplayer game showing private per-player state and turn-based logic: [calimero-network/battleships](https://github.com/calimero-network/battleships).
+- **Starter template** — scaffold a fresh app (Rust logic + frontend + workflows) with `npx create-mero-app@latest my-app`. See [Developer Tools](/tools-apis/developer-tools/).
 
-$: meroctl --node node1 app install --path res/kv_store.wasm
-> ╭───────────────────────────────────────────────────────────────────────────────────╮
-> │ Application Installed                                                             │
-> ╞═══════════════════════════════════════════════════════════════════════════════════╡
-> │ Successfully installed application 'A1fKrY7kkbqiJJU9oaG65NPRw2MCvrNESs31ERqg7gLo' │
-> ╰───────────────────────────────────────────────────────────────────────────────────╯
-```
+To discover apps already built on Calimero, see the [App Directory](/app-directory/).
 
-## Application Examples
+## Running an example
 
-For complete applications, see:
-
-- **Battleships** - Multiplayer game - [`battleships`](https://github.com/calimero-network/battleships) repository
-- **KV Store** - Template app - Created via `npx create-mero-app`
-
-## By Complexity
-
-Examples organized by difficulty:
-
-- **Starter**: Basic CRDT usage (kv-store, counters)
-- **Intermediate**: Event handling, blob management, nested structures
-- **Advanced**: Cross-context calls, complex state machines
-
-## Getting Started with Examples
-
-1. Clone or browse the repository
-2. Read the README for setup instructions
-3. Run `./build.sh` or `pnpm run logic:build`
-4. Install on a local node using `meroctl`
-5. Explore the code and adapt patterns to your app
+1. Clone or browse the repo and read its README.
+2. Build the WASM (`./build.sh` or the repo's build step).
+3. Install it on a local node: `meroctl app install --path <file.wasm>` (returns an application id).
+4. Create a context: `meroctl context create --application-id <APP_ID>`.
+5. Call methods with `meroctl call` or run the bundled merobox workflow.
 
 See [Getting Started](/getting-started/) for installation and setup.

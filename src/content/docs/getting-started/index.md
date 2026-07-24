@@ -122,31 +122,11 @@ $: rustc --version
 > rustc 1.92.0 (ded5c06cf 2025-12-08)
 ```
 
-### Install Node.js SDKs (for client development)
+### Install the JavaScript client (for client development)
 
-```bash
-# Install Calimero JavaScript SDK
-$: npm install @calimero-network/calimero-cli-js @calimero-network/calimero-sdk-js
-> ...
-> added 213 packages in 2m
-> 12 packages are looking for funding
->  run `npm fund` for details
+The canonical JavaScript client is **mero.js**. See the [mero.js documentation](https://calimero-network.github.io/mero-js/) for installation and usage.
 
-# Or with pnpm
-$: pnpm add @calimero-network/calimero-cli-js @calimero-network/calimero-sdk-js
-> ...
-> dependencies:
-> + @calimero-network/calimero-cli-js 0.2.0
-> + @calimero-network/calimero-sdk-js 0.2.1
-
-> Done in 2m 29.8s
-```
-
-NPM resources:
-
-- [calimero-sdk-js](https://www.npmjs.com/package/@calimero-network/calimero-sdk-js)
-
-- [calimero-cli-js](https://www.npmjs.com/package/@calimero-network/calimero-cli-js)
+To generate typed TypeScript clients from an application ABI, use [mero-devtools-js](https://calimero-network.github.io/mero-devtools-js/).
 
 See [`merobox/README.md`](https://github.com/calimero-network/merobox#readme) for complete installation options.
 
@@ -216,9 +196,9 @@ See [Running Nodes](/operator-track/run-a-local-network/) for detailed node mana
 
 Calimero applications consist of two parts: `frontend logic` and `backend logic`.
 
-The frontend logic can be written in any frontend language and must include the `calimero-client` dependency, which handles user authentication and JSON-RPC requests to the node.
+The frontend logic can be written in any frontend language and uses the **mero.js** client, which handles user authentication and JSON-RPC requests to the node.
 
-The backend logic is the core of a Calimero application. It can be written in Rust or JavaScript and is compiled into WebAssembly (WASM) using `calimero-sdk-rs` or `calimero-sdk-js`. This WASM module is then installed on a node, where its logic (mutate and query methods) is executed. Data storage is handled by RocksDB, while CRDTs are responsible for keeping data persistent and synchronized across nodes.
+The backend logic is the core of a Calimero application. It is written in Rust and compiled into WebAssembly (WASM) using the `calimero-sdk` crate. This WASM module is then installed on a node, where its logic (mutate and query methods) is executed. Data storage is handled by RocksDB, while CRDTs are responsible for keeping data persistent and synchronized across nodes.
 
 ### Option A: Create from Template
 ```bash
@@ -476,10 +456,10 @@ To understand what contexts are and how they work read [here](/core-concepts/con
 **Create a context:**
 ```bash
 # Merobox command for creating contexts
-$: merobox context create --node <NODE_ID> --protocol <PROTOCOL> --application-id <APP_ID>
+$: merobox context create --node <NODE_ID> --application-id <APP_ID>
 
-# Creating context with application ID from previous steps using NEAR protocol
-$: merobox context create --node calimero-node-1 --protocol near  --application-id 7mHCKUsCeb84hDF8trn1eNzcqH8L1LNbdZiCcvFUWx7s
+# Creating context with the application ID from the previous steps
+$: merobox context create --node calimero-node-1 --application-id 7mHCKUsCeb84hDF8trn1eNzcqH8L1LNbdZiCcvFUWx7s
 > Creating context for application 7mHCKUsCeb84hDF8trn1eNzcqH8L1LNbdZiCcvFUWx7s on node calimero-node-1
 
 > ✓ Context created successfully!
@@ -510,11 +490,10 @@ $: Getting context FCaGbSngPec9u2mTSXJy1jRjzqLZUfHuuEppPiaRKJHS from node calime
 **Call methods:**
 ```bash
 # Merobox - call a mutation command
-$: merobox call --node <NODE_ID> --context-id <CONTEXT_ID> --function <METHOD_NAME> --args <ARGS_IN_JSN> --executor-key <IDENTITY_PUBLIC_KEY>
+$: merobox call --node <NODE_ID> --context-id <CONTEXT_ID> --function <METHOD_NAME> --args <ARGS_IN_JSN>
 
 # Commands from previous steps 
-$: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZUfHuuEppPiaRKJHS --function add_item --args '{"key": "hello", "value": "world"}' --executor-key CgZxoj9mMECAGFVrGQ3mA8X57bWt38jvTPuAo3RAPhos
-> Using RPC endpoint: http://localhost:59603
+$: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZUfHuuEppPiaRKJHS --function add_item --args '{"key": "hello", "value": "world"}'> Using RPC endpoint: http://localhost:59603
 > ...
 > 🔍 JSON-RPC Parsed Response: {
 >  jsonrpc: 2.0,
@@ -532,11 +511,10 @@ $: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZ
 > ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 # Merobox - call a view command
-$: merobox call --node <NODE_ID> --context-id <CONTEXT_ID> --function <METHOD_NAME> --args <ARGS_IN_JSN> --executor-key <IDENTITY_PUBLIC_KEY>
+$: merobox call --node <NODE_ID> --context-id <CONTEXT_ID> --function <METHOD_NAME> --args <ARGS_IN_JSN>
 
 # Commands from previous steps 
-$: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZUfHuuEppPiaRKJHS --function get_item --args '{"key": "hello"}' --executor-key CgZxoj9mMECAGFVrGQ3mA8X57bWt38jvTPuAo3RAPhos
-> Using RPC endpoint: http://localhost:59603
+$: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZUfHuuEppPiaRKJHS --function get_item --args '{"key": "hello"}'> Using RPC endpoint: http://localhost:59603
 > ...
 > 🔍 JSON-RPC Parsed Response: {
 >  jsonrpc: 2.0,
@@ -560,12 +538,10 @@ $: merobox call --node calimero-node-1 --context-id FCaGbSngPec9u2mTSXJy1jRjzqLZ
 **Create a context:**
 ```bash
 # Meroctl command for creating contexts
-$: meroctl --node <NODE_ID> context create \
- --protocol <PROTOCOL> --application-id <APP_ID>
+$: meroctl --node <NODE_ID> context create --application-id <APP_ID>
 
-# Creating context with application ID from previous steps using NEAR protocol
-$: meroctl --node node1 context create \
-  --protocol near --application-id A1fKrY7kkbqiJJU9oaG65NPRw2MCvrNESs31ERqg7gLo
+# Creating context with the application ID from the previous steps
+$: meroctl --node node1 context create --application-id A1fKrY7kkbqiJJU9oaG65NPRw2MCvrNESs31ERqg7gLo
 > +------------------------------+
 > | Context Created              |
 > +==============================+
@@ -644,7 +620,7 @@ As this is the final step of this guide, let’s recap what we accomplished:
  
  4. Installed the application WASM on the node using Merobox or meroctl.
  
- 5. Created a context for the installed application on the NEAR Protocol to store its configuration using Merobox or meroctl.
+ 5. Created a context for the installed application to store its configuration using Merobox or meroctl.
  
  6. Invoked a change method using Merobox or meroctl to save a key–value pair, then used a view method to verify that the data was saved correctly.
 
@@ -728,10 +704,10 @@ See [Examples](/examples/) for complete list.
 A: For local development, yes. Use `merobox` to run nodes locally. For production, you can use hosted nodes or run your own by using merod and meroctl setup.
 
 **Q: Which language should I use?**  
-A: Applications can be written in Rust (compiled to WASM) or JavaScript/TypeScript (using `@calimero-network/calimero-sdk-js`). Clients can use JavaScript/TypeScript or Python.
+A: Applications are written in Rust and compiled to WASM using the `calimero-sdk` crate. Clients can use JavaScript/TypeScript (mero.js), Python (calimero-client-py), Kotlin (mero-kotlin), or Swift (MeroKit).
 
 **Q: How do I handle authentication?**  
-A: Calimero supports User/Password and NEAR wallet-based authentication. See [Identity](/core-concepts/identity/) and [Client SDKs](/tools-apis/client-sdks/).
+A: Calimero uses hierarchical keypair identities (a root identity delegates per-device client keys, and every operation is signed) alongside username/password login. See [Identity](/core-concepts/identity/) and [Client SDKs](/tools-apis/client-sdks/).
 
 **Q: Can I use this offline?**  
 A: Yes! Calimero is offline-first. Apps work offline and sync when online.

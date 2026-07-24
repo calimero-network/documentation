@@ -42,7 +42,7 @@ For complete API documentation, including all methods, request/response formats,
 
 For easier client development, use the official SDKs:
 
-- **JavaScript/TypeScript**: [`@calimero/client`](https://github.com/calimero-network/calimero-client-js) - See [Client SDKs](/tools-apis/client-sdks/)
+- **JavaScript/TypeScript**: [mero.js](https://calimero-network.github.io/mero-js/) - See [Client SDKs](/tools-apis/client-sdks/)
 - **Python**: [`calimero-client-py`](https://github.com/calimero-network/calimero-client-py) - See [Client SDKs](/tools-apis/client-sdks/)
 - **Rust**: [`core/crates/client`](https://github.com/calimero-network/core/tree/master/crates/client)
 

@@ -17,7 +17,7 @@ At the application layer, Calimero provides a shared environment for collaborati
 | **Offline-first** | Works without connectivity, syncs when online |
 | **Event-driven** | Real-time notifications across nodes |
 | **WASM Runtime** | Write apps in Rust or TypeScript, run in sandboxed environment |
-| **Multi-chain** | Integrates with NEAR, ICP, Ethereum, Stellar |
+| **Optional anchoring** | Optionally anchor a proof or checkpoint to an external ledger for tamper-evident verification |
 
 ## Key Design Principles
 
@@ -138,11 +138,6 @@ core/
 │   ├── kv-store/    # Simple key-value store
 │   ├── blobs/       # Blob sharing example
 │   └── ...          # More examples
-├── contracts/       # Cross-chain smart contracts
-│   ├── near/        # NEAR Protocol contracts
-│   ├── icp/         # Internet Computer Protocol canisters
-│   ├── ethereum/    # Solidity contracts
-│   └── stellar/     # Stellar contracts
 └── e2e-tests/       # End-to-end test suite
 ```
 

@@ -169,17 +169,6 @@ steps:
     expected_failure: true
 ```
 
-## Near sandbox integration
-
-Merobox also documents local NEAR Sandbox support, which is useful when your testing flow needs blockchain-connected paths without paying real network costs.
-
-This is a strong fit for:
-
-- app development,
-- local demonstrations,
-- end-to-end tests,
-- repeatable workshop or tutorial environments.
-
 ## Merobox vs other tools
 
 | Tool | Best for |
@@ -209,7 +198,6 @@ The repository links to a full external architecture reference covering:
 - workflow engine internals,
 - node management,
 - remote nodes,
-- NEAR integration,
 - CLI reference,
 - testing and troubleshooting.
 

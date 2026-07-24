@@ -1,0 +1,87 @@
+---
+title: Architecture at a glance
+description: A high-level tour of how a Calimero app, a context, the node, and peer-to-peer sync fit together — with pointers into the Core protocol reference for depth.
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+import Figure from '../../../components/Figure.astro';
+import ArchStack from '../../../components/ArchStack.astro';
+
+Calimero has a small number of moving parts. This page is the map; each layer
+ends with a link into the [Core reference](https://calimero-network.github.io/core/)
+for the full detail. For the deeper conceptual pages, see
+[Core Concepts](/core-concepts/).
+
+## The stack at a glance
+
+<Figure id="d-architecture">
+  <ArchStack />
+</Figure>
+
+## Applications
+
+You write an app in Rust using the SDK, declare your state as **CRDT
+collections** (maps, sets, counters, lists), and compile to a single
+**WebAssembly** module. The runtime executes it in a sandbox with resource
+limits — deterministic, so every node produces the same result from the same
+operations. Apps expose **views** (read) and **mutations** (write), and can
+**emit events** that clients subscribe to.
+
+<LinkCard title="Applications" href="/core-concepts/applications/" description="The app model, concretely." />
+
+## Contexts
+
+A **context** is a running instance of an app with its own isolated, encrypted
+state, shared among its members. Think of it as a private network for one app
+and one group. Membership, access control, and upgrades are governed by signed
+operations that propagate to every member. A node can participate in many
+contexts at once.
+
+<LinkCard title="Contexts" href="/core-concepts/contexts/" description="Lifecycle, membership, isolation." />
+
+## Shared state: CRDTs over a causal DAG
+
+Every mutation becomes a **signed operation** with references to the operations
+it causally followed — forming a **DAG** (directed acyclic graph), not a linear
+chain. Operations replicate to peers; each node folds the DAG it has into
+**state** and a **root hash**. Because the state types are CRDTs, the fold is
+order-independent: peers that have seen the same operations agree, and peers that
+diverged reconcile when the missing operations arrive. Divergence is *detected*
+(via the root hash), never prevented by locking.
+
+<CardGrid>
+  <LinkCard title="Operations & the DAG" href="https://calimero-network.github.io/core/protocol/operations/" description="What an operation is and how causality is tracked." />
+  <LinkCard title="State, projection & root hash" href="https://calimero-network.github.io/core/protocol/projection/" description="How the DAG folds to a verifiable state." />
+</CardGrid>
+
+## Sync: two paths
+
+Calimero replicates on two complementary paths:
+
+- **Broadcast** — new operations gossip to context members in ~100–200ms for
+  real-time feel.
+- **Catch-up sync** — nodes periodically reconcile directly, so a peer that was
+  offline or missed a broadcast still converges. This is what makes the system
+  resilient to partitions and restarts.
+
+<LinkCard title="Sync & convergence (Core)" href="https://calimero-network.github.io/core/protocol/sync/" description="The reconciliation protocol in full." />
+
+## Identity, encryption & the network
+
+Identities are **hierarchical keypairs** — a root identity delegates per-device
+keys — and every operation is signed. Context state is **end-to-end encrypted**;
+keys are delivered to members and rotated on membership changes, so a removed
+member cannot read future state. Transport is **libp2p** (gossip, direct
+streams, peer discovery).
+
+<CardGrid>
+  <LinkCard title="Identity" href="/core-concepts/identity/" description="Root and device keys, signing." />
+  <LinkCard title="Encryption & key rotation (Core)" href="https://calimero-network.github.io/core/protocol/encryption/" description="How confidentiality is maintained across membership changes." />
+</CardGrid>
+
+<Aside type="tip" title="Go deeper">
+The [Core protocol reference](https://calimero-network.github.io/core/protocol/overview/)
+walks the entire life of one operation — write path, receive path, projection,
+sync, governance — as a normative spec. This page is the orientation; that is
+the source of truth.
+</Aside>
