@@ -685,7 +685,7 @@ See [Examples](/examples/) for complete list.
 - **[Core Concepts](/core-concepts/)** - Deep dive into architecture, contexts, identity
 - **[Service SDK (Rust)](/builder-directory/sdk-guide/)** - Write the app logic that runs in the node
 - **[Client SDKs](/tools-apis/client-sdks/)** - Call your app from JS, Python, Kotlin, or Swift
-- **[Examples](/examples/core-apps-examples/)** - Working example applications
+- **[Examples](/examples/)** - Working example applications
 
 ### For Operators
 

@@ -106,7 +106,6 @@ export default defineConfig({
 						{ label: 'Service SDKs', slug: 'builder-directory/sdk-guide' },
 						{ label: 'Client SDKs', slug: 'tools-apis/client-sdks' },
 						{ label: 'Examples', slug: 'examples' },
-						{ label: 'Core App Examples', slug: 'examples/core-apps-examples' },
 						{ label: 'App Directory & Registry', slug: 'app-directory' },
 						{ label: 'Registry Overview', slug: 'app-directory/registry-overview' },
 						{ label: 'Registry API & CLI', slug: 'app-directory/registry-api-and-cli' },

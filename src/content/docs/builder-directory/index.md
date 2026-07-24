@@ -49,7 +49,7 @@ A `create-mero-app` scaffolder is available to generate a starter project (Rust 
 
 - [Service SDK (Rust)](/builder-directory/sdk-guide/) — the app model: state, logic, CRDTs, events, storage.
 - [Client SDKs](/tools-apis/client-sdks/) — call your app from JS, Python, Kotlin, or Swift.
-- [Core Apps Examples](/examples/core-apps-examples/) and [Examples](/examples/) — working reference apps to clone and adapt.
+- [Examples](/examples/) — working reference apps to clone and adapt.
 - [Developer Tools](/tools-apis/developer-tools/) and [Client SDKs](/tools-apis/client-sdks/) — the surrounding tooling.
 - [Core reference site](https://calimero-network.github.io/core/build/) — the authoritative Rust SDK and runtime documentation.
 - [Core Concepts](/core-concepts/) and [Privacy, Verifiability & Security](/privacy-verifiability-security/) — the concepts behind contexts, identity, and private data.

@@ -58,4 +58,4 @@ See the [mero-devtools-js reference](https://calimero-network.github.io/mero-dev
 - [Client SDKs](/tools-apis/client-sdks/) — client libraries for interacting with nodes
 - [meroctl CLI](/tools-apis/meroctl-cli/) — command-line node management
 - [SDK Guide](/builder-directory/sdk-guide/) — building Calimero applications
-- [Core Apps Examples](/examples/core-apps-examples/) — reference implementations
+- [Examples](/examples/) — reference implementations
