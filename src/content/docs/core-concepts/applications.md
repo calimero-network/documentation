@@ -180,8 +180,8 @@ Applications export an ABI (Application Binary Interface) that clients use:
 
 Tools:
 
-- **`calimero-abi`**: Rust tool for ABI generation
-- **`@calimero-network/abi-codegen`**: TypeScript client generator
+- **`calimero-abi-codegen`**: Rust tool for ABI generation
+- **[mero-devtools-js](https://calimero-network.github.io/mero-devtools-js/)**: TypeScript client generator
 
 ## Example Applications
 

@@ -1,0 +1,80 @@
+---
+title: Why Calimero
+description: The Internet was built to be peer-to-peer. Calimero is the application layer that returns data ownership to the people using an app — without the cost of consensus.
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+## The Internet was built to be peer-to-peer
+
+Packet switching was a response to the fragility of centralized, circuit-switched
+networks. TCP/IP and SMTP encode that spirit: open, resilient, no central
+authority. Somewhere along the way, applications drifted the other direction —
+your data now lives on someone else's server, and you rent access to it.
+
+Calimero is an attempt to give applications back the property the network layer
+never lost: **the people using an app hold their own data, and coordinate
+directly with each other.**
+
+## Not a blockchain
+
+Calimero is often mistaken for one, so it's worth being precise about what it is
+*not*.
+
+- A blockchain exists to make strangers agree on a single global history through
+  **consensus**. That guarantee is expensive: every participant re-executes every
+  transaction, throughput is capped, and everything is public by default.
+- Calimero is for the far more common case where you **don't need global
+  agreement** — you need a group of known participants to share state reliably,
+  privately, and cheaply.
+
+Instead of consensus, Calimero uses **CRDTs** (Conflict-free Replicated Data
+Types). Each participant applies changes locally and merges what others send;
+the data structure itself guarantees everyone converges to the same state, in
+any order, even after being offline. No quorum, no fees, no waiting.
+
+<Aside type="note" title="When to reach for Calimero">
+Reach for Calimero when local autonomy and asynchronous coordination are enough
+— collaboration, private group state, offline-first apps. Reach for a blockchain
+when you genuinely need a trustless global ledger. They compose: Calimero can
+anchor a proof to an external ledger when a specific fact needs public
+verifiability.
+</Aside>
+
+## Self-sovereign by construction
+
+Two properties define the model:
+
+1. **Users own their data.** State lives on the nodes of the people in a
+   context, encrypted end-to-end. There is no central copy to leak, subpoena, or
+   monetize.
+2. **Operators never see it.** You can run your own node, or use a hosted one —
+   and a hosted node still can't read your data. When a node runs in a
+   [Trusted Execution Environment](/privacy-verifiability-security/mero-tee/),
+   hardware attestation proves *which* code is running before any key is released
+   to it. "Trust us" becomes "verify the machine."
+
+This is what makes Calimero viable where ordinary SaaS is a liability: teams and
+regulated organizations that cannot hand their data to a vendor, but still want
+the convenience of software that just works.
+
+## What you can build
+
+Calimero is a general application layer, not a single product. The same
+primitives support:
+
+- **Collaboration tools** — shared documents, boards, and workspaces that merge
+  concurrent edits automatically and work offline.
+- **Private team data rooms** — a group's records, replicated only among its
+  members, with per-member access control and revocation.
+- **SaaS replacements** — the multi-user app you'd normally rent, but where the
+  data never leaves the organization.
+- **Multiplayer and real-time apps** — game state and presence that sync in
+  ~100ms and heal after a disconnect.
+
+<CardGrid>
+  <LinkCard title="See the architecture" href="/vision/architecture/" description="How an app, a context, the node, and sync fit together." />
+  <LinkCard title="Explore the ecosystem" href="/vision/ecosystem/" description="Cloud, Desktop, the Apps Registry, and the SDK family." />
+  <LinkCard title="How Calimero compares" href="/vision/comparison/" description="Versus Holepunch, Nostr, blockchains, IPFS, Matrix, and CRDT libraries." />
+  <LinkCard title="Build something" href="/getting-started/" description="Run a node and call your first app in a few minutes." />
+</CardGrid>

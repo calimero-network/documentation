@@ -1,58 +1,44 @@
 ---
 title: "Examples"
-description: "Learn Calimero by exploring working examples. All examples include source code, README files, and Merobox workflow configurations."
+description: "A catalog of working Calimero example apps — focused reference apps in core/apps plus full applications. Clone one and adapt its patterns."
 ---
 
-Learn Calimero by exploring working examples. All examples include source code, README files, and Merobox workflow configurations.
+Learn Calimero by exploring working examples. Each has source code, a README, and (mostly) merobox workflows you can run locally.
 
-## Core Apps Examples
+## Reference apps (`core/apps`)
 
-**[Core Apps Examples](/examples/core-apps-examples/)** — Reference implementations from `core/apps` demonstrating SDK patterns and CRDT usage.
+Small, focused implementations that each demonstrate one set of SDK patterns. Clone one, read its README, and adapt it — the authoritative detail lives in the source.
 
-These examples live in [`calimero-network/core/apps`](https://github.com/calimero-network/core/tree/master/apps):
+| Example | Demonstrates | Repo |
+| --- | --- | --- |
+| **kv-store** | CRDT `UnorderedMap` + `LwwRegister`, mutations vs views, events, `app::Result` — the canonical starting point | [kv-store](https://github.com/calimero-network/core/tree/master/apps/kv-store) |
+| **kv-store-with-handlers** | Event handlers that run on peer nodes (real-time, event-driven updates) | [kv-store-with-handlers](https://github.com/calimero-network/core/tree/master/apps/kv-store-with-handlers) |
+| **blobs** | Content-addressed file/blob storage + P2P distribution outside the CRDT state | [blobs](https://github.com/calimero-network/core/tree/master/apps/blobs) |
+| **collaborative-editor** | `ReplicatedGrowableArray` (RGA) for conflict-free character-level text | [collaborative-editor](https://github.com/calimero-network/core/tree/master/apps/collaborative-editor) |
+| **private-data** | Node-local private storage that never syncs to other nodes | [private-data](https://github.com/calimero-network/core/tree/master/apps) |
+| **team-metrics** | Nested CRDTs (map → map → counter); ships a `derive(Mergeable)` and a custom-merge variant | [macro](https://github.com/calimero-network/core/tree/master/apps/team-metrics-macro) · [custom](https://github.com/calimero-network/core/tree/master/apps/team-metrics-custom) |
+| **xcall-example** | Cross-context calls (one context invoking another) with a ping/pong pattern | [xcall-example](https://github.com/calimero-network/core/tree/master/apps/xcall-example) |
 
-- **kv-store** - Basic CRDT operations, key-value storage
-- **blobs** - File/blob management with content addressing
-- **collaborative-editor** - Text collaboration with RGA CRDT
-- **private-data** - Private storage patterns
-- **team-metrics** - Nested CRDT structures
-- **xcall-example** - Cross-context communication
+## Full applications
 
-**Quick start:**
+- **Battleships** — a multiplayer game showing private per-player state and turn-based logic: [calimero-network/battleships](https://github.com/calimero-network/battleships).
+- **Starter template** — scaffold a fresh app (Rust logic + frontend + workflows) with `npx create-mero-app@latest my-app`. See [Developer Tools](/tools-apis/developer-tools/).
+
+To discover apps already built on Calimero, browse the [App Directory](/app-directory/).
+
+## Running an example
+
+Most examples ship a merobox workflow, so the fastest path is:
+
 ```bash
-$: cd core/apps/kv-store && chmod +x build.sh && ./build.sh
-> ...
-> Finished `app-release` profile [optimized] target(s) in 14.04s
-
-$: meroctl --node node1 app install --path res/kv_store.wasm
-> ╭───────────────────────────────────────────────────────────────────────────────────╮
-> │ Application Installed                                                             │
-> ╞═══════════════════════════════════════════════════════════════════════════════════╡
-> │ Successfully installed application 'A1fKrY7kkbqiJJU9oaG65NPRw2MCvrNESs31ERqg7gLo' │
-> ╰───────────────────────────────────────────────────────────────────────────────────╯
+cd core/apps/kv-store
+merobox bootstrap run workflows/kv-store.yml
 ```
 
-## Application Examples
+To run it manually: build the WASM (`./build.sh`), install it (`meroctl app install --path res/kv_store.wasm` — returns an application id), create a context (`meroctl context create --application-id <APP_ID>`), then call methods (`meroctl call <METHOD> --context <CTX> --args '<JSON>'`). See [Getting Started](/getting-started/) for setup.
 
-For complete applications, see:
+## Related
 
-- **Battleships** - Multiplayer game - [`battleships`](https://github.com/calimero-network/battleships) repository
-- **KV Store** - Template app - Created via `npx create-mero-app`
-
-## By Complexity
-
-Examples organized by difficulty:
-
-- **Starter**: Basic CRDT usage (kv-store, counters)
-- **Intermediate**: Event handling, blob management, nested structures
-- **Advanced**: Cross-context calls, complex state machines
-
-## Getting Started with Examples
-
-1. Clone or browse the repository
-2. Read the README for setup instructions
-3. Run `./build.sh` or `pnpm run logic:build`
-4. Install on a local node using `meroctl`
-5. Explore the code and adapt patterns to your app
-
-See [Getting Started](/getting-started/) for installation and setup.
+- [Service SDKs](/builder-directory/sdk-guide/) — the app model and CRDT reference
+- [Applications](/core-concepts/applications/) — application architecture
+- [Core Build docs](https://calimero-network.github.io/core/build/) — the full Rust SDK reference

@@ -1,0 +1,89 @@
+---
+title: The Calimero ecosystem
+description: How the pieces fit — the node at the center, the SDK family around it, and Calimero Cloud, Desktop, and the Apps Registry built on top.
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Calimero is a stack, not a single app. At the center is the **node**; everything
+else exists to help you build against it, run it, or ship apps to it.
+
+## The node — merod
+
+`merod` is the runtime. It executes your WASM app, stores CRDT state, tracks the
+causal DAG, and syncs with peers over libp2p. A node can host many contexts for
+many apps at once. Everything below talks to a node, or runs inside one.
+
+<CardGrid>
+  <LinkCard title="Nodes" href="/core-concepts/nodes/" description="What a node does and how it participates in contexts." />
+  <LinkCard title="Core reference" href="https://calimero-network.github.io/core/" description="The runtime, node operation, CLI, and full protocol." />
+</CardGrid>
+
+## The SDK family
+
+Two kinds of SDK, depending on which side of the node you're on:
+
+- **App SDK (Rust)** — for writing the WASM app itself. Ships in Core; declares
+  state as CRDT collections and exposes views, mutations, and events. See the
+  [Builder Directory](/builder-directory/).
+- **Client SDKs** — thin clients that talk to a node's API from an app's
+  frontend or a script. They authenticate, call methods over JSON-RPC, and
+  stream events. Pick your language:
+
+<CardGrid>
+  <LinkCard title="mero.js" href="https://calimero-network.github.io/mero-js/" description="Pure-JavaScript client — browser, Node, Deno, Bun, edge. Zero dependencies." />
+  <LinkCard title="calimero-client-py" href="https://calimero-network.github.io/calimero-client-py/" description="Python client over a native Rust core (PyO3). Great for scripts and automation." />
+  <LinkCard title="mero-kotlin" href="https://calimero-network.github.io/kotlin-sdk/" description="Native Kotlin client for Android, with optional Jetpack Compose UI." />
+  <LinkCard title="MeroKit (Swift)" href="https://calimero-network.github.io/swift-sdk/" description="Native Swift client for iOS/macOS, with optional SwiftUI components." />
+  <LinkCard title="mero-devtools-js" href="https://calimero-network.github.io/mero-devtools-js/" description="Generate a fully-typed TypeScript client from an app's ABI." />
+</CardGrid>
+
+The client catalog and how to choose live in [Client SDKs](/tools-apis/client-sdks/).
+
+## Calimero Cloud
+
+Not everyone wants to run infrastructure. **Calimero Cloud** provides managed
+nodes so you get a reachable, always-on node without operating servers — with
+single sign-on, plans, and one-time join keys for onboarding members.
+
+The important part: a managed node **still can't read your data**. Cloud nodes
+run inside a **Trusted Execution Environment**, and the key-management service
+only releases a node's storage key when hardware attestation proves the node is
+running an approved build. The operator hosts the machine; they never hold the
+keys to what's inside it.
+
+<CardGrid>
+  <LinkCard title="Calimero Cloud & MDMA" href="/calimero-cloud/" description="Managed, TEE-backed nodes — dashboard, plans, and operator architecture." />
+  <LinkCard title="TEE: attestation & KMS" href="/privacy-verifiability-security/mero-tee/" description="How a node proves what code it runs before a key is released." />
+</CardGrid>
+
+## Calimero Desktop
+
+**Calimero Desktop** brings a node and apps to the desktop as a native
+application (macOS, Windows, Linux), so end users can run Calimero apps without
+touching a terminal.
+
+<LinkCard title="Desktop" href="/tools-apis/desktop/" description="The native desktop app — what it is and how it works." />
+
+## Apps Registry
+
+The **Apps Registry** is where WASM apps are published and discovered. Apps ship
+as signed bundles; the registry validates the signature on upload and **nodes
+re-verify it on install** — so what runs is exactly what the author published.
+
+<LinkCard title="App Directory & Registry" href="/app-directory/" description="Publish, discover, and manage signed WASM app bundles." />
+
+## Where to go next
+
+| You want to… | Go to |
+| --- | --- |
+| Understand the design | [Architecture](/vision/architecture/) |
+| Write an app | [Builder Directory](/builder-directory/) |
+| Add Calimero to a frontend | [Client SDKs](/tools-apis/client-sdks/) |
+| Run or host a node | [Operate Nodes](/operator-track/) · [Calimero Cloud](/calimero-cloud/) |
+| See how it compares | [How Calimero compares](/vision/comparison/) |
+
+<Aside type="note">
+This page names the moving parts and links each to its own documentation. The
+per-tool reference sites are the source of truth for their tool.
+</Aside>

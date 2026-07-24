@@ -1,0 +1,106 @@
+---
+title: "Client SDKs"
+description: "Libraries for talking to a Calimero node from your own app — call methods, subscribe to events, drive the admin API — in JavaScript, Python, Kotlin, and Swift. Minimal examples plus links to each full reference."
+---
+
+import { Tabs, TabItem, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+**Client SDKs** run *outside* the node — in a web app, script, or mobile app — and talk to it over JSON-RPC: call your application's methods, subscribe to context events, and drive the admin API.
+
+They're distinct from the [**Service SDK**](/builder-directory/sdk-guide/), which is the code that runs *inside* the node (your app logic). If you're building a frontend or a tool, you want a client SDK below.
+
+## Calling a node from a client
+
+<Tabs>
+  <TabItem label="JavaScript">
+
+```typescript
+import { MeroJs } from '@calimero-network/mero-js';
+
+const client = new MeroJs({ nodeUrl: 'http://localhost:2528', apiKey: '…' });
+await client.auth.authenticate();
+
+const result = await client.rpc.call({
+  contextId: '…',
+  method: 'set',
+  args: { key: 'hello', value: 'world' },
+});
+```
+
+  </TabItem>
+  <TabItem label="Python">
+
+```python
+from calimero_client_py import create_connection, create_client
+
+connection = create_connection(api_url="http://localhost:2528")
+client = create_client(connection)
+
+result = client.get_peers_count()
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+import com.calimero.mero.Mero
+import com.calimero.mero.MeroConfig
+import com.calimero.mero.Credentials
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+val mero = Mero(MeroConfig(baseUrl = "https://your-node.example", /* tokenStore, … */))
+mero.authenticate(Credentials(username = "alice", password = "s3cr3t"))
+
+val post = mero.rpc.execute(
+    contextId = "…",
+    method = "get_post",
+    argsJson = buildJsonObject { put("id", "42") },
+)
+```
+
+  </TabItem>
+  <TabItem label="Swift">
+
+```swift
+import MeroKit
+
+let mero = Mero(config: MeroConfig(
+    baseURL: URL(string: "https://your-node.example")!,
+    tokenStore: KeychainTokenStore()
+))
+try await mero.authenticate(Credentials(username: "alice", password: "s3cr3t"))
+
+let post = try await mero.rpc.execute(
+    contextId: "…",
+    method: "get_post",
+    argsJson: ["id": "42"]
+)
+```
+
+  </TabItem>
+</Tabs>
+
+These are just enough to show the shape — create a client, authenticate, call a method. Installation, the full API, event subscriptions (WebSocket / SSE), and the admin surface live in each SDK's reference below.
+
+## Full references
+
+<CardGrid>
+  <LinkCard title="JavaScript — mero.js" href="https://calimero-network.github.io/mero-js/" description="Pure-JS client for browser, Node, and edge. Full auth support." />
+  <LinkCard title="Python — calimero-client-py" href="https://calimero-network.github.io/calimero-client-py/" description="Python client over a native Rust core. Automation, monitoring, scripting." />
+  <LinkCard title="Kotlin — mero-kotlin" href="https://calimero-network.github.io/kotlin-sdk/" description="Native Kotlin client for Android and JVM." />
+  <LinkCard title="Swift — MeroKit" href="https://calimero-network.github.io/swift-sdk/" description="Native Swift client for iOS and macOS." />
+</CardGrid>
+
+| SDK | Language | Best for |
+| --- | --- | --- |
+| **mero.js** | TypeScript / JavaScript | Web apps, Node tools, admin UIs |
+| **calimero-client-py** | Python | Automation, monitoring, CI/CD |
+| **mero-kotlin** | Kotlin | Android and JVM apps |
+| **MeroKit** | Swift | iOS and macOS apps |
+
+## Related
+
+- [Service SDKs](/builder-directory/sdk-guide/) — write the app logic that runs in the node
+- [meroctl CLI](/tools-apis/meroctl-cli/) — the command-line client
+- [Contexts](/core-concepts/contexts/) and [Identity](/core-concepts/identity/)

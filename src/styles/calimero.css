@@ -290,6 +290,15 @@ site-search button {
   letter-spacing: 0.04em;
 }
 
+/* Heading permalink (anchor) icon. The reduced heading sizes above shrink the
+   heading text, but the heading wrapper keeps Starlight's larger default
+   font-size — and the anchor icon is sized in `em` off that wrapper, so it
+   rendered oversized next to the smaller heading. Pin it in `rem` so it stays
+   proportional across all heading levels. */
+.sl-markdown-content .sl-heading-wrapper {
+  --sl-anchor-icon-size: 0.85rem;
+}
+
 /* Links */
 .sl-markdown-content a {
   color: var(--sl-color-text-accent);
@@ -594,4 +603,35 @@ body {
 @media (max-width: 50rem) {
   .sl-markdown-content h1 { font-size: 1.3rem; }
   .sl-markdown-content h2 { font-size: 1rem; }
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATED DIAGRAM ENGINE (Figure / SeqDiagram / ArchStack)
+   ═══════════════════════════════════════════ */
+
+/* Light theme: keep the diagram Replay control legible. */
+:root[data-theme='light'] .replay-btn {
+  background: #f4f4f5; color: #52525b; border-color: #d4d4d8;
+}
+
+.diagram-container { overflow-x: auto; margin: 1.25rem 0; }
+.diagram-container svg { border-radius: 10px; max-height: 75vh; }
+.diagram-container.seq svg { min-width: 700px; }
+.seq-step { opacity: 0; }
+.diagram-container.animating .seq-step {
+  animation: stepIn .4s ease-out forwards;
+  animation-delay: calc(var(--step-i) * .35s);
+}
+@keyframes stepIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.diagram-tools { display: flex; justify-content: flex-end; margin-bottom: .5rem; }
+.replay-btn {
+  padding: 6px 16px; border: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-gray-6); color: var(--sl-color-gray-2);
+  font-family: var(--sl-font-mono); font-size: .74rem; border-radius: 8px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.replay-btn:hover { border-color: var(--sl-color-accent); color: var(--sl-color-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .seq-step { opacity: 1; }
+  .diagram-container.animating .seq-step { animation: none; }
 }

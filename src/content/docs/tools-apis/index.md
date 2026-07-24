@@ -84,11 +84,13 @@ flowchart TD
 >
 | SDK | Reference | Notes |
 | --- | --- | --- |
-| Client SDKs | [Client SDKs Guide](/tools-apis/client-sdks/) | Comprehensive guide to Rust, Python, and JavaScript client SDKs for interacting with Calimero nodes. |
-| JavaScript Client | [`calimero-network/calimero-client-js`](https://github.com/calimero-network/calimero-client-js#readme) | Browser/Node bindings, event streaming, auth helpers. ✅ Full authentication support. |
-| Python Client | [`calimero-network/calimero-client-py`](https://github.com/calimero-network/calimero-client-py#readme) | Python bindings, ABI tooling, automation recipes. ⚠️ Authentication support planned. |
+| Client SDKs | [Client SDKs Guide](/tools-apis/client-sdks/) | Comprehensive guide to the client SDKs for interacting with Calimero nodes. |
+| JavaScript Client | [mero.js](https://calimero-network.github.io/mero-js/) | Browser/Node bindings, event streaming, auth helpers. ✅ Full authentication support. |
+| Python Client | [`calimero-client-py`](https://github.com/calimero-network/calimero-client-py#readme) | Python bindings, ABI tooling, automation recipes. ⚠️ Authentication support planned. |
+| Kotlin Client | [mero-kotlin](https://calimero-network.github.io/kotlin-sdk/) | Kotlin/Android bindings for Calimero nodes. |
+| Swift Client | [MeroKit](https://calimero-network.github.io/swift-sdk/) | Swift bindings for Apple platforms. |
 | Rust Client | [`calimero-network/core/crates/client`](https://github.com/calimero-network/core/tree/master/crates/client) | Rust client SDK for CLI tools and sidecar services. ⚠️ Authentication support planned. |
-| Rust SDK | [`calimero-network/core/crates/sdk`](https://github.com/calimero-network/core/tree/master/crates/sdk) | App macros, storage primitives, state helpers. For building Calimero applications. |
+| Rust SDK | [`calimero-sdk`](https://github.com/calimero-network/core/tree/master/crates/sdk) | App macros, storage primitives, state helpers. For building Calimero applications. |
 
 ## Publishing
 

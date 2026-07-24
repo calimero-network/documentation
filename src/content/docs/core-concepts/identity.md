@@ -11,7 +11,7 @@ Calimero supports a hierarchical identity model:
 
 ```mermaid
 flowchart LR
-    ROOT[Root Key<br/>alice.near] --> CLIENT1[Client Key A]
+    ROOT[Root Key<br/>alice] --> CLIENT1[Client Key A]
     ROOT --> CLIENT2[Client Key B]
     ROOT --> CLIENT3[Client Key C]
     
@@ -32,9 +32,9 @@ flowchart LR
 
 A **root key** is an authentication credential that represents a user's master identity in the Calimero auth system. It's typically:
 
-- Generated from a NEAR wallet or from username / password combination
+- Generated from a keypair or from a username / password combination
 - Used for high-level operations (creating contexts, managing memberships)
-- Stored securely (hardware wallet, keychain, etc.)
+- Stored securely (keychain, secure enclave, etc.)
 
 ### Client Keys
 
@@ -65,27 +65,22 @@ $: meroctl --node node1 context identity generate
 
 See [`core/crates/meroctl/README.md`](https://github.com/calimero-network/core/blob/master/crates/meroctl/README.md) for CLI details.
 
-## Blockchain Wallet Integration
+## Hierarchical Keypair Identity
 
-Calimero supports wallet-based authentication:
-
-| Protocol | Identity Source |
-| --- | --- |
-| **NEAR** | NEAR account ID + signature |
-
+Calimero uses its own hierarchical keypair identity. A root identity delegates per-device client keys, and every operation is signed:
 
 **Flow:**
-1. User connects wallet
-2. Signs challenge message
-3. Calimero verifies signature
-4. JWT token issued
+1. A root identity is created (keypair or username / password)
+2. The root delegates a per-device client key
+3. Each operation is signed with the client key
+4. Calimero verifies the signature and issues a JWT token
 
-See [`calimero-client-js/README.md`](https://github.com/calimero-network/calimero-client-js#readme) for client authentication examples.
+See [mero.js](https://calimero-network.github.io/mero-js/) for client authentication examples.
 
 ## Authentication Flows
 
-For wallet authentication examples, see:
-- **JavaScript**: [`calimero-client-js/README.md`](https://github.com/calimero-network/calimero-client-js#readme) - Client-side auth flows
+For authentication examples, see:
+- **JavaScript**: [mero.js](https://calimero-network.github.io/mero-js/) - Client-side auth flows
 - **Python**: [`calimero-client-py/README.md`](https://github.com/calimero-network/calimero-client-py#readme) - Python client auth
 
 ## JWT Tokens
@@ -122,23 +117,13 @@ See [`core/crates/meroctl/README.md`](https://github.com/calimero-network/core/b
 - Root key remains unaffected
 - Removed member stops receiving updates
 
-## Wallet Adapters
+## Client Integration
 
-Calimero provides wallet adapters for easy integration:
+Calimero clients handle node connection and signed authentication for you:
 
 ### JavaScript Client
 
-```typescript
-import {
-  CalimeroConnectButton,
-} from "@calimero-network/calimero-client";
-
-// Automatically handles node connection and authentication
-<CalimeroConnectButton />
-```
-
-**Supported wallets:**
-- NEAR Wallet
+Use **mero.js** to connect to a node and authenticate. It manages the client key, signs operations, and handles the JWT lifecycle automatically. See the [mero.js documentation](https://calimero-network.github.io/mero-js/) for setup and usage.
 
 ### Python Client
 
@@ -161,16 +146,16 @@ client = create_client(connection)
 1. **Use Client Keys**: Don't use root keys directly for context operations
 2. **Rotate Keys**: Periodically rotate client keys for security
 3. **Secure Storage**: Store private keys in secure keychains, never in code
-4. **Multi-Sig Support**: Use multi-signature wallets for high-value contexts
-5. **Key Backup**: Backup root keys securely (hardware wallet, paper backup)
+4. **Multi-Signature Approval**: Require multiple signatures for high-value contexts
+5. **Key Backup**: Backup root keys securely (secure enclave, offline backup)
 
 ## Deep Dives
 
 For detailed identity documentation:
 
-- **Identity Contracts**: [`contracts` README](https://github.com/calimero-network/contracts#readme) - Smart contract implementations
 - **Auth Service**: [`core/crates/auth/README.md`](https://github.com/calimero-network/core/blob/master/crates/auth/README.md) - Authentication service
-- **Client SDKs**: [Tools & APIs](/tools-apis/) - Wallet integration guides
+- **Protocol details**: [Core reference site](https://calimero-network.github.io/core/) - Identity, signing, and delegation internals
+- **Client SDKs**: [Tools & APIs](/tools-apis/) - Client integration guides
 
 ## Related Topics
 

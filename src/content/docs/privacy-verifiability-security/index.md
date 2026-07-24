@@ -1,9 +1,9 @@
 ---
 title: "Privacy, Verifiability & Security"
-description: "Calimero integrates with blockchain infrastructure — not to perform computation, but to provide a **source of truth** for:"
+description: "Calimero runs fully peer-to-peer and can optionally anchor a proof to an external ledger to provide a verifiable source of truth for membership, roles, and state checkpoints."
 ---
 
-Calimero integrates with blockchain infrastructure — not to perform computation, but to provide a **source of truth** for:
+Calimero runs fully peer-to-peer and needs no external ledger. Where verifiability matters, it can **optionally anchor a proof to an external ledger** — not to perform computation, but to provide a **verifiable source of truth** for:
 
 - Network membership (list of participants)
 - Roles and permissions
@@ -12,7 +12,7 @@ Calimero integrates with blockchain infrastructure — not to perform computatio
 In this modular stack:
 
 - Calimero handles **data collaboration and replication**.
-- The blockchain layer provides **immutability and verification**.
+- An optional external ledger provides **immutability and verification** for anchored proofs.
 - Other tools like **zero-knowledge proofs (ZK)** can extend privacy guarantees.
 
 Calimero is a component of a broader **privacy-oriented architecture** — modular, composable, and adaptable to your needs.
@@ -24,7 +24,7 @@ flowchart LR
     DATA[Private user data] --> CONTEXT[Calimero context]
     CONTEXT --> NODE[Node runtime]
     NODE --> AUDIT[Replayable audit trail]
-    CONTEXT -. membership and checkpoints .-> CHAIN[Blockchain source of truth]
+    CONTEXT -. membership and checkpoints .-> CHAIN["External ledger (optional)"]
     NODE -. selective disclosure .-> PROOF[Hashes / proofs / attestations]
 
     classDef lime fill:#14210a,stroke:#a5ff11,color:#f5ffe0,stroke-width:2px;
@@ -50,15 +50,15 @@ flowchart LR
 
 | Layer | What is verified | How |
 | --- | --- | --- |
-| Context membership | Who can read/write state | Anchored invites or role assignments persisted on-chain |
+| Context membership | Who can read/write state | Signed invites or role assignments, optionally anchored to an external ledger |
 | State synchronization | CRDT merges, Merkle checkpoints | Nodes exchange proofs before accepting remote updates |
-| Application integrity | WASM binaries, configuration | Hashes committed to L1, compared during deployment |
-| User actions | Caller identity, authorization | Challenge/response over wallet connector + executor audit logs |
+| Application integrity | WASM binaries, configuration | Hashes compared during deployment, optionally anchored to an external ledger |
+| User actions | Caller identity, authorization | Signed challenge/response over client keys + executor audit logs |
 | Data access | Private vs shared storage | Storage namespaces tied to caller identity, enforced in runtime |
 
 ## Hardening Checklist
 
-1. Anchor critical context membership changes to NEAR.
+1. Optionally anchor critical context membership changes to an external ledger.
 2. Enable event payload hashing when emitting sensitive data; share full payloads via authenticated channels only.
 3. Rotate client keys on a cadence and revoke stale devices at the root key level.
 4. Run periodic Merkle checkpoint comparisons across nodes to detect divergence early.
@@ -70,9 +70,9 @@ flowchart LR
 | --- | --- | --- |
 | Hosted TEE, KMS, and attestation | [mero-tee, KMS & Attestation](/privacy-verifiability-security/mero-tee/) | Explains secure-service execution, attestation evidence, and how hosted trust claims are verified |
 | Runtime architecture & security model | [`calimero-network/core` – Architecture](https://github.com/calimero-network/core#architecture) | Details on `merod`, networking layers, and verification primitives |
-| Identity delegation & permissions | [`calimero-network/contracts`](https://github.com/calimero-network/contracts) | How root/client keys, invites, and revocations are enforced |
+| Identity delegation & permissions | [`core/crates/auth`](https://github.com/calimero-network/core/tree/master/crates/auth) | How root/client keys, invites, and revocations are enforced |
 | Context lifecycle & admin API | [`calimero-network/merobox` – Workflows](https://github.com/calimero-network/merobox#workflows) | Managing contexts, capturing Application IDs, production rollouts |
-| Authentication adapters & wallet flows | [`calimero-network/core`](https://github.com/calimero-network/core) | Challenge/response flows for NEAR |
+| Authentication & signing flows | [Core reference site](https://calimero-network.github.io/core/) | Signed challenge/response and hierarchical key delegation |
 | Advanced cryptography experiments | [`calimero-network/experiments`](https://github.com/calimero-network/experiments) | Threshold signing, multi-party custody, and ZK experiments |
 
 _This page stays high-level. For full setup steps, audit procedures, and API details, follow the linked READMEs._
