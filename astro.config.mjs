@@ -109,24 +109,6 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'builder-directory' },
-						{
-							label: 'Service SDK',
-							items: [
-								{ label: 'Rust — calimero-sdk', slug: 'builder-directory/sdk-guide' },
-								{ label: 'JavaScript — calimero-sdk-js', link: 'https://github.com/calimero-network/calimero-sdk-js', badge: { text: 'In dev', variant: 'caution' }, attrs: { target: '_blank' } },
-							],
-						},
-						{
-							label: 'Client SDKs',
-							collapsed: true,
-							items: [
-								{ label: 'Overview', slug: 'tools-apis/client-sdks' },
-								{ label: 'JavaScript — mero.js', link: 'https://calimero-network.github.io/mero-js/', attrs: { target: '_blank' } },
-								{ label: 'Python — calimero-client-py', link: 'https://calimero-network.github.io/calimero-client-py/', attrs: { target: '_blank' } },
-								{ label: 'Kotlin — mero-kotlin', link: 'https://calimero-network.github.io/kotlin-sdk/', attrs: { target: '_blank' } },
-								{ label: 'Swift — MeroKit', link: 'https://calimero-network.github.io/swift-sdk/', attrs: { target: '_blank' } },
-							],
-						},
 						{ label: 'Examples', slug: 'examples' },
 						{ label: 'Core App Examples', slug: 'examples/core-apps-examples' },
 						{
@@ -139,6 +121,25 @@ export default defineConfig({
 								{ label: 'Organizations & Ownership', slug: 'app-directory/organizations-and-ownership' },
 							],
 						},
+					],
+				},
+				{
+					label: 'Service SDK',
+					collapsed: false,
+					items: [
+						{ label: 'Rust', slug: 'builder-directory/sdk-guide' },
+						{ label: 'JavaScript', link: 'https://github.com/calimero-network/calimero-sdk-js', badge: { text: 'In dev', variant: 'caution' }, attrs: { target: '_blank' } },
+					],
+				},
+				{
+					label: 'Client SDKs',
+					collapsed: true,
+					items: [
+						{ label: 'Overview', slug: 'tools-apis/client-sdks' },
+						{ label: 'JavaScript', link: 'https://calimero-network.github.io/mero-js/', attrs: { target: '_blank' } },
+						{ label: 'Python', link: 'https://calimero-network.github.io/calimero-client-py/', attrs: { target: '_blank' } },
+						{ label: 'Kotlin', link: 'https://calimero-network.github.io/kotlin-sdk/', attrs: { target: '_blank' } },
+						{ label: 'Swift', link: 'https://calimero-network.github.io/swift-sdk/', attrs: { target: '_blank' } },
 					],
 				},
 				{
