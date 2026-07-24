@@ -1,0 +1,146 @@
+---
+title: "Service SDKs"
+description: "Write the application logic that runs inside a Calimero node (compiled to WASM). Rust (calimero-sdk) is production; a JavaScript service SDK is in development. Minimal examples plus links to the full reference."
+---
+
+import { Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+A **Service SDK** is what you use to write the application logic that runs *inside* a node — your state and methods, compiled to WebAssembly and replicated across a context's members. There are two:
+
+- **Rust — `calimero-sdk`** — production-ready and the recommended path today.
+- **JavaScript/TypeScript — `calimero-sdk-js`** — in active development, not yet production-ready.
+
+<Aside type="caution" title="JavaScript Service SDK is in development">
+`calimero-sdk-js` lets you write services in TypeScript (bundled to WASM via QuickJS). It's evolving and not production-ready — for anything real, use Rust today. Track it in the [calimero-sdk-js docs](https://calimero-network.github.io/calimero-sdk-js/). (This is *not* the JS **client** SDK, [mero.js](https://calimero-network.github.io/mero-js/), which talks to a node from the outside — see [Client SDKs](/tools-apis/client-sdks/).)
+</Aside>
+
+## A minimal service
+
+<Tabs>
+  <TabItem label="Rust">
+
+```rust
+use calimero_sdk::app;
+use calimero_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use calimero_storage::collections::{LwwRegister, UnorderedMap};
+
+#[app::state]
+#[derive(Debug, BorshSerialize, BorshDeserialize)]
+#[borsh(crate = "calimero_sdk::borsh")]
+pub struct KvStore {
+    items: UnorderedMap<String, LwwRegister<String>>,
+}
+
+#[app::logic]
+impl KvStore {
+    #[app::init]
+    pub fn init() -> KvStore {
+        KvStore { items: UnorderedMap::new() }
+    }
+
+    pub fn set(&mut self, key: String, value: String) -> app::Result<()> {
+        self.items.insert(key, value.into())?;
+        Ok(())
+    }
+
+    pub fn get(&self, key: &str) -> app::Result<Option<String>> {
+        Ok(self.items.get(key)?.map(|v| v.get().clone()))
+    }
+}
+```
+
+  </TabItem>
+  <TabItem label="JavaScript">
+
+```typescript
+import { State, Logic, Init, View, createCounter } from '@calimero-network/calimero-sdk-js';
+import type { Counter } from '@calimero-network/calimero-sdk-js/collections';
+
+@State
+export class CounterApp {
+  count: Counter = createCounter();
+}
+
+@Logic(CounterApp)
+export class CounterLogic extends CounterApp {
+  @Init
+  static initialize(): CounterApp {
+    return new CounterApp();
+  }
+
+  increment(): void {
+    this.count.increment();
+  }
+
+  @View()
+  getCount(): bigint {
+    return this.count.value();
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+The rest of this page tours the **Rust** app model (the production path). For the complete, authoritative reference see the [Core Build docs](https://calimero-network.github.io/core/build/).
+
+## The app model
+
+An application is a single state struct plus the methods that operate on it:
+
+- `#[app::state]` marks the struct that is persisted and synchronized across context members.
+- `#[app::logic]` marks the `impl` block whose public methods become callable endpoints.
+- `#[app::init]` marks the one-time initializer run when a context is created.
+- Methods taking `&mut self` are **mutations** (they produce deltas that sync to peers); methods taking `&self` are **views** (read-only, no delta).
+- Methods return `app::Result<T>` for error handling.
+
+The caller's identity is available inside any method via `calimero_sdk::env::executor_id()` — use it for authorization and per-user data.
+
+## CRDT collections
+
+Synchronized state must use CRDT collections (not plain Rust collections) so that concurrent edits on different nodes merge deterministically. The collection you pick decides the merge behavior:
+
+| Collection | Use case | Merge strategy |
+| --- | --- | --- |
+| `Counter` | Counters, metrics | Max per writer, summed at read |
+| `LwwRegister<T>` | Single values | Latest timestamp wins |
+| `ReplicatedGrowableArray` | Text, documents | Character-level |
+| `UnorderedMap<K,V>` | Key-value storage | Recursive per-entry |
+| `Vector<T>` | Ordered lists | Element-wise |
+| `UnorderedSet<T>` | Unique values | Union |
+
+Custom structs made of CRDT fields can derive `Mergeable` to merge field-by-field. Primitives like `String`/`u64` are not `Mergeable` — wrap them in `LwwRegister<T>`.
+
+## Events
+
+State changes can emit events that propagate with the delta and run handlers on peer nodes — useful for driving real-time UI updates. Declare the event type with `#[app::event]`, enable emission with `#[app::state(emits = ...)]`, and emit with `app::emit!(...)`. See the [Core Build docs](https://calimero-network.github.io/core/build/) for the full lifecycle.
+
+## Storage kinds
+
+Beyond the shared CRDT state, the SDK offers three specialized storage kinds:
+
+- **Private storage** (`#[app::private]`) — node-local data (secrets, caches). Never replicated, never in deltas.
+- **User storage** (`UserStorage<T>`) — per-user data keyed by the owner's public key. Writes are signed by the executor and verified by other nodes (with replay protection).
+- **Frozen storage** (`FrozenStorage<T>`) — immutable, content-addressed values keyed by their SHA-256 hash. Insert-only; good for audit logs and attestations.
+
+## Build to WASM
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo build --target wasm32-unknown-unknown --profile app-release
+```
+
+A `build.rs` that calls the `calimero-wasm-abi` emitter generates `res/abi.json` during the build; feed the ABI to `calimero-abi-codegen` to generate a typed client.
+
+## Full reference
+
+<CardGrid>
+  <LinkCard title="Rust — Core Build docs" href="https://calimero-network.github.io/core/build/" description="Complete SDK, collections, events, and storage API." />
+  <LinkCard title="JavaScript — calimero-sdk-js (in dev)" href="https://calimero-network.github.io/calimero-sdk-js/" description="The TypeScript service SDK, under active development." />
+</CardGrid>
+
+## Related
+
+- [Client SDKs](/tools-apis/client-sdks/) — call your app from JS, Python, Kotlin, or Swift
+- [Applications](/core-concepts/applications/) — the application architecture overview
+- [Getting Started](/getting-started/) and the [Builder Directory](/builder-directory/)

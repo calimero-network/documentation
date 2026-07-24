@@ -103,31 +103,14 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'builder-directory' },
+						{ label: 'Service SDKs', slug: 'builder-directory/sdk-guide' },
+						{ label: 'Client SDKs', slug: 'tools-apis/client-sdks' },
 						{ label: 'Examples', slug: 'examples' },
 						{ label: 'Core App Examples', slug: 'examples/core-apps-examples' },
 						{ label: 'App Directory & Registry', slug: 'app-directory' },
 						{ label: 'Registry Overview', slug: 'app-directory/registry-overview' },
 						{ label: 'Registry API & CLI', slug: 'app-directory/registry-api-and-cli' },
 						{ label: 'Organizations & Ownership', slug: 'app-directory/organizations-and-ownership' },
-					],
-				},
-				{
-					label: 'Service SDK',
-					collapsed: false,
-					items: [
-						{ label: 'Rust', slug: 'builder-directory/sdk-guide' },
-						{ label: 'JavaScript', link: 'https://github.com/calimero-network/calimero-sdk-js', badge: { text: 'In dev', variant: 'caution' }, attrs: { target: '_blank' } },
-					],
-				},
-				{
-					label: 'Client SDKs',
-					collapsed: true,
-					items: [
-						{ label: 'Overview', slug: 'tools-apis/client-sdks' },
-						{ label: 'JavaScript', link: 'https://calimero-network.github.io/mero-js/', attrs: { target: '_blank' } },
-						{ label: 'Python', link: 'https://calimero-network.github.io/calimero-client-py/', attrs: { target: '_blank' } },
-						{ label: 'Kotlin', link: 'https://calimero-network.github.io/kotlin-sdk/', attrs: { target: '_blank' } },
-						{ label: 'Swift', link: 'https://calimero-network.github.io/swift-sdk/', attrs: { target: '_blank' } },
 					],
 				},
 				{
