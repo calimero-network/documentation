@@ -1,9 +1,13 @@
 ---
-title: "Calimero SDK Guide for Builders"
-description: "An overview of the Rust application SDK (calimero-sdk): the app model, CRDT collections, events, and storage kinds. Links to the full Core reference for the complete API."
+title: "Service SDK (Rust)"
+description: "The Rust Service SDK (calimero-sdk) for writing the application logic that runs inside a node: the app model, CRDT collections, events, and storage kinds. Links to the full Core reference."
 ---
 
-Calimero applications are written in **Rust** with `calimero-sdk` (plus `calimero-storage` for CRDT collections) and compiled to WASM. This page is a high-level tour of the app model. For the complete, authoritative API reference see the **[Core Build docs](https://calimero-network.github.io/core/build/)**.
+The **Service SDK** is what you use to write the application logic that runs *inside* a node (compiled to WASM). The **Rust** SDK (`calimero-sdk`, plus `calimero-storage` for CRDT collections) is production-ready and the recommended path today. This page is a high-level tour of the app model; for the complete, authoritative API reference see the **[Core Build docs](https://calimero-network.github.io/core/build/)**.
+
+:::note[JavaScript Service SDK — in development]
+A JavaScript/TypeScript Service SDK (`calimero-sdk-js`) is in active development and not yet production-ready. To write app logic today, use Rust; to follow the JS effort, see [`calimero-network/calimero-sdk-js`](https://github.com/calimero-network/calimero-sdk-js). (This is separate from the JS **client** SDK, [mero.js](https://calimero-network.github.io/mero-js/), which talks to a node from the outside.)
+:::
 
 ## The app model
 
@@ -94,4 +98,4 @@ A `build.rs` that calls the `calimero-wasm-abi` emitter generates `res/abi.json`
 - [Getting Started](/getting-started/)
 - [Builder Directory](/builder-directory/) — the end-to-end build path
 - [Applications](/core-concepts/applications/) — application architecture overview
-- [JavaScript SDK Guide](/builder-directory/js-sdk-guide/) — calling apps from JS/TS
+- [Client SDKs](/tools-apis/client-sdks/) — calling your app from JS, Python, Kotlin, or Swift

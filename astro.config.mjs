@@ -89,8 +89,13 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Builder Directory', slug: 'builder-directory' },
-						{ label: 'Rust SDK', slug: 'builder-directory/sdk-guide' },
-						{ label: 'JavaScript SDK', slug: 'builder-directory/js-sdk-guide' },
+						{
+							label: 'Service SDK',
+							items: [
+								{ label: 'Rust — calimero-sdk', slug: 'builder-directory/sdk-guide' },
+								{ label: 'JavaScript — calimero-sdk-js', link: 'https://github.com/calimero-network/calimero-sdk-js', badge: { text: 'In dev', variant: 'caution' }, attrs: { target: '_blank' } },
+							],
+						},
 						{ label: 'Examples', slug: 'examples' },
 						{ label: 'Core App Examples', slug: 'examples/core-apps-examples' },
 						{
@@ -123,7 +128,16 @@ export default defineConfig({
 								{ label: 'Desktop', slug: 'tools-apis/desktop' },
 								{ label: 'How Desktop Works', slug: 'tools-apis/desktop-internals' },
 								{ label: 'CLI (meroctl)', slug: 'tools-apis/meroctl-cli' },
-								{ label: 'Client SDKs', slug: 'tools-apis/client-sdks' },
+								{
+									label: 'Client SDKs',
+									items: [
+										{ label: 'Overview', slug: 'tools-apis/client-sdks' },
+										{ label: 'JavaScript — mero.js', link: 'https://calimero-network.github.io/mero-js/', attrs: { target: '_blank' } },
+										{ label: 'Python — calimero-client-py', link: 'https://calimero-network.github.io/calimero-client-py/', attrs: { target: '_blank' } },
+										{ label: 'Kotlin — mero-kotlin', link: 'https://calimero-network.github.io/kotlin-sdk/', attrs: { target: '_blank' } },
+										{ label: 'Swift — MeroKit', link: 'https://calimero-network.github.io/swift-sdk/', attrs: { target: '_blank' } },
+									],
+								},
 								{ label: 'Developer Tools', slug: 'tools-apis/developer-tools' },
 								{ label: 'Merobox', slug: 'tools-apis/merobox' },
 								{ label: 'mero-sign', slug: 'tools-apis/mero-sign' },

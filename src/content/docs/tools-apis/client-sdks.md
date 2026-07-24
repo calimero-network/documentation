@@ -5,11 +5,11 @@ description: "A catalog of the client libraries for talking to Calimero nodes �
 
 Client SDKs let you interact with Calimero nodes from your own code: call application methods over JSON-RPC, subscribe to context events, and drive the admin API (contexts, namespaces, groups, members).
 
-## App SDK vs client SDKs
+## Service SDK vs client SDKs
 
 These are two different things, and it's easy to confuse them:
 
-- **App SDK** — the Rust `calimero-sdk` you use to *write* application logic that runs inside the node as WASM. See the [SDK Guide](/builder-directory/sdk-guide/).
+- **[Service SDK](/builder-directory/sdk-guide/)** — used to *write* the application logic that runs inside the node as WASM. Rust (`calimero-sdk`) is production-ready; a JavaScript Service SDK (`calimero-sdk-js`) is in development.
 - **Client SDKs** — the libraries below that *talk to* a node from the outside (web apps, scripts, tools, mobile apps).
 
 ## The client catalog
@@ -28,5 +28,5 @@ Each reference site documents installation, authentication, calling methods, eve
 
 - [meroctl CLI](/tools-apis/meroctl-cli/) — the command-line client
 - [Developer Tools](/tools-apis/developer-tools/) — merobox, ABI codegen, scaffolding
-- [JavaScript SDK Guide](/builder-directory/js-sdk-guide/) — using mero.js
+- [Service SDK](/builder-directory/sdk-guide/) — writing the app logic that runs in the node
 - [Contexts](/core-concepts/contexts/) and [Identity](/core-concepts/identity/)

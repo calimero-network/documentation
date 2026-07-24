@@ -446,7 +446,7 @@ $: meroctl --node node1 app install --path res/my_app.wasm
 ```
 
 
-See [SDK Guide](/builder-directory/sdk-guide/) or [JavaScript SDK Guide](/builder-directory/js-sdk-guide/) for detailed development guides.
+See the [Service SDK (Rust)](/builder-directory/sdk-guide/) guide or [Client SDKs](/tools-apis/client-sdks/) for detailed development guides.
 
 ## Step 5: Create Context and call mutate and view methods
 
@@ -683,8 +683,8 @@ See [Examples](/examples/) for complete list.
 ### For Builders
 
 - **[Core Concepts](/core-concepts/)** - Deep dive into architecture, contexts, identity
-- **[Rust SDK Guide](/builder-directory/sdk-guide/)** - Complete Rust development guide
-- **[JavaScript SDK Guide](/builder-directory/js-sdk-guide/)** - JavaScript/TypeScript development
+- **[Service SDK (Rust)](/builder-directory/sdk-guide/)** - Write the app logic that runs in the node
+- **[Client SDKs](/tools-apis/client-sdks/)** - Call your app from JS, Python, Kotlin, or Swift
 - **[Examples](/examples/core-apps-examples/)** - Working example applications
 
 ### For Operators
