@@ -1,7 +1,13 @@
 ---
 title: "Calimero Documentation"
-description: "Calimero is a privacy-first, peer-to-peer application layer. Build self-sovereign apps over CRDT shared state — users own their data, operators never see it, and it works offline."
+description: "Calimero is the open-source protocol for sovereign apps. Build apps over CRDT shared state — users own their data, operators never see it, and it works offline."
 ---
+
+**Calimero is the open-source protocol for sovereign apps.** We believe your data should belong to you — even when it lives on someone else's machine. So Calimero apps run on the devices of the people who use them and sync directly between them, with keys only the members of a namespace hold.
+
+| Use it | Build on it | Run it your way |
+| --- | --- | --- |
+| Install apps from the [App Registry](https://apps.calimero.network) with [Calimero Desktop](https://calimero.network/download) on macOS, Windows or Linux. | Write the app logic in Rust, connect a front end with the client SDKs, and publish a signed bundle. [Quickstart →](/getting-started/) | [Self-host](/operator-track/) for free on your own hardware — or let [Calimero Cloud](https://cloud.calimero.network) keep your app always on, in sealed hardware we can't look inside. |
 
 ## The Internet was meant to be peer-to-peer
 
@@ -18,7 +24,7 @@ Decentralization was always the design; for thirty years it was simply the *hard
 | **Cost at scale** | "Decentralized" was assumed to mean "more expensive" — the naive model replicates all data to every node. | State is *sharded by context* — each node stores and syncs only the contexts it belongs to, so cost scales with what you actually use, not the size of the network. |
 | **Developer experience** | Conflict resolution, sync, key management, NAT traversal — each was a dissertation, not a library. | Composable primitives: [WASM](https://en.wikipedia.org/wiki/WebAssembly) runtimes, [libp2p](https://libp2p.io/), mature [CRDT](https://crdt.tech/) libraries, Rust. |
 | **User experience** | One server was easier to ship and reason about than coordinating thousands. | Local-first apps feel instant, work offline, and sync the moment they reconnect. |
-| **Security** | Trusting a single server you ran was the only practical model. | End-to-end encryption by default, and Trusted Execution Environments whose attestation makes even *hosted* infrastructure verifiable. |
+| **Security** | Trusting a single server you ran was the only practical model. | Encrypted sync by default, and Trusted Execution Environments whose attestation makes even *hosted* infrastructure verifiable. |
 | **Open source** | The stack was proprietary, or a from-scratch build behind a vendor's walls. | A deep open-source foundation — Rust, WASM, libp2p, CRDTs — and fully open platforms like Calimero you can run, read, fork, and extend. |
 
 So we traded ownership for convenience — our data moved onto other people's servers, and we now rent access to it, along with the outages, lock-in, surveillance, and breaches that come with a single point of control. That trade no longer holds: you can finally have decentralization's **ownership and privacy** *together with* the cloud's **convenience**. Closing that gap is what Calimero is for.
@@ -61,7 +67,7 @@ flowchart LR
 ## Why build on Calimero
 
 - **Write apps, not infrastructure.** The sandboxed runtime handles the hard, error-prone parts — storage, end-to-end encryption, and conflict-free synchronization — so you write plain application logic and ship. No database to run, no sync code to maintain, no key management to get wrong.
-- **Fully open source, no lock-in.** Every layer is open: read it, run it, fork it, customize it. Your app and your users' data belong to you, not to a platform you can't leave.
+- **Open source, no lock-in.** The protocol, the SDKs and the tools are open: read them, run them, fork them, customize them. Your app and your users' data belong to you, not to a platform you can't leave.
 - **A fair deal, not surveillance.** Most software today monetizes the people using it. Calimero removes the temptation — operators, hosted ones included, can't see user data. Ship your product on [Calimero Cloud](/calimero-cloud/) at a fair, predictable price, or [self-host](/operator-track/) it entirely. It's a win-win: you deliver the best possible service, users keep ownership, and you can move between hosted and self-hosted without rewriting a thing.
 
 ## Quick Actions

@@ -3,6 +3,18 @@ title: "Calimero Cloud & MDMA"
 description: "Understand how Calimero Cloud and the MDMA services work together to provision, manage, and expose hosted Calimero nodes."
 ---
 
+## What Calimero Cloud is for
+
+Calimero is open source and free to run yourself. **Calimero Cloud is the managed way to run it** — how Calimero makes money, at a fair price, so you don't have to operate nodes to get an always-on app:
+
+- **Always-on nodes** for your namespaces, so your app stays in sync while your devices sleep.
+- **Sealed hardware.** Cloud nodes run inside Intel TDX and prove the exact image they run before they get a key. We can't look inside.
+- **Delegated execution.** Browsers and phones write through a Cloud node with a one-time signed warrant, with no local node needed.
+
+Plans start free; Basic ($5/month) keeps one namespace always on, Premium ($15/month) three, with three nodes each. See [cloud.calimero.network](https://cloud.calimero.network) and its [pricing](https://cloud.calimero.network/pricing).
+
+## How it is built
+
 **Calimero Cloud** is the hosted user-facing experience for managing nodes and related infrastructure.  
 **MDMA** is the backend system that actually provisions, tracks, and operates that experience.
 

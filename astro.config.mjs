@@ -29,7 +29,7 @@ export default defineConfig({
 				SocialIcons: './src/components/SocialIcons.astro',
 			},
 			title: 'Calimero Docs',
-			description: 'Lightweight documentation for the Calimero network and developer stack.',
+			description: 'Documentation for Calimero, the open-source protocol for sovereign apps — build, run and host apps whose data belongs to the people who use them.',
 			logo: {
 				src: './src/assets/calimero-logo.svg',
 				alt: 'Calimero',
@@ -41,6 +41,8 @@ export default defineConfig({
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/calimero-network' },
 				{ icon: 'x.com', label: 'X', href: 'https://x.com/CalimeroNetwork' },
 				{ icon: 'external', label: 'calimero.network', href: 'https://calimero.network' },
+				{ icon: 'puzzle', label: 'App Registry', href: 'https://apps.calimero.network' },
+				{ icon: 'rocket', label: 'Calimero Cloud', href: 'https://cloud.calimero.network' },
 			],
 			customCss: ['./src/styles/calimero.css'],
 			head: [
@@ -51,7 +53,7 @@ export default defineConfig({
 				{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
 				{ tag: 'meta', attrs: { property: 'og:site_name', content: 'Calimero Docs' } },
 				{ tag: 'meta', attrs: { property: 'og:title', content: 'Calimero Docs' } },
-				{ tag: 'meta', attrs: { property: 'og:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { property: 'og:description', content: 'Documentation for Calimero, the open-source protocol for sovereign apps — core concepts, SDKs, running nodes, Calimero Cloud and the App Registry.' } },
 				{ tag: 'meta', attrs: { property: 'og:url', content: 'https://docs.calimero.network' } },
 				{ tag: 'meta', attrs: { property: 'og:image', content: 'https://docs.calimero.network/og-image.png' } },
 				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
@@ -61,7 +63,7 @@ export default defineConfig({
 				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
 				{ tag: 'meta', attrs: { name: 'twitter:site', content: '@CalimeroNetwork' } },
 				{ tag: 'meta', attrs: { name: 'twitter:title', content: 'Calimero Docs' } },
-				{ tag: 'meta', attrs: { name: 'twitter:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { name: 'twitter:description', content: 'Documentation for Calimero, the open-source protocol for sovereign apps — core concepts, SDKs, running nodes, Calimero Cloud and the App Registry.' } },
 				{ tag: 'meta', attrs: { name: 'twitter:image', content: 'https://docs.calimero.network/og-image.png' } },
 			],
 			sidebar: [
