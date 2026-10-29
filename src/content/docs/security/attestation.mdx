@@ -1,0 +1,47 @@
+---
+title: Attestation
+description: How a Calimero node proves what it runs — to clients, to its peers and to mero-kms — and what the proof binds.
+---
+
+import Flow from '../../../components/Flow.astro';
+
+Every node runs inside an Intel TDX VM built from a signed **mero-tee release**. Before anyone sends it anything (a
+client, another node, or mero-kms handing out a storage key), they ask it for a **quote**: a hardware-signed
+statement of what the VM is running, and check it.
+
+## Who checks a node
+
+<Flow
+	steps={[
+		{ k: 'mero-kms', title: 'Before keys', text: 'A node gets its storage key only after proving its image.' },
+		{ k: 'Peers', title: 'Before Raft traffic', text: 'Nodes check each other the same way before replicating anything.' },
+		{ k: 'Clients', title: 'Before a request', text: 'Every client checks the node before opening the sealed channel.', accent: true },
+	]}
+/>
+
+## What a quote binds
+
+A quote carries the VM's measurements and 64 bytes of report data the VM chose. Calimero puts two things there:
+
+- **Your nonce**, so an old quote can't be replayed.
+- **A digest of a key that lives only in that VM's memory**: the transport key the sealed channel opens to, or the
+  receipt key that signs answers.
+
+Verifying the quote therefore proves that the key belongs to a process running the measured image, and that nobody
+else can open what is sealed to it.
+
+## Signed releases
+
+The measurements of each image are published with the mero-tee release, as `published-mrtds.json`, signed with
+Sigstore by the release workflow. A client fetches the release the node names, checks the signature, refuses a
+release older than its floor, and requires the quote's registers to match one of the release's allowed **profiles**.
+Production clusters run the `locked-read-only` profile; debug profiles are refused unless a client explicitly allows
+them.
+
+## Images the data may live on
+
+Which new images may hold an app's data is a governance decision of the cluster: the app's owner or the operator
+approves each release. The replicas that hold the data refuse to replicate to a node on an unapproved image.
+
+Details: [Attestation & receipts](https://calimero-network.github.io/core/protocol/tee-attestation/) and
+[Deployment governance](https://calimero-network.github.io/core/protocol/governance/) in the core reference.

@@ -1,0 +1,74 @@
+---
+/** The home page's opening, in the landing's type: eyebrow, two-line headline with a red second line, lede, two buttons. */
+---
+
+<section class="cal-hero not-content">
+	<span class="cal-eyebrow">Calimero docs</span>
+	<h1>
+		Ship the app.
+		<em>Skip the infrastructure.</em>
+	</h1>
+	<p class="lede">
+		Write your app once and run it sealed on Calimero Cloud. Every node proves what it runs before it gets keys, every
+		client checks that proof before it sends anything, and nobody operating the nodes, Calimero included, can read the
+		data inside.
+	</p>
+	<div class="ctas">
+		<a class="btn ink" href="/getting-started/">Quickstart</a>
+		<a class="btn line" href="/build/">Build an app</a>
+	</div>
+</section>
+
+<style>
+	.cal-hero {
+		padding: 1.5rem 0 2.25rem;
+		border-bottom: 1px solid var(--cal-rule);
+		margin-bottom: 2rem;
+	}
+	h1 {
+		font-weight: 800;
+		font-size: clamp(2.5rem, 6vw, 4.25rem);
+		line-height: 0.98;
+		letter-spacing: -0.045em;
+		margin: 1.1rem 0 1.25rem;
+		color: var(--cal-ink);
+	}
+	h1 em {
+		display: block;
+		font-style: normal;
+		color: var(--cal-seal);
+	}
+	.lede {
+		font-size: 1.15rem;
+		line-height: 1.55;
+		color: var(--cal-ink-2);
+		max-width: 40ch;
+		margin: 0 0 1.75rem;
+	}
+	.ctas {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		padding: 13px 20px;
+		font: 600 15px/1 var(--sl-font);
+		text-decoration: none;
+		border: 1px solid var(--cal-ink);
+		color: var(--cal-ink);
+	}
+	.btn.ink {
+		background: var(--cal-ink);
+		color: var(--cal-paper);
+	}
+	.btn.ink:hover {
+		background: var(--cal-seal);
+		border-color: var(--cal-seal);
+	}
+	.btn.line:hover {
+		background: var(--cal-ink);
+		color: var(--cal-paper);
+	}
+</style>

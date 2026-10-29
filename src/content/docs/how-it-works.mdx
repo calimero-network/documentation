@@ -1,0 +1,42 @@
+---
+title: How it works
+description: The whole path on one page — from a signed package to an instance per organization on attested nodes, and who can see what along the way.
+---
+
+import EndToEnd from '../../components/EndToEnd.astro';
+import TrustMatrix from '../../components/TrustMatrix.astro';
+import UseCases from '../../components/UseCases.astro';
+
+## End to end
+
+<EndToEnd />
+
+1. **Build.** You write the app's logic in Rust and bundle it with its frontend into one signed package
+   (`cargo mero bundle`). The signature covers the UI too. See [Build an app](/build/).
+2. **Publish.** You publish the package to the app registry, private to your Cloud organization or public. The
+   registry checks the signature on upload. See [Package & publish](/build/publish/).
+3. **Deploy.** From the Cloud console you make a version available on a shared cluster (pay per request) or a
+   dedicated one (a flat fee). Every node that installs it checks the publisher's signature. See
+   [Deploy & instances](/cloud/deploy/).
+4. **An instance per organization.** Each organization that uses the app gets its own instance, with its own state
+   and its own init arguments, replicated by its own Raft log across three attested nodes. Your frontend can create
+   them as customers sign up.
+5. **Keys only after proof.** A node gets its storage key from mero-kms only after its quote matches the signed
+   release. Everything it writes to disk is sealed under that key.
+6. **Verify, then talk.** People and agents verify a node's quote against the signed release before sending anything,
+   open a sealed channel to the key the quote binds, and sign in: a passkey for a person, a scoped API key for an agent.
+   Every answer carries a receipt. See [Verify a cluster](/clients/verify/).
+7. **Decisions with a name on them.** Who approves new node images, app upgrades and outbound hosts is fixed when the
+   cluster is created, and attested with every receipt: the app's owner, or the operator.
+
+## Who can see what
+
+<TrustMatrix />
+
+The full table, and what stops each attack, is on the [security model](/security/) page.
+
+## Who it's for
+
+<UseCases />
+
+More on each in the [use cases](https://calimero.network/use-cases/) on calimero.network.

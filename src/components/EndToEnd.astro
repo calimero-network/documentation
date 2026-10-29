@@ -1,0 +1,275 @@
+---
+/**
+ * How it works, end to end: the developer's path to a cluster, the cluster
+ * with an instance per organization and mero-kms, and the people and agents
+ * who verify a node before they talk to their instance. Governance decisions
+ * (releases, upgrades, outbound hosts) are marked where they gate the path.
+ */
+---
+
+<figure class="cal-e2e not-content">
+	<div class="lanes">
+		<section class="lane">
+			<span class="k">01 · Developer</span>
+			<ol class="steps">
+				<li><b>Write</b><span>Rust logic on the SDK, and a frontend</span></li>
+				<li><b>Bundle &amp; sign</b><code>cargo mero bundle --key</code></li>
+				<li><b>Publish</b><span>to the app registry, private to your org or public</span></li>
+				<li><b>Deploy</b><span>from the Cloud console: shared or dedicated cluster</span></li>
+			</ol>
+		</section>
+
+		<div class="flow" aria-hidden="true"><span>signed .mpk</span></div>
+
+		<section class="lane cluster">
+			<span class="k">02 · Cluster · attested Intel TDX nodes</span>
+			<div class="nodes" aria-hidden="true">
+				<span>node</span><span>node</span><span>node</span>
+			</div>
+			<p class="note">Every node checks the package signature before it runs it.</p>
+			<div class="orgs">
+				<div class="org">
+					<span class="o">Org · acme</span>
+					<b>notes</b>
+					<span class="i">own state · init {'{'}"title": "Acme"{'}'}</span>
+				</div>
+				<div class="org">
+					<span class="o">Org · globex</span>
+					<b>notes</b>
+					<span class="i">own state · init {'{'}"title": "Globex"{'}'}</span>
+				</div>
+			</div>
+			<p class="note">Each instance is replicated by its own Raft log across three nodes.</p>
+			<div class="kms">
+				<b>mero-kms</b>
+				<span>releases a node's storage key only after its quote matches the signed release</span>
+			</div>
+			<div class="gov">
+				<span class="k">Governance · fixed at genesis, attested</span>
+				<ul>
+					<li><b>Node images</b> approved by the app's owner or the operator</li>
+					<li><b>App upgrades</b> approved by the app's owner or the operator</li>
+					<li><b>Outbound hosts</b> the manifest declares, approved before any call leaves</li>
+				</ul>
+			</div>
+		</section>
+
+		<div class="flow back" aria-hidden="true"><span>verify, then seal</span></div>
+
+		<section class="lane">
+			<span class="k">03 · People &amp; agents</span>
+			<ol class="steps">
+				<li><b>Verify</b><span>the node's quote against the signed release</span></li>
+				<li><b>Seal</b><span>open an encrypted channel to the key the quote binds</span></li>
+				<li><b>Sign in</b><span>a passkey for people, a scoped API key for agents</span></li>
+				<li><b>Call</b><span>their org's instance; every answer carries a receipt</span></li>
+			</ol>
+			<p class="note">mero-js · Python · Rust · meroctl · the Calimero MCP</p>
+		</section>
+	</div>
+	<figcaption>
+		One signed bundle, any number of organizations. Nobody operating the nodes, Calimero included, can read an instance's
+		data, and every client can check that before it sends anything.
+	</figcaption>
+</figure>
+
+<style>
+	.cal-e2e {
+		margin: 1.75rem 0;
+	}
+	.lanes {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.35fr) auto minmax(0, 1fr);
+		gap: 10px;
+		align-items: stretch;
+	}
+	.lane {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 14px;
+		border: 1px solid var(--cal-rule);
+		background: var(--cal-card);
+		min-width: 0;
+	}
+	.lane.cluster {
+		border-color: var(--cal-ink);
+		background: var(--cal-paper-2);
+		box-shadow: 4px 4px 0 var(--cal-hard);
+	}
+	.k {
+		font: 600 0.7rem/1.4 var(--sl-font-mono);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--cal-seal);
+	}
+	.steps {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+		counter-reset: s;
+	}
+	.steps li {
+		display: grid;
+		gap: 1px;
+		padding-left: 26px;
+		position: relative;
+		counter-increment: s;
+	}
+	.steps li::before {
+		content: counter(s);
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 18px;
+		height: 18px;
+		display: grid;
+		place-items: center;
+		border: 1px solid var(--cal-ink);
+		font: 600 0.68rem/1 var(--sl-font-mono);
+		color: var(--cal-ink);
+	}
+	.steps b {
+		font-size: 0.9rem;
+		color: var(--cal-ink);
+	}
+	.steps span,
+	.steps code {
+		font-size: 0.82rem;
+		line-height: 1.4;
+		color: var(--cal-ink-2);
+	}
+	.steps code {
+		font-family: var(--sl-font-mono);
+		background: none;
+		border: 0;
+		padding: 0;
+	}
+	.nodes {
+		display: flex;
+		gap: 6px;
+	}
+	.nodes span {
+		flex: 1;
+		padding: 5px 0;
+		text-align: center;
+		border: 1px solid var(--cal-box-line);
+		font: 500 0.7rem/1 var(--sl-font-mono);
+		color: var(--cal-muted);
+	}
+	.orgs {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+		gap: 8px;
+	}
+	.org {
+		display: grid;
+		gap: 2px;
+		padding: 8px 10px;
+		border: 1px solid var(--cal-seal);
+		background: var(--cal-card);
+	}
+	.o {
+		font: 600 0.66rem/1.3 var(--sl-font-mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cal-seal);
+	}
+	.org b {
+		color: var(--cal-ink);
+	}
+	.i {
+		font: 400 0.72rem/1.35 var(--sl-font-mono);
+		color: var(--cal-muted);
+		overflow-wrap: anywhere;
+	}
+	.kms {
+		display: grid;
+		gap: 2px;
+		padding: 8px 10px;
+		border: 1px dashed var(--cal-box-line);
+	}
+	.kms b {
+		font: 600 0.78rem/1.3 var(--sl-font-mono);
+		color: var(--cal-ink);
+	}
+	.kms span {
+		font-size: 0.8rem;
+		color: var(--cal-ink-2);
+	}
+	.gov {
+		display: grid;
+		gap: 6px;
+		padding-top: 10px;
+		border-top: 1px solid var(--cal-rule);
+	}
+	.gov ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 4px;
+	}
+	.gov li {
+		font-size: 0.8rem;
+		line-height: 1.4;
+		color: var(--cal-ink-2);
+	}
+	.gov b {
+		color: var(--cal-ink);
+	}
+	.note {
+		margin: 0;
+		font: 400 0.74rem/1.45 var(--sl-font-mono);
+		color: var(--cal-muted);
+	}
+	.flow {
+		display: grid;
+		place-items: center;
+		position: relative;
+		min-width: 22px;
+	}
+	.flow::before {
+		content: '→';
+		font: 600 1.3rem/1 var(--sl-font-mono);
+		color: var(--cal-seal);
+	}
+	.flow.back::before {
+		content: '⇄';
+	}
+	.flow span {
+		position: absolute;
+		top: calc(50% + 16px);
+		writing-mode: vertical-rl;
+		font: 500 0.64rem/1 var(--sl-font-mono);
+		color: var(--cal-muted);
+		white-space: nowrap;
+	}
+	figcaption {
+		margin-top: 10px;
+		font: 400 0.8rem/1.5 var(--sl-font-mono);
+		color: var(--cal-muted);
+	}
+	@media (max-width: 56rem) {
+		.lanes {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.flow {
+			min-height: 34px;
+		}
+		.flow::before {
+			transform: rotate(90deg);
+		}
+		.flow span {
+			position: static;
+			writing-mode: horizontal-tb;
+			margin-top: 4px;
+		}
+		.flow {
+			grid-auto-flow: column;
+			gap: 10px;
+		}
+	}
+</style>

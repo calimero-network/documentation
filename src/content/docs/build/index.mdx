@@ -1,0 +1,35 @@
+---
+title: Build an app
+description: A Calimero app is Rust compiled to WASM — its state and the methods that change it. The cluster stores, replicates and serves it.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Flow from '../../../components/Flow.astro';
+
+A Calimero app is a Rust crate compiled to WASM. You declare its **state**, built from the SDK's collection types,
+and its **methods**: calls that change the state, and views that read it. You write no storage, sync, encryption or
+networking code. The cluster runs each call on the instance's leader, replicates the result, and serves it to
+signed-in callers over a sealed channel.
+
+<Flow
+	steps={[
+		{ k: 'cargo mero new', title: 'Scaffold', text: 'A crate with SDK pins, the package id and a test.' },
+		{ k: 'cargo test', title: 'Test', text: 'TestHost runs your logic in-process, no node needed.' },
+		{ k: 'cargo mero build', title: 'Build', text: 'WASM with its ABI embedded.' },
+		{ k: 'cargo mero bundle', title: 'Sign', text: 'A signed .mpk, your release.' },
+		{ k: 'cargo mero publish', title: 'Publish', text: 'Upload it to the app registry.', accent: true },
+	]}
+/>
+
+The toolchain is [`cargo mero`](https://calimero-network.github.io/core/build/cargo-mero/), which ships in the core
+repository. Install it with `cargo install cargo-mero`.
+
+<CardGrid>
+	<LinkCard title="Your first app" href="/build/first-app/" description="Scaffold, write state and methods, test, build." />
+	<LinkCard title="What an app sees" href="/build/app-model/" description="Init arguments, callers, organizations, events, blobs, upgrades, limits." />
+	<LinkCard title="Package & publish" href="/build/publish/" description="Sign a release and publish it to the registry." />
+	<LinkCard title="Example apps" href="https://github.com/calimero-network/apps" description="Chat, docs, sheets, forms, games and more, all on the same SDK." />
+</CardGrid>
+
+The full SDK reference (every macro, the collection types, storage costs, advanced patterns) is in the
+[core reference's Build section](https://calimero-network.github.io/core/build/).

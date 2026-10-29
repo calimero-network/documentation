@@ -1,0 +1,50 @@
+---
+title: Verify a cluster
+description: How a client decides to trust a node, how a user checks every replica of an app and the rules its cluster runs under, and the receipt that comes with every answer.
+---
+
+import Flow from '../../../components/Flow.astro';
+
+A Calimero client trusts nothing on the network. Before it sends anything to a node, it checks what the node is
+running, and every answer comes back with a receipt a user can keep.
+
+## Before the first request
+
+<Flow
+	steps={[
+		{ k: 'Release', title: 'Which image?', text: 'The node names the signed mero-tee release it runs; one below your floor is refused.' },
+		{ k: 'Sigstore', title: 'Published measurements', text: "The release's published-mrtds.json and its signature are checked." },
+		{ k: 'Intel', title: 'A genuine TD', text: "The quote is checked against Intel's collateral; a debug TD is refused." },
+		{ k: 'Match', title: 'The right image', text: "Its registers match the release's profile." },
+		{ k: 'Bind', title: 'Your nonce, its key', text: 'The quote binds your nonce and the key the sealed channel opens to.', accent: true },
+	]}
+/>
+
+Only then does the client open the sealed channel. A replayed quote fails on the nonce; a quote from another machine
+fails on the key.
+
+## Choose what you trust
+
+| Setting | mero-js | Python / Rust / meroctl |
+| --- | --- | --- |
+| Trust signed releases from a version up | `policy.release.minReleaseVersion` | `--min-release`, the client's default floor otherwise |
+| Which image profiles | `locked-read-only` by default; debug only with `allowDebugProfile` | `--tee-profiles`; debug only with `--allow-debug-profiles` |
+| Accept a development cluster's mock quotes | `allowMock: true` | `allow_mock=True`, `--allow-mock` |
+
+A debug profile lets the host read the VM's memory, so production clients never accept one.
+
+## Check every replica of an app
+
+A user can ask more than the node they talk to. `verify_app_cluster` (Python and Rust) checks the quote of **every
+replica** of an app instance with the client's policy, collects each replica's receipt key, and reports the
+**governance** they all attest: who approves new node images, who upgrades apps, and who approves outbound hosts on
+this cluster, each either the app's owner or the operator. A cluster can't claim one rule to you and run another.
+
+## Receipts
+
+Every answer carries a **receipt**: a node's signature over the app, the log position, a digest of the result and the
+node, made with a receipt key that the node's quote binds. Keep it, and you can show later which attested image
+produced the answer.
+
+The full check, step by step, is in the core reference's
+[Attestation & receipts](https://calimero-network.github.io/core/protocol/tee-attestation/).

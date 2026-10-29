@@ -1,0 +1,119 @@
+---
+title: Your first app
+description: Scaffold a Calimero app, write its state and methods, test it in-process, and build it to WASM.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Scaffold** a crate with `cargo mero`:
+
+   ```bash
+   cargo mero new my-app
+   cd my-app
+   ```
+
+   It writes `Cargo.toml` (the SDK pins, your package id under `[package.metadata.calimero]`, and the build profiles),
+   a working `src/lib.rs` with a test, and `GUIDE.md`, the guide the registry asks every package for.
+
+2. **Write the state and methods.** Every app has the same shape: one state struct built from CRDT collections, an
+   `init` constructor, calls that take `&mut self`, and views that take `&self`.
+
+   ```rust
+   use calimero_sdk::app;
+   use calimero_storage::collections::{LwwRegister, UnorderedMap};
+
+   #[app::state(emits = for<'a> Event<'a>)]
+   pub struct KvStore {
+       items: UnorderedMap<String, LwwRegister<String>>,
+   }
+
+   #[app::event]
+   pub enum Event<'a> {
+       Inserted { key: &'a str, value: &'a str },
+   }
+
+   #[app::logic]
+   impl KvStore {
+       // Runs once, when an instance is created.
+       #[app::init]
+       pub fn init() -> KvStore {
+           KvStore { items: UnorderedMap::new() }
+       }
+
+       // A call: changes state, commits on success.
+       pub fn set(&mut self, key: String, value: String) -> app::Result<()> {
+           app::emit!(Event::Inserted { key: &key, value: &value });
+           self.items.insert(key, value.into())?;
+           Ok(())
+       }
+
+       // A view: reads state, never commits.
+       #[app::view]
+       pub fn get(&self, key: String) -> app::Result<Option<String>> {
+           Ok(self.items.get(&key)?.map(|v| v.get().clone()))
+       }
+   }
+   ```
+
+   Callers pass arguments as JSON, by parameter name: `{"key": "a", "value": "1"}`.
+
+3. **Give each instance its own starting state** by taking arguments in `init`. They are the *init arguments* of
+   [an instance](/cloud/deploy/#create-an-instance-for-an-organization), so two organizations' instances of the same
+   app can start differently:
+
+   ```rust
+   #[app::init]
+   pub fn init(title: String) -> Notes {
+       Notes { title: LwwRegister::new(title), notes: UnorderedMap::new() }
+   }
+   ```
+
+   An instance created with `{"title": "Team notes"}` starts with that title. If `init` fails, creating the instance
+   fails with `INIT_FAILED` and the app's error.
+
+4. **Test** the logic in-process with `TestHost`, which stands in for the node. Enable the mock store for tests only:
+
+   ```toml
+   [dev-dependencies]
+   calimero-storage = { workspace = true, features = ["testing"] }
+   ```
+
+   ```rust
+   #[cfg(test)]
+   mod tests {
+       use calimero_sdk::testing::TestHost;
+
+       use super::*;
+
+       #[test]
+       fn set_then_get() {
+           let mut app = TestHost::new(KvStore::init);
+           app.call(|s| s.set("k".into(), "v".into())).unwrap();
+           assert_eq!(app.view(|s| s.get("k".into())).unwrap(), Some("v".to_owned()));
+           assert_eq!(app.events().len(), 1);
+       }
+   }
+   ```
+
+   ```bash
+   cargo test
+   ```
+
+5. **Build** to WASM. One command compiles, optimizes and embeds the app's ABI (its methods, events and types):
+
+   ```bash
+   cargo mero build
+   ```
+
+   The module lands at `res/<crate_name>.wasm`. To run it, install it on a [local cluster](/getting-started/) or
+   [package and publish it](/build/publish/).
+
+</Steps>
+
+## Next
+
+- [What an app sees](/build/app-model/) on a cluster: callers, organizations, events, blobs, upgrades.
+- The [SDK macros](https://calimero-network.github.io/core/build/sdk-macros/) and
+  [collections](https://calimero-network.github.io/core/build/collections/) references.

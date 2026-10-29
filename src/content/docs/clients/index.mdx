@@ -1,0 +1,91 @@
+---
+title: Clients
+description: mero-js, the Python client, the Rust client and meroctl — each verifies the node's attestation, seals every request and signs people in with passkeys.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Every client does the same three things before your first call: it **verifies** the node's TDX attestation against a
+signed mero-tee release, opens a **sealed channel** to the key that attestation binds, and signs the caller in, a
+person with a **passkey** or a machine with an **API key** (`cal_…`). The check is the same in every client; there is
+no way to call an app without it.
+
+| Client | For | Install |
+| --- | --- | --- |
+| **mero-js** | Browser and Node 18+ | `npm install @calimero-network/mero-js` |
+| **calimero-client-py** | Python 3.9+ | `pip install --pre calimero-client-py` |
+| **calimero-client** | Rust | the `calimero-client` crate in core |
+| **meroctl** | The command line | `cargo install --path crates/meroctl` in core |
+
+## A first call
+
+<Tabs>
+<TabItem label="mero-js">
+
+```ts
+import { CalimeroClient, browserPasskey } from '@calimero-network/mero-js';
+
+const client = new CalimeroClient({
+	baseUrl: 'https://eu1.cloud.calimero.network',
+	// Trust the signed mero-tee release the node names, from this one up.
+	policy: { release: { minReleaseVersion: '2.3.109' } },
+});
+
+await client.signIn(browserPasskey()); // or signUp(browserPasskey(), 'alice')
+await client.call(app, 'set', { key: 'a', value: '1' });
+const { result } = await client.view(app, 'get', { key: 'a' });
+for await (const event of client.events(app)) console.log(event);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```python
+from calimero_client_py import Client
+
+client = Client("https://eu1.cloud.calimero.network")
+client.use_api_key("cal_...")
+client.call(app_id, "set", {"key": "a", "value": "1"}, idempotency_key="k1")
+print(client.view(app_id, "get", {"key": "a"})["result"])
+for e in client.events(app_id, start=0, limit=10, timeout=5):
+    print(e["kind"], e["data"])
+```
+
+</TabItem>
+<TabItem label="meroctl">
+
+```bash
+meroctl node add eu1 https://eu1.cloud.calimero.network/
+export CALIMERO_API_KEY=cal_...   # made in the console
+meroctl call --context <app> set --args '{"key":"a","value":"1"}'
+meroctl call --context <app> get --args '{"key":"a"}' --view
+```
+
+`meroctl` calls an app instance a *context*. Name the images you trust with `--tee-profiles <profile>` and, if
+you need a newer floor than the default, `--min-release <version>`.
+
+</TabItem>
+</Tabs>
+
+## What the clients cover
+
+- **Sign-in:** sign up and sign in with a passkey, refresh and sign out, add and remove passkeys (a person's devices),
+  create and revoke scoped API keys.
+- **Instances:** create one from a package release (with init arguments, an organization and an access rule), list,
+  upgrade, change access, transfer, delete.
+- **Calls:** calls, views, confirmed calls that need a fresh passkey assertion, and the instance's event stream. A call
+  carries an idempotency key, so a retry is answered once.
+- **Blobs and presence:** upload and download an instance's blobs; publish and stream presence.
+- **Organizations:** create them, manage members, roles, capabilities and teams, invite and redeem.
+- **Owner decisions:** upgrade runs and approvals that need the owner's passkey.
+
+## Development clusters
+
+A local cluster (`merod local`) sends mock quotes. Clients accept them only when told to: `allowMock: true` in
+mero-js, `allow_mock=True` in Python, `--allow-mock` in meroctl. Nothing is read from the environment.
+
+## Full references
+
+- [mero-js](https://calimero-network.github.io/mero-js/)
+- [calimero-client-py](https://calimero-network.github.io/calimero-client-py/)
+- [meroctl](https://calimero-network.github.io/core/operate/meroctl/)

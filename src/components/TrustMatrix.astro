@@ -1,0 +1,206 @@
+---
+/**
+ * Trust model at a glance: who can do what to an app instance's data and
+ * code. Consistent with security/index.mdx ("Who can do what"). Each cell is
+ * yes, no, or a condition the cluster or the app decides.
+ */
+type Cell = { v: 'yes' | 'no' | 'if'; t: string };
+const cols = ['Read app data', 'Change the app’s code', 'Manage members', 'Verify the build'];
+const rows: { who: string; sub: string; cells: Cell[] }[] = [
+	{
+		who: 'Network, host, cloud provider',
+		sub: 'between the client and the VM',
+		cells: [
+			{ v: 'no', t: 'Sees sizes and timing' },
+			{ v: 'no', t: '' },
+			{ v: 'no', t: '' },
+			{ v: 'yes', t: 'Like anyone' },
+		],
+	},
+	{
+		who: 'Calimero, as operator',
+		sub: 'runs the nodes',
+		cells: [
+			{ v: 'no', t: 'Counts and status only' },
+			{ v: 'if', t: 'Only where the cluster’s rules make it the upgrade approver' },
+			{ v: 'no', t: '' },
+			{ v: 'yes', t: 'Like anyone' },
+		],
+	},
+	{
+		who: 'App developer',
+		sub: 'publishes the package',
+		cells: [
+			{ v: 'if', t: 'Only in instances they are a member of' },
+			{ v: 'if', t: 'Publishes versions; each instance’s approver applies them' },
+			{ v: 'if', t: 'Only in orgs they administer' },
+			{ v: 'yes', t: '' },
+		],
+	},
+	{
+		who: 'Org owner or admin',
+		sub: 'of the instance’s organization',
+		cells: [
+			{ v: 'if', t: 'What the access rule and the app allow' },
+			{ v: 'if', t: 'The owner approves upgrades where the rules say owner' },
+			{ v: 'yes', t: 'Roles below owner, teams, invites' },
+			{ v: 'yes', t: '' },
+		],
+	},
+	{
+		who: 'Member',
+		sub: 'reaches the instance',
+		cells: [
+			{ v: 'if', t: 'What the access rule and the app allow' },
+			{ v: 'no', t: '' },
+			{ v: 'no', t: '' },
+			{ v: 'yes', t: '' },
+		],
+	},
+	{
+		who: 'Public',
+		sub: 'not signed in',
+		cells: [
+			{ v: 'if', t: 'Only an instance whose access is public' },
+			{ v: 'no', t: '' },
+			{ v: 'no', t: '' },
+			{ v: 'yes', t: '' },
+		],
+	},
+];
+const mark = { yes: '●', no: '○', if: '◐' };
+const label = { yes: 'Yes', no: 'No', if: 'Depends' };
+---
+
+<figure class="cal-trust not-content">
+	<div class="scroll">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Who</th>
+					{cols.map((c) => <th scope="col">{c}</th>)}
+				</tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((r) => (
+						<tr>
+							<th scope="row">
+								<b>{r.who}</b>
+								<span>{r.sub}</span>
+							</th>
+							{r.cells.map((c) => (
+								<td class={c.v}>
+									<span class="m" aria-label={label[c.v]}>
+										{mark[c.v]} <i>{label[c.v]}</i>
+									</span>
+									{c.t ? <span class="t">{c.t}</span> : null}
+								</td>
+							))}
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+	<figcaption>
+		● yes · ◐ depends on the cluster's rules or the instance's access rule · ○ no. Everything on disk and on the wire is
+		sealed; the app's own code decides finer rules with <code>env::caller_org()</code>.
+	</figcaption>
+</figure>
+
+<style>
+	.cal-trust {
+		margin: 1.75rem 0;
+	}
+	.scroll {
+		overflow-x: auto;
+		border: 1px solid var(--cal-ink);
+		background: var(--cal-card);
+	}
+	table {
+		width: 100%;
+		min-width: 620px;
+		border-collapse: collapse;
+		margin: 0;
+		display: table;
+	}
+	th,
+	td {
+		padding: 10px 12px;
+		text-align: left;
+		vertical-align: top;
+		border-bottom: 1px solid var(--cal-rule);
+		border-left: 1px solid var(--cal-rule);
+	}
+	tr > :first-child {
+		border-left: 0;
+	}
+	tbody tr:last-child > * {
+		border-bottom: 0;
+	}
+	thead th {
+		font: 600 0.68rem/1.35 var(--sl-font-mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cal-seal);
+		background: var(--cal-paper-2);
+	}
+	tbody th {
+		display: table-cell;
+		width: 26%;
+		font-family: var(--sl-font);
+		text-transform: none;
+		letter-spacing: normal;
+		background: none;
+	}
+	tbody th b {
+		display: block;
+		font: 600 0.9rem/1.3 var(--sl-font);
+		text-transform: none;
+		letter-spacing: -0.01em;
+		color: var(--cal-ink);
+	}
+	tbody th span {
+		display: block;
+		margin-top: 2px;
+		text-transform: none;
+		letter-spacing: normal;
+		font: 400 0.72rem/1.35 var(--sl-font-mono);
+		color: var(--cal-muted);
+	}
+	.m {
+		display: block;
+		font: 600 0.8rem/1.3 var(--sl-font-mono);
+	}
+	.m i {
+		font-style: normal;
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.yes .m {
+		color: var(--cal-ok);
+	}
+	.no .m {
+		color: var(--cal-muted);
+	}
+	.if .m {
+		color: var(--cal-warn);
+	}
+	.t {
+		display: block;
+		margin-top: 2px;
+		font-size: 0.78rem;
+		line-height: 1.4;
+		color: var(--cal-ink-2);
+	}
+	figcaption {
+		margin-top: 10px;
+		font: 400 0.8rem/1.5 var(--sl-font-mono);
+		color: var(--cal-muted);
+	}
+	figcaption code {
+		font-size: 0.78rem;
+	}
+</style>

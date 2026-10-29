@@ -1,0 +1,37 @@
+---
+title: Glossary & further reading
+description: The terms these docs use, and where the full reference for each part of Calimero lives.
+---
+
+## Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **Account** | A person on a cluster. Its passkeys are its devices. |
+| **API key** | A scoped credential (`cal_…`) a machine uses to act for an account. |
+| **App instance** | One running copy of a package: its own state, owner, access rule and Raft log. `meroctl` calls it a *context*. |
+| **Attestation** | A TDX quote proving which image a node runs, bound to a key only that node holds. |
+| **Cluster** | A set of `merod` nodes sharing one system state and one storage key. Shared or dedicated. |
+| **Cloud organization** | Your team in the Calimero Cloud console: who builds, publishes and pays. |
+| **Governance** | Who approves new node images, upgrades apps and approves outbound hosts on a cluster: each app's owner, or the operator. |
+| **Init arguments** | The JSON an instance's `#[app::init]` receives when the instance is created. |
+| **mero-tee release** | A signed node image, with the published measurements of each profile. |
+| **Organization** | Members with roles and nested teams on a cluster; who reaches its instances. |
+| **Package** | A signed `.mpk` release of an app: WASM services, ABI, optional frontend, manifest. |
+| **Passkey** | A WebAuthn credential; a person signs in and approves decisions with it. |
+| **Receipt** | An attested node's signature over an answer. |
+| **Sealed channel** | The encrypted session a client opens to an attested node's key; every request travels in it. |
+| **Team** | A group inside an organization, open or restricted, nested. |
+
+## Further reading
+
+| Topic | Where |
+| --- | --- |
+| The protocol: replication, the system group, encryption, upgrades | [Core reference · Protocol](https://calimero-network.github.io/core/protocol/overview/) |
+| The full SDK: macros, collections, storage, advanced patterns | [Core reference · Build](https://calimero-network.github.io/core/build/) |
+| Running your own nodes: `merod`, configuration, deployment | [Core reference · Operate](https://calimero-network.github.io/core/operate/) |
+| `meroctl` commands | [meroctl reference](https://calimero-network.github.io/core/operate/meroctl/) |
+| The JavaScript client | [mero-js docs](https://calimero-network.github.io/mero-js/) |
+| The Python client | [calimero-client-py docs](https://calimero-network.github.io/calimero-client-py/) |
+| Example apps | [calimero-network/apps](https://github.com/calimero-network/apps) |
+| The app registry | [apps.calimero.network](https://apps.calimero.network) |

@@ -1,0 +1,88 @@
+---
+title: What an app sees
+description: What a Calimero app instance sees once it runs on a cluster — init arguments, callers, organizations and teams, events, blobs, upgrades, outbound requests, confirmations and limits.
+---
+
+An **app instance** is one running copy of your package: its own state, its owner, an access rule, and its own Raft
+log on (by default) three nodes. This page covers what your code sees inside one. The complete list is in the core
+reference's [Writing apps for a cluster](https://calimero-network.github.io/core/cloud/apps/).
+
+## Creation and init
+
+An instance is created from a package release, with **init arguments** (JSON) that your `#[app::init]` receives.
+`init` runs once, on the instance's first leader, as the instance's owner. If it fails, the instance is not left
+half-made: creation answers `422 INIT_FAILED` with your error.
+
+Each organization that uses your app gets its own instance, so init arguments are per organization. See
+[Deploy & instances](/cloud/deploy/).
+
+## Who is calling
+
+- **The caller.** `env::account_id()` is the signed-in account. A person's devices are passkeys on one account, so
+  there is one id per person, whichever device they use.
+- **The organization.** `env::caller_org()` returns the caller's standing in the instance's organization (its id,
+  their role and the teams they are in), or `None`. The node already keeps non-members out; use this for rules
+  inside the app:
+
+  ```rust
+  use calimero_sdk::env::{self, OrgRole};
+
+  pub fn set_pinned(&mut self, text: String) -> app::Result<()> {
+      if !env::caller_org().is_some_and(|o| o.role >= OrgRole::Admin) {
+          app::bail!("admins only");
+      }
+      self.pinned.set(text);
+      Ok(())
+  }
+  ```
+
+- **The instance.** `env::context_id()` is the instance's id as the app sees it.
+
+## Calls, views and ordering
+
+Calls to one instance apply in one order on its leader, so a write never races another write. Views read state
+without changing it. Strong reads go through the leader; a client may ask for a faster read from any replica. A
+caller that cannot reach the cluster cannot write, so there are no offline edits to reconcile later.
+
+## Events
+
+`app::emit!` publishes an event with the call that emitted it. Clients stream an instance's events
+(`client.events(app)` in mero-js, `meroctl context watch`). Methods marked `#[app::handler]` can run in response to an
+event, once, on the leader.
+
+## Blobs and search
+
+`env::blob_*` store and open content-addressed bytes that belong to the instance; clients upload and download them
+through the same sealed channel. `#[derive(app::Searchable)]` declares full-text indexes that views can query.
+
+## Cross-app calls and timers
+
+An `#[app::xcall]` method can be called by other apps in the same organization. `#[app::tee(every = "..")]` methods run
+on a schedule.
+
+## Outbound HTTPS
+
+A call may send an HTTPS request under a URL prefix your signed manifest declares, once that prefix is approved for
+your package by whoever the cluster's rules give that decision (the instance's owner, or the operator). Until then
+the request is refused with `NotApproved`, which your app can show.
+
+## Confirmations
+
+Methods listed in an instance's `confirmMethods` need a fresh passkey assertion over the exact call
+(`callConfirmed` in the clients). Use it for anything a person must explicitly agree to, such as a payment or a
+deletion.
+
+## Upgrades
+
+A new version upgrades an instance in place. Mark your state's version with `#[app::state(version = ..)]` and write
+an `#[app::migrate]` function; the cluster plans the migration from the two versions' embedded ABIs and refuses a
+downgrade or a missing migration. Who may upgrade is decided per cluster: the instance's owner (with a passkey
+step-up) or the operator.
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Package size | 16 MiB |
+| One call's log entry (arguments, state change and events) | 1 MiB |
+| Instances, package bytes, API keys and organizations per account | Quotas set by the operator (`429 QUOTA_EXCEEDED`) |
