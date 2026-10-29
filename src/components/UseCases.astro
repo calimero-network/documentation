@@ -1,0 +1,114 @@
+---
+/**
+ * Who Calimero is for: the landing's four use cases (calimero.network/use-cases/),
+ * each with the problem and what makes it fit.
+ */
+const cases = [
+	{
+		n: '01',
+		title: 'An on-prem edition without the on-prem work',
+		problem: 'Your largest customers want the product on their own premises.',
+		fit: 'The same signed bundle runs on Calimero Cloud and on your customer’s own cluster of the same attested nodes.',
+		shape: ['SaaS · Calimero Cloud', 'On-prem · their cluster'],
+	},
+	{
+		n: '02',
+		title: 'Internal tools for regulated teams',
+		problem: 'Self-hosting means admins who can read everything; SaaS means a vendor who can.',
+		fit: 'Organizations, teams and access rules are enforced by every node, and auditors can check which build has access.',
+		shape: ['Finance · read write', 'Legal · read', 'Operator · no data'],
+	},
+	{
+		n: '03',
+		title: 'Shared apps between companies',
+		problem: 'Whoever hosts shared live data can see all of it.',
+		fit: 'An attested app instance no single party controls; each company sees only what its group is granted.',
+		shape: ['Manufacturer', 'Supplier', 'Bank'],
+	},
+	{
+		n: '04',
+		title: 'Confidential AI agents',
+		problem: 'Useful agents need your most sensitive data.',
+		fit: 'Agents act on app data through the Calimero MCP, with their own scoped API key, under the app’s own rules.',
+		shape: ['Agent · own key', 'MCP · app rules', 'Data stays in the node'],
+	},
+];
+---
+
+<div class="cal-uses not-content">
+	{
+		cases.map((c) => (
+			<article class="case">
+				<span class="k">{c.n} · Use case</span>
+				<h3>{c.title}</h3>
+				<p class="problem">{c.problem}</p>
+				<div class="shape" aria-hidden="true">
+					{c.shape.map((s) => (
+						<span>{s}</span>
+					))}
+				</div>
+				<p class="fit">{c.fit}</p>
+			</article>
+		))
+	}
+</div>
+
+<style>
+	.cal-uses {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 14px;
+		margin: 1.5rem 0;
+	}
+	.case {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 16px;
+		border: 1px solid var(--cal-rule);
+		background: var(--cal-card);
+		min-width: 0;
+		transition: box-shadow 0.15s, border-color 0.15s;
+	}
+	.case:hover {
+		border-color: var(--cal-ink);
+		box-shadow: 4px 4px 0 var(--cal-hard);
+	}
+	.k {
+		font: 600 0.68rem/1.4 var(--sl-font-mono);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--cal-seal);
+	}
+	h3 {
+		margin: 0;
+		font: 700 1.02rem/1.25 var(--sl-font);
+		letter-spacing: -0.015em;
+		color: var(--cal-ink);
+	}
+	.problem {
+		margin: 0;
+		font-size: 0.85rem;
+		line-height: 1.45;
+		color: var(--cal-muted);
+	}
+	.shape {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+	.shape span {
+		padding: 3px 7px;
+		border: 1px solid var(--cal-box-line);
+		font: 500 0.68rem/1.3 var(--sl-font-mono);
+		color: var(--cal-ink-2);
+	}
+	.fit {
+		margin: auto 0 0;
+		padding-top: 8px;
+		border-top: 1px solid var(--cal-rule);
+		font-size: 0.86rem;
+		line-height: 1.45;
+		color: var(--cal-ink);
+	}
+</style>

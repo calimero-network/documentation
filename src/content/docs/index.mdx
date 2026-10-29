@@ -9,6 +9,15 @@ hero:
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 import Flow from '../../components/Flow.astro';
 import ClusterDiagram from '../../components/ClusterDiagram.astro';
+import WhyCalimero from '../../components/WhyCalimero.astro';
+import UseCases from '../../components/UseCases.astro';
+
+## Why Calimero
+
+Customers want their data on their terms. Delivering that usually means an on-prem edition and everything that comes
+with it, and the admins can still see everything. Calimero takes that off your plate.
+
+<WhyCalimero />
 
 ## From code to a running app
 
@@ -26,10 +35,17 @@ import ClusterDiagram from '../../components/ClusterDiagram.astro';
 
 <ClusterDiagram />
 
+## Who it's for
+
+<UseCases />
+
+The whole path, and who can see what, is on [How it works](/how-it-works/).
+
 ## Where to go
 
 <CardGrid>
 	<LinkCard title="What is Calimero" href="/what-is-calimero/" description="The model in five minutes: clusters, apps, instances, organizations, and what nobody can see." />
+	<LinkCard title="How it works" href="/how-it-works/" description="End to end on one diagram, and who can see what." />
 	<LinkCard title="Quickstart" href="/getting-started/" description="Run a local cluster, deploy an app and call it from the terminal, JavaScript and Python." />
 	<LinkCard title="Build an app" href="/build/" description="Write a Rust app on the SDK, test it, and package it as a signed .mpk." />
 	<LinkCard title="Calimero Cloud" href="/cloud/" description="Deploy to a shared or dedicated cluster and create an instance for each organization." />

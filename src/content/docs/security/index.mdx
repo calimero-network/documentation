@@ -3,6 +3,8 @@ title: Security model
 description: What a Calimero cluster trusts, what each party can and cannot do, and which mechanism stops each attack.
 ---
 
+import TrustMatrix from '../../../components/TrustMatrix.astro';
+
 The claim is narrow and checkable: **nobody operating the cluster, Calimero included, can read an app's data or put
 new code in front of it without the party the cluster's rules name for that decision.**
 
@@ -20,6 +22,12 @@ Not trusted: the host and hypervisor, the disks, the network and any TLS termina
 an app's publisher beyond its own code.
 
 ## Who can do what
+
+At a glance:
+
+<TrustMatrix />
+
+In detail:
 
 | Party | Can | Cannot |
 | --- | --- | --- |

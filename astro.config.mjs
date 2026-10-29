@@ -110,6 +110,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Home', slug: '' },
 						{ label: 'What is Calimero', slug: 'what-is-calimero' },
+						{ label: 'How it works', slug: 'how-it-works' },
 						{ label: 'Quickstart', slug: 'getting-started' },
 					],
 				},

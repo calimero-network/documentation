@@ -4,6 +4,7 @@ description: A confidential cloud for collaborative apps — WASM apps replicate
 ---
 
 import ClusterDiagram from '../../components/ClusterDiagram.astro';
+import WhyCalimero from '../../components/WhyCalimero.astro';
 
 Calimero is a **confidential cloud** for collaborative apps. You write an app in Rust and compile it to WASM. Every
 instance of it runs inside attested Intel TDX nodes that Calimero (or you, on a dedicated cluster) operates, and
@@ -11,6 +12,10 @@ nobody operating them, Calimero included, can read the app's data.
 
 You don't run a database, write sync code or manage keys. You write the app's state and methods; the cluster stores,
 replicates, encrypts and serves them.
+
+## Why use it
+
+<WhyCalimero />
 
 ## The pieces
 
@@ -50,4 +55,5 @@ that key.
 - **One model, two places.** The same app runs on Calimero Cloud's shared clusters, on a dedicated cluster, or on
   nodes you run yourself.
 
-Next: run it locally in the [Quickstart](/getting-started/), or start [building an app](/build/).
+Next: see the whole path on [How it works](/how-it-works/), run it locally in the [Quickstart](/getting-started/), or
+start [building an app](/build/).
