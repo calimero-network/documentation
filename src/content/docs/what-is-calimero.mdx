@@ -1,0 +1,53 @@
+---
+title: What is Calimero
+description: A confidential cloud for collaborative apps — WASM apps replicated across attested Intel TDX nodes, reached through a sealed channel, signed in with passkeys.
+---
+
+import ClusterDiagram from '../../components/ClusterDiagram.astro';
+
+Calimero is a **confidential cloud** for collaborative apps. You write an app in Rust and compile it to WASM. Every
+instance of it runs inside attested Intel TDX nodes that Calimero (or you, on a dedicated cluster) operates, and
+nobody operating them, Calimero included, can read the app's data.
+
+You don't run a database, write sync code or manage keys. You write the app's state and methods; the cluster stores,
+replicates, encrypts and serves them.
+
+## The pieces
+
+| Term | What it is |
+| --- | --- |
+| **Cluster** | A set of `merod` nodes, each in an Intel TDX VM, that share one system state and one storage key. Calimero runs shared clusters, where many developers' apps run side by side, and dedicated clusters, which belong to one customer. |
+| **Package** | Your app as a signed `.mpk`: one or more WASM services, an optional frontend, and a manifest naming the package and version. Published to the [app registry](https://apps.calimero.network). |
+| **App instance** | One running copy of a package, with its own state, its owner and an access rule. Each instance is replicated by its own Raft log on (by default) three nodes. Its `init` runs once, when it is created. |
+| **Account** | A person. Their passkeys are their devices; they sign in with one and get a short session token. Machines act for an account with an API key. |
+| **Organization** | Members with a role (`guest`, `member`, `admin`, `owner`) and nested teams. An instance created in an organization is reachable by its members, or by one team's. |
+| **Operator** | Whoever runs the machines. It sees counts and replication status, never app data. |
+
+## How a request is served
+
+<ClusterDiagram />
+
+1. **Verify.** The client fetches the node's attestation: a TDX quote that binds the node's transport key and names the
+   signed mero-tee release it runs. It checks the quote against Intel's collateral and the release's published
+   measurements.
+2. **Seal.** Only then does it open a sealed channel (Noise NK) to that key. Every request travels inside it, so a
+   proxy, a load balancer or the host sees sizes and timing, nothing else.
+3. **Check.** Any node takes any request. It checks the caller's credential and the instance's access rule against
+   fresh cluster state, and forwards the call to the instance's leader over an attested peer channel.
+4. **Run.** The leader runs the call against the app's WASM, appends it with its state change to the instance's log,
+   and answers with a receipt signed by an attested key. The other replicas apply the change.
+
+Each node gets its storage key from mero-kms only after proving its image, and keeps everything on disk sealed under
+that key.
+
+## What this gives you
+
+- **Nobody sees the data.** The host, the network and the operator see encrypted traffic, sealed disks and counts.
+- **Users can check it.** Any client can verify every replica of an instance and the rules the cluster runs under, and
+  every answer carries a receipt. See [Verify a cluster](/clients/verify/).
+- **Calls are ordered.** Calls to one instance apply in one order, and strong reads go through the leader. An instance
+  keeps serving while a majority of its replicas run.
+- **One model, two places.** The same app runs on Calimero Cloud's shared clusters, on a dedicated cluster, or on
+  nodes you run yourself.
+
+Next: run it locally in the [Quickstart](/getting-started/), or start [building an app](/build/).

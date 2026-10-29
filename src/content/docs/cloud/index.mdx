@@ -1,0 +1,42 @@
+---
+title: Calimero Cloud
+description: Calimero's hosted clusters — shared clusters billed per use, dedicated clusters of your own — and the console you deploy from.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Calimero Cloud runs the clusters your apps run on, and the console at
+[cloud.calimero.network](https://cloud.calimero.network/signin) is where you publish packages, deploy them, create
+instances and invite your team.
+
+## Shared and dedicated clusters
+
+| | Shared cluster | Dedicated cluster |
+| --- | --- | --- |
+| **Who runs on it** | Many developers' apps side by side, each account within its quotas | One customer |
+| **Billing** | Per use, with a free allowance every month | A flat monthly fee |
+| **Nodes** | Calimero's attested TDX nodes, replicas spread across zones | Your own attested TDX nodes |
+
+Every cluster is self-contained: its own accounts, passkeys, organizations and storage key. An organization and its
+instances live on one cluster, and every shared app of a Cloud organization runs on the same shared cluster. See the
+[plans](https://www.calimero.network/plans) for prices.
+
+## Two kinds of sign-in
+
+- **The console** signs you in with your work account. It knows your Cloud organization, its members, its packages
+  and its billing.
+- **The cluster** signs you in with a **passkey**. An app instance belongs to your account on the cluster, and only
+  your passkey can create one, approve an upgrade or mint an invite. So the console prepares those steps and your
+  browser runs them against the cluster: Calimero, which operates the cluster, holds no credential to your apps.
+
+## Trust you can check
+
+Calimero operates the nodes but cannot read your app's data, and it cannot put new code in front of it unless your
+cluster's rules give it that decision. Those rules (who approves new node images, who upgrades apps, who approves
+outbound hosts) are fixed when the cluster is created, attested with every receipt, and visible to every user. See
+the [security model](/security/).
+
+<CardGrid>
+	<LinkCard title="Deploy & instances" href="/cloud/deploy/" description="Make a version available, then create an instance for each organization." />
+	<LinkCard title="Organizations & access" href="/cloud/organizations/" description="Members, roles, teams, invites and who reaches which instance." />
+</CardGrid>

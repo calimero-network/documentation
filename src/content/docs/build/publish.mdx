@@ -1,0 +1,61 @@
+---
+title: Package & publish
+description: Turn a built app into a signed .mpk release and publish it to the Calimero app registry.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+A release of your app is a **`.mpk` package**: a gzip-compressed archive with your WASM, its ABI and a signed
+`manifest.json` naming the package and version. Clusters install packages only from a registry, and every node that
+runs one checks its signature and the digest of each WASM file before it runs.
+
+<Steps>
+
+1. **Create a signing key, once.** The key is your app's identity: a new version must be signed by the same key, or
+   it is a different app.
+
+   ```bash
+   mero-sign generate-key --output my-signing-key.json
+   #   signerId: did:key:z6Mk...
+   ```
+
+   Keep the file secret and out of version control.
+
+2. **Bundle and sign** the release:
+
+   ```bash
+   cargo mero bundle --key my-signing-key.json
+   ```
+
+   It builds every service, writes and signs `manifest.json`, and writes `dist/<package>-<version>.mpk`. It also wants
+   an icon: `icon = "<path>"` under `[package.metadata.calimero]`, or `--no-icon`. The version comes from your crate's
+   version; `--bump patch|minor|major` takes the next one.
+
+3. **Publish** it to the [Calimero app registry](https://apps.calimero.network) with an API key:
+
+   ```bash
+   export CALIMERO_API_KEY=...
+   cargo mero publish dist/com.example.my-app-1.0.0.mpk
+   ```
+
+   The registry checks the signature on upload, and that the package's `author` matches your registry account. You can
+   also upload a `.mpk` from the Calimero Cloud console's Registry page.
+
+</Steps>
+
+<Aside type="caution">
+`cargo mero bundle --dev` signs with a well-known development key. That is fine for a local cluster, and the registry
+refuses it: anyone holds that key, so it proves nothing.
+</Aside>
+
+## Private and public packages
+
+A package belongs to the Cloud organization that publishes it and is **private** by default: only that
+organization can deploy it. Making it **public** lists it for everyone, after a registry review.
+
+## Next
+
+[Deploy it on Calimero Cloud](/cloud/deploy/), then create an instance for each organization that uses it.
+
+The manifest format and the exact checks a node runs on install are in the core reference's
+[Packaging & signing](https://calimero-network.github.io/core/build/packaging-signing/).

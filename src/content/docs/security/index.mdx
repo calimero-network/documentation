@@ -1,0 +1,50 @@
+---
+title: Security model
+description: What a Calimero cluster trusts, what each party can and cannot do, and which mechanism stops each attack.
+---
+
+The claim is narrow and checkable: **nobody operating the cluster, Calimero included, can read an app's data or put
+new code in front of it without the party the cluster's rules name for that decision.**
+
+## What is trusted
+
+| Trusted | For |
+| --- | --- |
+| Intel TDX and its attestation | That a quote comes from a genuine VM running the measured image, and is not a debug VM |
+| The signed mero-tee release | That the published measurements are the image Calimero built and signed |
+| mero-kms | Releasing a node's storage key only to an attested VM |
+| The `merod` build in that image | Running apps as described in these docs |
+| The person's authenticator | Their passkey |
+
+Not trusted: the host and hypervisor, the disks, the network and any TLS terminator, the operator, other tenants, and
+an app's publisher beyond its own code.
+
+## Who can do what
+
+| Party | Can | Cannot |
+| --- | --- | --- |
+| **Network or proxy** | See that clients talk to nodes, sizes, timing; drop traffic | Read or forge requests or answers; impersonate a node |
+| **Host** | Stop or restart a node; read its sealed disks | Read the memory of a non-debug VM; get its storage key |
+| **Operator** | Register nodes, move replicas onto approved images, set quotas, take sealed backups, read counts and status | Read state, events, blobs or credentials; sign in as anyone; upgrade apps or approve images and outbound hosts, unless the cluster's rules give it that decision |
+| **An app's owner** | Upgrade it, change its access, approve images and outbound hosts for it (where the rules say owner), delete it | Read other apps; act for other accounts |
+| **A member** | What the instance's access rule and the app's code allow | Read another member's private space; write with a read-only team row |
+| **An API key** | What its scope allows | Manage credentials; produce a passkey assertion |
+
+## What stops each attack
+
+- **Reading traffic:** the sealed channel, keyed to an attested key, with forward secrecy per session.
+- **A fake or outdated node:** the quote check, with a measurement policy and a release floor, for clients and nodes
+  alike.
+- **Reading disks:** everything on disk is encrypted with AES-256-GCM under a key only attested nodes hold.
+- **A new image reaching data:** image approvals, enforced by the replicas that hold the data before any of it leaves.
+- **New code reaching data:** app upgrades held by one named party, with a passkey step-up for owners.
+- **Exfiltration:** outbound HTTPS only to hosts the operator allows, under prefixes the app's signed manifest declares
+  and its approver approved.
+- **A stolen session:** 15-minute tokens, single-use refresh tokens whose reuse revokes the session, and revocation
+  that holds on every node before the next request.
+- **A malicious app:** the WASM sandbox and its limits; it reaches only its own blobs, its caller's private space, and
+  cross-app calls within its organization.
+- **Proving all this to a user:** [verifying every replica](/clients/verify/) and a receipt on every answer.
+
+What is not protected yet, and every mechanism in detail, is in the core reference's
+[Security & threat model](https://calimero-network.github.io/core/protocol/security-model/).

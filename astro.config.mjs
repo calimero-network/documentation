@@ -1,41 +1,68 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import mermaid from 'astro-mermaid';
 import starlight from '@astrojs/starlight';
+
+const DESCRIPTION =
+	'Build, publish and run apps on Calimero: sandboxed WASM replicated across attested Intel TDX nodes, reached through a sealed channel, signed in with passkeys.';
 
 export default defineConfig({
 	site: 'https://docs.calimero.network',
+	// Pages that moved. Old links (the landing, search engines, bookmarks) land on the page that covers it now.
+	redirects: {
+		'/intro/': '/what-is-calimero/',
+		'/vision/why-calimero/': '/what-is-calimero/',
+		'/vision/architecture/': '/what-is-calimero/',
+		'/vision/ecosystem/': '/what-is-calimero/',
+		'/vision/comparison/': '/what-is-calimero/',
+		'/core-concepts/': '/what-is-calimero/',
+		'/core-concepts/architecture/': '/what-is-calimero/',
+		'/core-concepts/contexts/': '/build/app-model/',
+		'/core-concepts/applications/': '/build/app-model/',
+		'/core-concepts/identity/': '/cloud/organizations/',
+		'/core-concepts/nodes/': '/security/',
+		'/privacy-verifiability-security/': '/security/',
+		'/privacy-verifiability-security/mero-tee/': '/security/attestation/',
+		'/builder-directory/': '/build/',
+		'/builder-directory/sdk-guide/': '/build/first-app/',
+		'/app-directory/': '/build/publish/',
+		'/app-directory/registry-overview/': '/build/publish/',
+		'/app-directory/registry-api-and-cli/': '/build/publish/',
+		'/app-directory/organizations-and-ownership/': '/build/publish/',
+		'/operator-track/': '/reference/',
+		'/operator-track/run-a-local-network/': '/getting-started/',
+		'/operator-track/monitor-and-debug/': '/reference/',
+		'/calimero-cloud/': '/cloud/',
+		'/calimero-cloud/cloud-dashboard/': '/cloud/',
+		'/calimero-cloud/operator-architecture/': '/security/',
+		'/tools-apis/': '/clients/',
+		'/tools-apis/client-sdks/': '/clients/',
+		'/tools-apis/meroctl-cli/': '/clients/',
+		'/tools-apis/mero-sign/': '/build/publish/',
+		'/tools-apis/developer-tools/': '/clients/',
+		'/tools-apis/desktop/': '/clients/',
+		'/tools-apis/desktop-internals/': '/clients/',
+		'/tools-apis/merobox/': '/getting-started/',
+		'/examples/': '/build/',
+	},
 	integrations: [
-		mermaid({
-			autoTheme: true,
-			enableLog: false,
-			mermaidConfig: {
-				theme: 'dark',
-				flowchart: { curve: 'basis', nodeSpacing: 32, rankSpacing: 48 },
-				themeVariables: {
-					fontFamily: 'DM Sans, Inter, ui-sans-serif, system-ui, sans-serif',
-					fontSize: '13px',
-					primaryColor: '#18181b',
-					primaryTextColor: '#e4e4e7',
-					primaryBorderColor: '#3f3f46',
-					lineColor: '#52525b',
-					secondaryColor: '#27272a',
-					tertiaryColor: '#1c1c1e',
-				},
-			},
-		}),
 		starlight({
 			components: {
 				SocialIcons: './src/components/SocialIcons.astro',
+				// The home page's hero, in the landing's type.
+				Hero: './src/components/Hero.astro',
 			},
 			title: 'Calimero Docs',
-			description: 'Lightweight documentation for the Calimero network and developer stack.',
+			description: DESCRIPTION,
+			// The landing's wordmark, in ink on paper and paper on ink.
 			logo: {
-				src: './src/assets/calimero-logo.svg',
+				light: './src/assets/calimero-logo-light.svg',
+				dark: './src/assets/calimero-logo-dark.svg',
 				alt: 'Calimero',
 				replacesTitle: true,
 			},
 			titleDelimiter: '|',
+			// src/pages/404.astro is the site's 404, in the landing's design.
+			disable404Route: true,
 			defaultLocale: 'root',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/calimero-network' },
@@ -44,99 +71,82 @@ export default defineConfig({
 			],
 			customCss: ['./src/styles/calimero.css'],
 			head: [
-				// Fonts
+				// The landing's faces: Inter Tight and JetBrains Mono.
 				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
-				{ tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap' } },
-				// Open Graph
+				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' } },
+				{
+					tag: 'link',
+					attrs: {
+						rel: 'stylesheet',
+						href: 'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap',
+					},
+				},
 				{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
 				{ tag: 'meta', attrs: { property: 'og:site_name', content: 'Calimero Docs' } },
 				{ tag: 'meta', attrs: { property: 'og:title', content: 'Calimero Docs' } },
-				{ tag: 'meta', attrs: { property: 'og:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { property: 'og:description', content: DESCRIPTION } },
 				{ tag: 'meta', attrs: { property: 'og:url', content: 'https://docs.calimero.network' } },
 				{ tag: 'meta', attrs: { property: 'og:image', content: 'https://docs.calimero.network/og-image.png' } },
 				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
 				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
 				{ tag: 'meta', attrs: { property: 'og:image:alt', content: 'Calimero Docs' } },
-				// Twitter / X card
 				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
 				{ tag: 'meta', attrs: { name: 'twitter:site', content: '@CalimeroNetwork' } },
 				{ tag: 'meta', attrs: { name: 'twitter:title', content: 'Calimero Docs' } },
-				{ tag: 'meta', attrs: { name: 'twitter:description', content: 'Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry.' } },
+				{ tag: 'meta', attrs: { name: 'twitter:description', content: DESCRIPTION } },
 				{ tag: 'meta', attrs: { name: 'twitter:image', content: 'https://docs.calimero.network/og-image.png' } },
 			],
+			expressiveCode: {
+				themes: ['github-dark', 'github-light'],
+				styleOverrides: {
+					borderRadius: '0',
+					codeFontFamily: "'JetBrains Mono', ui-monospace, monospace",
+					uiFontFamily: "'Inter Tight', system-ui, sans-serif",
+				},
+			},
 			sidebar: [
 				{
-					label: 'Start Here',
-					collapsed: false,
+					label: 'Start here',
 					items: [
 						{ label: 'Home', slug: '' },
-						{ label: 'Introduction', slug: 'intro' },
-						{ label: 'Getting Started', slug: 'getting-started' },
-					],
-				},
-				{
-					label: 'Vision',
-					collapsed: false,
-					items: [
-						{ label: 'Why Calimero', slug: 'vision/why-calimero' },
-						{ label: 'Architecture at a Glance', slug: 'vision/architecture' },
-						{ label: 'The Ecosystem', slug: 'vision/ecosystem' },
-						{ label: 'How Calimero Compares', slug: 'vision/comparison' },
-					],
-				},
-				{
-					label: 'Concepts',
-					collapsed: false,
-					items: [
-						{ label: 'Core Concepts', slug: 'core-concepts' },
-						{ label: 'System Architecture', slug: 'core-concepts/architecture' },
-						{ label: 'Contexts', slug: 'core-concepts/contexts' },
-						{ label: 'Identity', slug: 'core-concepts/identity' },
-						{ label: 'Applications', slug: 'core-concepts/applications' },
-						{ label: 'Nodes', slug: 'core-concepts/nodes' },
-						{ label: 'Privacy & Security', slug: 'privacy-verifiability-security' },
-						{ label: 'mero-tee, KMS & Attestation', slug: 'privacy-verifiability-security/mero-tee' },
+						{ label: 'What is Calimero', slug: 'what-is-calimero' },
+						{ label: 'Quickstart', slug: 'getting-started' },
 					],
 				},
 				{
 					label: 'Build',
-					collapsed: false,
 					items: [
-						{ label: 'Overview', slug: 'builder-directory' },
-						{ label: 'Service SDKs', slug: 'builder-directory/sdk-guide' },
-						{ label: 'Client SDKs', slug: 'tools-apis/client-sdks' },
-						{ label: 'Examples', slug: 'examples' },
-						{ label: 'App Directory & Registry', slug: 'app-directory' },
-						{ label: 'Registry Overview', slug: 'app-directory/registry-overview' },
-						{ label: 'Registry API & CLI', slug: 'app-directory/registry-api-and-cli' },
-						{ label: 'Organizations & Ownership', slug: 'app-directory/organizations-and-ownership' },
+						{ label: 'Overview', slug: 'build' },
+						{ label: 'Your first app', slug: 'build/first-app' },
+						{ label: 'What an app sees', slug: 'build/app-model' },
+						{ label: 'Package & publish', slug: 'build/publish' },
 					],
 				},
 				{
-					label: 'Run & Operate',
-					collapsed: false,
+					label: 'Calimero Cloud',
 					items: [
-						{ label: 'Overview', slug: 'operator-track' },
-						{ label: 'Run a Local Network', slug: 'operator-track/run-a-local-network' },
-						{ label: 'Monitoring', slug: 'operator-track/monitor-and-debug' },
-						{ label: 'Calimero Cloud & MDMA', slug: 'calimero-cloud' },
-						{ label: 'Cloud Dashboard & Plans', slug: 'calimero-cloud/cloud-dashboard' },
-						{ label: 'Operator Architecture', slug: 'calimero-cloud/operator-architecture' },
+						{ label: 'Overview', slug: 'cloud' },
+						{ label: 'Deploy & instances', slug: 'cloud/deploy' },
+						{ label: 'Organizations & access', slug: 'cloud/organizations' },
 					],
 				},
 				{
-					label: 'Tools & Reference',
-					collapsed: true,
+					label: 'Connect',
 					items: [
-						{ label: 'Overview', slug: 'tools-apis' },
-						{ label: 'Desktop', slug: 'tools-apis/desktop' },
-						{ label: 'How Desktop Works', slug: 'tools-apis/desktop-internals' },
-						{ label: 'CLI (meroctl)', slug: 'tools-apis/meroctl-cli' },
-						{ label: 'Developer Tools', slug: 'tools-apis/developer-tools' },
-						{ label: 'Merobox', slug: 'tools-apis/merobox' },
-						{ label: 'mero-sign', slug: 'tools-apis/mero-sign' },
-						{ label: 'API Reference', slug: 'reference' },
+						{ label: 'Clients', slug: 'clients' },
+						{ label: 'Verify a cluster', slug: 'clients/verify' },
 					],
+				},
+				{
+					label: 'Security',
+					items: [
+						{ label: 'Security model', slug: 'security' },
+						{ label: 'Attestation', slug: 'security/attestation' },
+					],
+				},
+				{
+					label: 'Reference',
+					items: [{ label: 'Glossary & further reading', slug: 'reference' }],
 				},
 			],
 		}),

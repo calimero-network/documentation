@@ -1,0 +1,76 @@
+---
+title: Organizations & access
+description: Organizations, roles, teams and invites on a Calimero cluster, and the rule that decides who reaches each app instance.
+---
+
+import OrgDiagram from '../../../components/OrgDiagram.astro';
+
+An **organization** on a cluster is who can use a set of app instances. It lives in the cluster's own state: the
+console never holds it, and the cluster enforces it on every request, on every node.
+
+<OrgDiagram />
+
+## Roles
+
+Every member has one role:
+
+| Role | May |
+| --- | --- |
+| `guest` | Reach the organization's instances whose access is `org` |
+| `member` | Also own instances in the organization |
+| `admin` | Manage members and their roles (below owner), capabilities, teams and metadata; delete the organization's instances |
+| `owner` | Everything, plus ownership, release approvals and deleting the organization. There is exactly one. |
+
+Beyond their role, members hold **capabilities**, such as creating instances (`CREATE_APP`), inviting people
+(`INVITE_MEMBERS`) or upgrading the organization's instances (`MANAGE_APPLICATION`). Admins and team leads hold all of
+them where they manage.
+
+## Teams
+
+Teams nest, and each is one of two kinds:
+
+- **Open**: whoever reaches the parent team (at the top, the organization) is a member too.
+- **Restricted**: only the people added to it. Nothing flows through a restricted team to the teams below it.
+
+A team's members have a role in it: `lead`, `member` or `read-only`. A read-only member reaches the team's
+instances, and a call of theirs that would write anything is refused.
+
+## Who reaches an instance
+
+Every instance carries one access rule, set when it is created and changed by its owner:
+
+| Access | Who reaches the instance |
+| --- | --- |
+| `org` | Every member of its organization. The default inside an organization. |
+| `team` | The team's members. |
+| `accounts` | The owner and the listed accounts. |
+| `owner` | The owner only. The default outside an organization. |
+| `public` | Anyone, signed in or not. |
+
+Someone who does not reach an instance gets `404`: its existence is not disclosed. Finer rules, such as who may
+edit which record, are your app's own code, which reads the caller's role and teams with `env::caller_org()`.
+
+## Invites
+
+An admin, or a member with `INVITE_MEMBERS`, creates an invite: a token (`inv_…`) with a role and, optionally, the
+teams it adds to. Only its hash is stored. It expires after 7 days and admits one account unless set otherwise. The
+person opens it, signs up with a passkey on the cluster and redeems it.
+
+```ts
+const token = await client.invite(org, 'member');   // send it to them
+await theirClient.redeemInvite(token);               // after they sign up
+```
+
+In the console, adding someone to a project invites them to the project's organization the same way.
+
+## Several customers
+
+Two shapes work, chosen per app:
+
+- **One organization and one instance per customer.** Separate state, members and upgrades. Your frontend (or the
+  console) creates the organization and the instance with that customer's init arguments.
+- **One instance, a restricted team per customer.** One shared state; your app's code keeps customers' records apart
+  using the caller's teams.
+
+The full rules, including every capability, are in the core reference's
+[Organizations, teams & access](https://calimero-network.github.io/core/protocol/organizations/).

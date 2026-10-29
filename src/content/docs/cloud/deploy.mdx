@@ -1,0 +1,66 @@
+---
+title: Deploy & instances
+description: Deploying makes a version of your app available on a cluster. Each organization then gets its own instance, with its own init arguments.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+import Flow from '../../../components/Flow.astro';
+
+Two steps, kept apart on purpose:
+
+- **Deploy** makes a version of your package available on a cluster. Nothing of your app runs yet.
+- **Create an instance** starts one running copy in one organization. Its `init` runs once, with that instance's init
+  arguments, so every organization that uses your app starts from its own state.
+
+<Flow
+	steps={[
+		{ k: 'Registry', title: 'notes 1.2.0', text: 'Your signed package, com.acme.notes.' },
+		{ k: 'Deploy', title: 'Installed on the cluster', text: 'Every node fetches it and checks the signature.' },
+		{ k: 'Instance', title: 'notes · your org', text: 'init {"title": "Team notes"}', accent: true },
+		{ k: 'Instance', title: 'notes-globex · globex', text: 'init {"title": "Globex notes"}', accent: true },
+	]}
+	caption="One deployed version, any number of instances. Each instance has its own state, members and access rule."
+/>
+
+## Deploy a version
+
+<Steps>
+
+1. In the console, open **Deploy an app** and pick the package: one of your organization's private packages, or a
+   public one from the registry.
+2. Name the app and pick the version.
+3. Choose where it runs: your organization's **shared** cluster, or one of your **dedicated** clusters. The console
+   shows the estimated cost.
+4. Press **Deploy**, then confirm with your passkey. Your browser installs the version on the cluster.
+
+</Steps>
+
+Deploying again with the same name is an upgrade, from the app's page.
+
+## Create an instance for an organization
+
+On the app's page, the **Instances** box lists the instances you created and creates new ones. For each one you pick:
+
+| Field | What it decides |
+| --- | --- |
+| **Organization** | Where the instance lives and who reaches it. The app's own organization (created with its first instance), a new organization (for example a customer's), or one an earlier instance created. |
+| **Instance name** | Its name on the cluster. |
+| **Init arguments** | JSON your `#[app::init]` receives: this instance's starting state. For an `init(title: String)`, `{"title": "Globex notes"}`. |
+
+Then confirm with your passkey: your browser creates the organization if it is new, and the instance in it. If the
+browser tab closes before the console hears back, running the same step again finds the instance it made rather than
+creating a second one.
+
+Your app's own frontend can create instances the same way with mero-js (`createOrg`, then `createApp` with
+`initArgs`), for example when a new customer signs up. See [Clients](/clients/).
+
+## Upgrades
+
+An upgrade installs the new version and upgrades every instance in **the app's own organization**, after one passkey
+confirmation. An instance in another organization is upgraded by that organization's owner, so a customer decides
+when their instance moves. An app with no instance yet only installs the new version.
+
+<Aside type="note">
+Upgrades are planned from your two versions' embedded ABIs, run your migration, and refuse a downgrade. See
+[What an app sees](/build/app-model/#upgrades).
+</Aside>

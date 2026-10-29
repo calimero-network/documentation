@@ -1,637 +1,357 @@
-/**
- * Calimero Docs — Design System
- * Tokens: #09090b bg, #18181b sidebar, #27272a surface, #3f3f46 border
- * Accent: #a5ff11 (lime). Text on lime must always be #09090b (dark).
- * Typography: DM Sans (UI) + JetBrains Mono (code)
- */
-
-/* ═══════════════════════════════════════════
-   TOKENS
-   ═══════════════════════════════════════════ */
+/* ==========================================================================
+   Calimero Docs — the landing page's "Sealed" design on Starlight.
+   Paper and ink with one wax-seal red; hairline rules, square corners,
+   mono uppercase labels, a hard offset shadow on hover. Tokens are the
+   landing's (calimero.network, public/assets/v2.css), mapped onto
+   Starlight's --sl-color-* scale for both themes.
+   Starlight's own :root is the dark theme and [data-theme='light'] the light.
+   ========================================================================== */
 
 :root {
-  /* Accent */
-  --sl-color-accent-low:  #1a2210;
-  --sl-color-accent:      #a5ff11;
-  --sl-color-accent-high: #a5ff11; /* keep same — Starlight uses accent-high for button bg */
-  --sl-color-text-accent: #b8ff44;
+	/* landing tokens, dark */
+	--cal-paper: #121211;
+	--cal-paper-2: #191917;
+	--cal-card: #1c1b18;
+	--cal-ink: #f1ede4;
+	--cal-ink-2: #cdc7ba;
+	--cal-muted: #a29d91;
+	--cal-rule: #34322d;
+	--cal-box-line: #5a564e;
+	--cal-seal: #ef6150;
+	--cal-seal-soft: #3a1914;
+	--cal-seal-deep: #c9402f;
+	--cal-ok: #62c792;
+	--cal-ok-soft: #14291d;
+	--cal-warn: #e3ac45;
+	--cal-warn-soft: #2e2310;
+	--cal-inv: #232220;
+	--cal-inv-text: #f1ede4;
+	--cal-inv-muted: #b5afa3;
+	--cal-inv-rule: #3a3833;
+	--cal-inv-accent: #ff9a8f;
+	--cal-hard: #3d3b35;
 
-  --cal-accent:      #a5ff11;
-  --cal-accent-dim:  rgba(165, 255, 17, 0.07);
-  --cal-accent-glow: rgba(165, 255, 17, 0.18);
+	/* Starlight, dark */
+	--sl-color-accent-low: var(--cal-seal-soft);
+	--sl-color-accent: var(--cal-seal);
+	--sl-color-accent-high: #ffb4a9;
+	--sl-color-white: var(--cal-ink);
+	--sl-color-gray-1: #e4dfd4;
+	--sl-color-gray-2: var(--cal-ink-2);
+	--sl-color-gray-3: var(--cal-muted);
+	--sl-color-gray-4: #6e6a61;
+	--sl-color-gray-5: var(--cal-rule);
+	--sl-color-gray-6: var(--cal-card);
+	--sl-color-black: var(--cal-paper);
+	--sl-color-bg-nav: var(--cal-paper);
+	--sl-color-bg-sidebar: var(--cal-paper);
+	--sl-color-hairline-light: var(--cal-rule);
+	--sl-color-hairline-shade: var(--cal-rule);
+	--sl-color-bg-inline-code: var(--cal-paper-2);
 
-  /* Surfaces */
-  --sl-color-bg:          #09090b;
-  --sl-color-bg-nav:      rgba(9, 9, 11, 0.9);
-  --sl-color-bg-sidebar:  #111113;
-  --sl-color-black:       #09090b; /* used by Starlight as text on accent buttons — must stay dark */
-
-  /* Text */
-  --sl-color-white:  #fafafa;
-  --sl-color-gray-1: #e4e4e7;
-  --sl-color-gray-2: #a1a1aa;
-  --sl-color-gray-3: #71717a;
-  --sl-color-gray-4: #52525b;
-  --sl-color-gray-5: #3f3f46;
-  --sl-color-gray-6: #18181b;
-
-  /* Borders */
-  --sl-color-hairline-light: #27272a;
-  --sl-color-hairline-shade: rgba(0, 0, 0, 0.6);
-  --sl-color-backdrop-overlay: rgba(0, 0, 0, 0.7);
-
-  /* Typography */
-  --sl-font:      'DM Sans', 'Inter', var(--sl-font-system);
-  --sl-font-mono: 'JetBrains Mono', var(--sl-font-system-mono);
-
-  /* Sizing */
-  --sl-content-width:    48rem;
-  --sl-sidebar-width:    230px;
-  --sl-nav-height:       3.25rem;
-
-  /* Text sizes */
-  --sl-text-xs:   0.6875rem;
-  --sl-text-sm:   0.75rem;
-  --sl-text-base: 0.875rem;
+	--sl-font: 'Inter Tight', system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--sl-text-base: 1rem;
+	--sl-line-height: 1.6;
+	--sl-content-width: 46rem;
 }
 
 :root[data-theme='light'] {
-  --sl-color-accent-low:  #edffd0;
-  --sl-color-accent:      #5a8f00;
-  --sl-color-accent-high: #5a8f00;
-  --sl-color-text-accent: #4a7600;
+	--cal-paper: #f4f1ea;
+	--cal-paper-2: #ece7dc;
+	--cal-card: #fffdf8;
+	--cal-ink: #111111;
+	--cal-ink-2: #3a3935;
+	--cal-muted: #5c5a54;
+	--cal-rule: #d6d0c3;
+	--cal-box-line: #a19c90;
+	--cal-seal: #b8261a;
+	--cal-seal-soft: #f5e1da;
+	--cal-seal-deep: #8f1d14;
+	--cal-ok: #1c6a43;
+	--cal-ok-soft: #dcefe3;
+	--cal-warn: #8a5a00;
+	--cal-warn-soft: #f6ead0;
+	--cal-inv: #111111;
+	--cal-inv-text: #f4f1ea;
+	--cal-inv-muted: #c9c3b6;
+	--cal-inv-rule: #333333;
+	--cal-inv-accent: #ff9a8f;
+	--cal-hard: #111111;
 
-  --cal-accent:      #5a8f00;
-  --cal-accent-dim:  rgba(90, 143, 0, 0.07);
-  --cal-accent-glow: rgba(90, 143, 0, 0.15);
-
-  --sl-color-bg:         #fafafa;
-  --sl-color-bg-nav:     rgba(250, 250, 250, 0.92);
-  --sl-color-bg-sidebar: #f4f4f5;
-  --sl-color-black:      #ffffff;
-
-  --sl-color-white:  #09090b;
-  --sl-color-gray-1: #18181b;
-  --sl-color-gray-2: #3f3f46;
-  --sl-color-gray-3: #71717a;
-  --sl-color-gray-4: #a1a1aa;
-  --sl-color-gray-5: #d4d4d8;
-  --sl-color-gray-6: #f4f4f5;
-
-  --sl-color-hairline-light: #e4e4e7;
-  --sl-color-hairline-shade: rgba(0, 0, 0, 0.06);
+	--sl-color-accent-low: var(--cal-seal-soft);
+	--sl-color-accent: var(--cal-seal);
+	--sl-color-accent-high: var(--cal-seal-deep);
+	--sl-color-white: var(--cal-ink);
+	--sl-color-gray-1: #232220;
+	--sl-color-gray-2: var(--cal-ink-2);
+	--sl-color-gray-3: var(--cal-muted);
+	--sl-color-gray-4: #8f8a7f;
+	--sl-color-gray-5: var(--cal-rule);
+	--sl-color-gray-6: var(--cal-paper-2);
+	--sl-color-gray-7: var(--cal-card);
+	--sl-color-black: var(--cal-paper);
+	--sl-color-bg-nav: var(--cal-paper);
+	--sl-color-bg-sidebar: var(--cal-paper);
+	--sl-color-hairline-light: var(--cal-rule);
+	--sl-color-hairline-shade: var(--cal-rule);
+	--sl-color-bg-inline-code: var(--cal-paper-2);
 }
-
-/* ═══════════════════════════════════════════
-   FORCE DARK — hide theme toggle entirely
-   ═══════════════════════════════════════════ */
-
-starlight-theme-select,
-starlight-theme-select * {
-  display: none !important;
-}
-
-/* ═══════════════════════════════════════════
-   RESET & BASE
-   ═══════════════════════════════════════════ */
-
-html { scroll-behavior: smooth; }
 
 body {
-  font-size: 0.875rem;
-  background: var(--sl-color-bg);
+	background: var(--cal-paper);
+	color: var(--cal-ink);
+	-webkit-font-smoothing: antialiased;
 }
 
 :focus-visible {
-  outline: 1.5px solid rgba(165, 255, 17, 0.45);
-  outline-offset: 2px;
-  border-radius: 3px;
+	outline: 2px solid var(--cal-seal);
+	outline-offset: 2px;
 }
 
-/* ═══════════════════════════════════════════
-   HEADER / NAVBAR
-   ═══════════════════════════════════════════ */
+/* ---------------------------------------------------------------- chrome */
+
+.site-title img {
+	height: 1.6rem;
+	width: auto;
+}
 
 header.header {
-  height: var(--sl-nav-height) !important;
-  border-bottom: 1px solid var(--sl-color-hairline-light) !important;
-  background: var(--sl-color-bg-nav) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: none !important;
+	border-bottom: 1px solid var(--cal-rule);
+	background: var(--cal-paper);
 }
-
-/* Site title */
-.site-title {
-  font-size: 0.8125rem !important;
-  font-weight: 600 !important;
-  letter-spacing: -0.01em !important;
-  color: var(--sl-color-white) !important;
-  gap: 0.4rem !important;
-}
-
-/* Header right icons — smaller */
-.social-icons a,
-starlight-theme-select button {
-  font-size: 0.75rem !important;
-  opacity: 0.65;
-  transition: opacity 0.12s ease;
-}
-.social-icons a:hover,
-starlight-theme-select button:hover { opacity: 1; }
-
-/* Search bar compact */
-site-search button {
-  font-size: 0.75rem !important;
-  padding: 0 0.6rem !important;
-  height: 1.9rem !important;
-  border-radius: 6px !important;
-  border: 1px solid var(--sl-color-hairline-light) !important;
-  background: var(--sl-color-gray-6) !important;
-  color: var(--sl-color-gray-3) !important;
-}
-
-/* ═══════════════════════════════════════════
-   SIDEBAR
-   ═══════════════════════════════════════════ */
 
 .sidebar-pane {
-  border-inline-end: 1px solid var(--sl-color-hairline-light) !important;
-  background: var(--sl-color-bg-sidebar) !important;
-  backdrop-filter: none !important;
-  width: var(--sl-sidebar-width) !important;
+	border-inline-end: 1px solid var(--cal-rule);
 }
 
-.sidebar-content {
-  padding: 0.75rem 0 !important;
+/* Group headers read like the landing's section numbers. */
+.sidebar-content .group-label .large,
+.sidebar-content summary .large {
+	font: 600 0.72rem/1.4 var(--sl-font-mono);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--cal-seal);
 }
 
-/* Section group labels */
-.group-label span,
-.sidebar-group-header {
-  font-size: 0.6rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.1em !important;
-  text-transform: uppercase !important;
-  color: var(--sl-color-gray-3) !important;
-  padding: 0.9rem 1rem 0.3rem !important;
-}
-
-/* All sidebar links */
 .sidebar-content a {
-  font-size: 0.8rem !important;
-  font-weight: 400 !important;
-  color: var(--sl-color-gray-2) !important;
-  padding: 0.3rem 1rem !important;
-  border-radius: 0 !important;
-  line-height: 1.35 !important;
-  transition: color 0.1s ease, background 0.1s ease !important;
-  text-decoration: none !important;
+	border-radius: 0;
+	color: var(--cal-ink-2);
 }
 
 .sidebar-content a:hover {
-  color: var(--sl-color-white) !important;
-  background: rgba(255, 255, 255, 0.04) !important;
+	color: var(--cal-ink);
 }
 
-/* Active page */
-.sidebar-content a[aria-current='page'] {
-  color: var(--cal-accent) !important;
-  background: var(--cal-accent-dim) !important;
-  font-weight: 500 !important;
-  position: relative;
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover {
+	background: transparent;
+	color: var(--cal-ink);
+	font-weight: 600;
+	box-shadow: inset 2px 0 0 var(--cal-seal);
 }
 
-.sidebar-content a[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 20%;
-  height: 60%;
-  width: 2px;
-  background: var(--cal-accent);
-  border-radius: 0 2px 2px 0;
+site-search button,
+starlight-theme-select select {
+	border-radius: 0;
 }
 
-/* Nested (sub) links */
-.sidebar-content a.small {
-  padding-left: 1.75rem !important;
-  font-size: 0.775rem !important;
-  color: var(--sl-color-gray-3) !important;
-}
-.sidebar-content a.small:hover { color: var(--sl-color-gray-2) !important; }
-.sidebar-content a.small[aria-current='page'] { color: var(--cal-accent) !important; }
+/* ---------------------------------------------------------------- type */
 
-/* Details/summary collapsible groups */
-.sidebar-content details summary {
-  cursor: pointer;
-  list-style: none;
-  font-size: 0.6rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.1em !important;
-  text-transform: uppercase !important;
-  color: var(--sl-color-gray-3) !important;
-  padding: 0.9rem 1rem 0.3rem !important;
-}
-.sidebar-content details summary::marker,
-.sidebar-content details summary::-webkit-details-marker { display: none; }
-
-/* ═══════════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════════ */
-
-.main-frame { background: var(--sl-color-bg); }
-
-.content-panel {
-  padding-inline: 2rem !important;
-  padding-block: 2rem !important;
+.sl-markdown-content h1,
+.content-panel h1 {
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 1.02;
 }
 
-/* Page entry animation */
-.sl-markdown-content {
-  animation: cal-in 0.3s ease both;
-  font-size: 0.875rem;
-  line-height: 1.7;
-  color: var(--sl-color-gray-1);
-}
-
-@keyframes cal-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Headings */
-.sl-markdown-content h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--sl-color-white);
-  margin-bottom: 0.5rem;
-}
 .sl-markdown-content h2 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--sl-color-white);
-  border-top: 1px solid var(--sl-color-hairline-light);
-  padding-top: 1.5rem;
-  margin-top: 2rem;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.1;
 }
+
 .sl-markdown-content h3 {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--sl-color-white);
-}
-.sl-markdown-content h4 {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--sl-color-gray-1);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+	font-weight: 700;
+	letter-spacing: -0.02em;
 }
 
-/* Heading permalink (anchor) icon. The reduced heading sizes above shrink the
-   heading text, but the heading wrapper keeps Starlight's larger default
-   font-size — and the anchor icon is sized in `em` off that wrapper, so it
-   rendered oversized next to the smaller heading. Pin it in `rem` so it stays
-   proportional across all heading levels. */
-.sl-markdown-content .sl-heading-wrapper {
-  --sl-anchor-icon-size: 0.85rem;
-}
-
-/* Links */
 .sl-markdown-content a {
-  color: var(--sl-color-text-accent);
-  text-decoration: none;
+	color: var(--cal-ink);
+	text-decoration-color: var(--cal-seal);
+	text-decoration-thickness: 1.5px;
+	text-underline-offset: 3px;
 }
+
 .sl-markdown-content a:hover {
-  color: var(--cal-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+	color: var(--cal-seal);
 }
 
-/* Any link/button with lime background must have dark text — no exceptions */
-.sl-markdown-content a[class*="btn-primary"],
-a[class*="btn-primary"],
-.sl-markdown-content a[data-variant="primary"],
-a[data-variant="primary"],
-.sl-link-button[data-variant="primary"] {
-  color: #09090b !important;
-}
-.sl-markdown-content a[class*="btn-primary"]:hover,
-a[class*="btn-primary"]:hover,
-.sl-markdown-content a[data-variant="primary"]:hover,
-a[data-variant="primary"]:hover,
-.sl-link-button[data-variant="primary"]:hover {
-  color: #09090b !important;
-  text-decoration: none !important;
+.sl-markdown-content strong {
+	color: var(--cal-ink);
 }
 
-/* Code */
+/* Inline code: a ruled chip on paper. */
 .sl-markdown-content :not(pre) > code {
-  font-size: 0.8em;
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
-  background: var(--sl-color-gray-6);
-  border: 1px solid var(--sl-color-hairline-light);
-  color: var(--sl-color-gray-1);
+	border: 1px solid var(--cal-rule);
+	border-radius: 0;
+	padding: 0.05em 0.35em;
+	font-size: 0.86em;
 }
 
-.sl-markdown-content pre {
-  font-size: 0.8125rem;
-  border-radius: 8px;
-  border: 1px solid var(--sl-color-hairline-light);
-  background: var(--sl-color-gray-6) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  padding: 1rem 1.1rem;
+/* Code blocks: the landing's code card, an ink panel. */
+.expressive-code .frame,
+.expressive-code pre {
+	border-radius: 0 !important;
 }
 
-/* Blockquote */
-.sl-markdown-content blockquote {
-  border-inline-start: 2px solid var(--cal-accent);
-  background: var(--cal-accent-dim);
-  border-radius: 0 6px 6px 0;
-  padding: 0.7rem 1rem;
-  margin: 1rem 0;
-  font-size: 0.875rem;
-  color: var(--sl-color-gray-2);
+.expressive-code .frame {
+	border: 1px solid var(--cal-ink) !important;
+	box-shadow: none !important;
 }
 
-/* Tables */
+/* Tables: hairlines, mono uppercase heads. */
 .sl-markdown-content table {
-  font-size: 0.8125rem;
-  border-collapse: collapse;
-  width: 100%;
+	border-collapse: collapse;
+	font-size: 0.94rem;
 }
+
 .sl-markdown-content th {
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--sl-color-gray-3);
-  border-bottom: 1px solid var(--sl-color-hairline-light);
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-}
-.sl-markdown-content td {
-  border-bottom: 1px solid var(--sl-color-hairline-light);
-  padding: 0.5rem 0.75rem;
-  color: var(--sl-color-gray-2);
+	font: 600 0.72rem/1.4 var(--sl-font-mono);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--cal-muted);
+	background: transparent;
+	border-bottom: 1px solid var(--cal-ink);
 }
 
-/* ═══════════════════════════════════════════
-   STARLIGHT CARDS
-   ═══════════════════════════════════════════ */
-
-.card {
-  border: 1px solid var(--sl-color-hairline-light) !important;
-  border-radius: 8px !important;
-  background: var(--sl-color-gray-6) !important;
-  box-shadow: none !important;
-  padding: 1rem !important;
-  transition: border-color 0.15s ease, transform 0.15s ease !important;
-}
-.card:hover {
-  border-color: var(--sl-color-gray-4) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-}
-.card .sl-flex { gap: 0.4rem !important; }
-.card p { font-size: 0.8125rem !important; color: var(--sl-color-gray-2) !important; }
-.card .title { font-size: 0.875rem !important; font-weight: 600 !important; color: var(--sl-color-white) !important; }
-.card .card-icon { font-size: 1rem !important; }
-
-/* Card stagger */
-.sl-markdown-content .card { animation: cal-card-in 0.35s ease both; }
-.sl-markdown-content .card:nth-child(1) { animation-delay: 0ms; }
-.sl-markdown-content .card:nth-child(2) { animation-delay: 50ms; }
-.sl-markdown-content .card:nth-child(3) { animation-delay: 100ms; }
-.sl-markdown-content .card:nth-child(4) { animation-delay: 150ms; }
-
-@keyframes cal-card-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+.sl-markdown-content td,
+.sl-markdown-content th {
+	border-inline: 0;
+	border-top: 0;
+	border-bottom: 1px solid var(--cal-rule);
 }
 
-/* ═══════════════════════════════════════════
-   STARLIGHT LINK BUTTONS
-   Lime bg → must have dark text. No white on lime.
-   ═══════════════════════════════════════════ */
-
-.sl-link-button {
-  font-size: 0.8rem !important;
-  font-weight: 600 !important;
-  padding: 0.4rem 0.85rem !important;
-  border-radius: 6px !important;
-  transition: all 0.12s ease !important;
-}
-
-.sl-link-button[data-variant='primary'],
-a.sl-link-button[data-variant='primary'],
-.sl-link-button[data-variant='primary'] *,
-a.sl-link-button[data-variant='primary'] * {
-  background: var(--cal-accent) !important;
-  color: #09090b !important;
-  border-color: var(--cal-accent) !important;
-}
-.sl-link-button[data-variant='primary']:hover,
-a.sl-link-button[data-variant='primary']:hover {
-  background: #baff35 !important;
-  color: #09090b !important;
-  text-decoration: none !important;
-}
-
-/* Global rule: anything with a lime/accent background must have dark text */
-[style*="background: #a5ff11"],
-[style*="background:#a5ff11"],
-[style*="background-color: #a5ff11"],
-[style*="background-color:#a5ff11"],
-.bg-accent,
-[data-variant='primary'] {
-  color: #09090b !important;
-}
-
-.sl-link-button[data-variant='secondary'],
-a.sl-link-button[data-variant='secondary'] {
-  background: transparent !important;
-  color: var(--sl-color-gray-2) !important;
-  border: 1px solid var(--sl-color-hairline-light) !important;
-}
-.sl-link-button[data-variant='secondary']:hover {
-  border-color: var(--sl-color-gray-4) !important;
-  color: var(--sl-color-white) !important;
-  text-decoration: none !important;
-}
-
-/* ═══════════════════════════════════════════
-   STARLIGHT ASIDES / CALLOUTS
-   ═══════════════════════════════════════════ */
-
+/* Asides: a rule on the left, no rounded box. */
 .starlight-aside {
-  border-radius: 6px !important;
-  border-width: 1px !important;
-  font-size: 0.8125rem !important;
-  padding: 0.75rem 1rem !important;
+	border-radius: 0;
+	border-inline-start-width: 3px;
+	background: var(--cal-card);
 }
 
-/* ═══════════════════════════════════════════
-   STARLIGHT STEPS
-   ═══════════════════════════════════════════ */
+.starlight-aside--note { border-color: var(--cal-ink); }
+.starlight-aside--tip { border-color: var(--cal-ok); }
+.starlight-aside--caution { border-color: var(--cal-warn); }
+.starlight-aside--danger { border-color: var(--cal-seal); }
 
-.sl-steps > li {
-  font-size: 0.875rem !important;
-  padding-inline-start: 2rem !important;
+.starlight-aside__title {
+	font: 600 0.75rem/1.4 var(--sl-font-mono);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
 }
+
+/* Cards: the landing's link cards. */
+.card,
+.sl-link-card {
+	border-radius: 0 !important;
+	border: 1px solid var(--cal-rule) !important;
+	background: var(--cal-card) !important;
+	box-shadow: none !important;
+	transition: box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.sl-link-card:hover {
+	border-color: var(--cal-ink) !important;
+	box-shadow: 6px 6px 0 var(--cal-hard) !important;
+}
+
+.sl-link-card .title {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+/* Buttons: ink primary, ruled secondary, red on hover. */
+.sl-link-button {
+	border-radius: 0 !important;
+	font-weight: 600;
+}
+
+.sl-link-button[data-variant='primary'] {
+	background: var(--cal-ink);
+	border-color: var(--cal-ink);
+	color: var(--cal-paper);
+}
+
+.sl-link-button[data-variant='primary']:hover {
+	background: var(--cal-seal);
+	border-color: var(--cal-seal);
+	color: var(--cal-paper);
+}
+
+.sl-link-button[data-variant='secondary'] {
+	border: 1px solid var(--cal-ink);
+	color: var(--cal-ink);
+}
+
+.sl-link-button[data-variant='secondary']:hover {
+	background: var(--cal-ink);
+	color: var(--cal-paper);
+}
+
+/* Steps: numbers in seal red, mono. */
 .sl-steps > li::before {
-  width: 1.4rem !important;
-  height: 1.4rem !important;
-  font-size: 0.7rem !important;
-  font-weight: 700 !important;
-  background: var(--cal-accent) !important;
-  color: #09090b !important;
-  border: none !important;
+	border-radius: 0 !important;
+	font-family: var(--sl-font-mono);
+	background: var(--cal-card) !important;
+	border: 1px solid var(--cal-ink) !important;
+	color: var(--cal-ink) !important;
 }
 
-/* ═══════════════════════════════════════════
-   STARLIGHT TABS
-   ═══════════════════════════════════════════ */
-
-starlight-tabs {
-  border: 1px solid var(--sl-color-hairline-light) !important;
-  border-radius: 8px !important;
-  overflow: hidden;
-}
-starlight-tabs [role='tablist'] {
-  background: var(--sl-color-gray-6) !important;
-  border-bottom: 1px solid var(--sl-color-hairline-light) !important;
-  gap: 0 !important;
-  padding: 0 0.5rem !important;
-}
-starlight-tabs [role='tab'] {
-  font-size: 0.775rem !important;
-  font-weight: 500 !important;
-  padding: 0.5rem 0.75rem !important;
-  color: var(--sl-color-gray-3) !important;
-}
-starlight-tabs [role='tab'][aria-selected='true'] {
-  color: var(--sl-color-white) !important;
-  border-bottom-color: var(--cal-accent) !important;
+.sl-steps > li::after {
+	background: var(--cal-rule) !important;
 }
 
-/* ═══════════════════════════════════════════
-   RIGHT SIDEBAR (TOC)
-   ═══════════════════════════════════════════ */
-
-.right-sidebar {
-  border-inline-start: 1px solid var(--sl-color-hairline-light) !important;
+/* Badges. */
+.sl-badge {
+	border-radius: 0;
+	font-family: var(--sl-font-mono);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
 }
 
-starlight-toc .sidebar-pane { background: transparent !important; border: none !important; }
-
-starlight-toc a {
-  font-size: 0.75rem !important;
-  color: var(--sl-color-gray-3) !important;
-  line-height: 1.4 !important;
-  padding: 0.2rem 0 !important;
-}
-starlight-toc a:hover { color: var(--sl-color-gray-1) !important; text-decoration: none !important; }
-starlight-toc a[aria-current='true'] { color: var(--cal-accent) !important; font-weight: 500 !important; }
-
-.right-sidebar-panel .section-header {
-  font-size: 0.6rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  color: var(--sl-color-gray-3) !important;
-  font-weight: 700 !important;
+/* Pagination links. */
+.pagination-links a {
+	border-radius: 0;
+	border-color: var(--cal-rule);
+	box-shadow: none;
 }
 
-/* ═══════════════════════════════════════════
-   PAGEFIND SEARCH
-   ═══════════════════════════════════════════ */
-
-.pagefind-ui {
-  --pagefind-ui-scale: 0.85;
-  --pagefind-ui-background: var(--sl-color-gray-6);
-  --pagefind-ui-border: var(--sl-color-hairline-light);
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 6px;
-  --pagefind-ui-text: var(--sl-color-gray-2);
-  --pagefind-ui-primary: var(--cal-accent);
+.pagination-links a:hover {
+	border-color: var(--cal-ink);
+	box-shadow: 6px 6px 0 var(--cal-hard);
 }
 
-/* ═══════════════════════════════════════════
-   MERMAID DIAGRAMS
-   ═══════════════════════════════════════════ */
-
-.mermaid-wrapper,
-pre.mermaid {
-  background: var(--sl-color-gray-6);
-  border: 1px solid var(--sl-color-hairline-light);
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin: 1rem 0;
-  overflow-x: auto;
+/* The landing's eyebrow, for pages that want one. */
+.cal-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font: 600 0.78rem/1 var(--sl-font-mono);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--cal-seal);
 }
 
-/* ═══════════════════════════════════════════
-   HERO PAGE BACKGROUND
-   ═══════════════════════════════════════════ */
-
-body {
-  background: var(--sl-color-bg);
+.cal-eyebrow::before {
+	content: '';
+	width: 22px;
+	height: 2px;
+	background: var(--cal-seal);
 }
 
-/* Subtle top glow only visible near header */
-.main-pane::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 300px;
-  background: radial-gradient(ellipse 60% 100% at 50% -30%, rgba(165, 255, 17, 0.04), transparent);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════ */
-
-@media (max-width: 72rem) {
-  .content-panel { padding-inline: 1.25rem !important; }
-}
-
-@media (max-width: 50rem) {
-  .sl-markdown-content h1 { font-size: 1.3rem; }
-  .sl-markdown-content h2 { font-size: 1rem; }
-}
-
-/* ═══════════════════════════════════════════
-   ANIMATED DIAGRAM ENGINE (Figure / SeqDiagram / ArchStack)
-   ═══════════════════════════════════════════ */
-
-/* Light theme: keep the diagram Replay control legible. */
-:root[data-theme='light'] .replay-btn {
-  background: #f4f4f5; color: #52525b; border-color: #d4d4d8;
-}
-
-.diagram-container { overflow-x: auto; margin: 1.25rem 0; }
-.diagram-container svg { border-radius: 10px; max-height: 75vh; }
-.diagram-container.seq svg { min-width: 700px; }
-.seq-step { opacity: 0; }
-.diagram-container.animating .seq-step {
-  animation: stepIn .4s ease-out forwards;
-  animation-delay: calc(var(--step-i) * .35s);
-}
-@keyframes stepIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-.diagram-tools { display: flex; justify-content: flex-end; margin-bottom: .5rem; }
-.replay-btn {
-  padding: 6px 16px; border: 1px solid var(--sl-color-gray-5);
-  background: var(--sl-color-gray-6); color: var(--sl-color-gray-2);
-  font-family: var(--sl-font-mono); font-size: .74rem; border-radius: 8px; cursor: pointer;
-  transition: border-color .15s, color .15s;
-}
-.replay-btn:hover { border-color: var(--sl-color-accent); color: var(--sl-color-accent); }
 @media (prefers-reduced-motion: reduce) {
-  .seq-step { opacity: 1; }
-  .diagram-container.animating .seq-step { animation: none; }
+	* {
+		transition: none !important;
+		animation: none !important;
+	}
 }

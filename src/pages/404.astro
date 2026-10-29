@@ -1,92 +1,105 @@
 ---
-import { LinkButton } from '@astrojs/starlight/components';
+const DESCRIPTION =
+	'Build, publish and run apps on Calimero: sandboxed WASM replicated across attested Intel TDX nodes, reached through a sealed channel, signed in with passkeys.';
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>404 – Page not found | Calimero Docs</title>
-    <link rel="icon" href="/favicon.svg" />
-    <meta name="description" content="Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry." />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Calimero Docs" />
-    <meta property="og:title" content="Calimero Docs" />
-    <meta property="og:description" content="Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry." />
-    <meta property="og:url" content="https://docs.calimero.network" />
-    <meta property="og:image" content="https://docs.calimero.network/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Calimero Docs" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@CalimeroNetwork" />
-    <meta name="twitter:title" content="Calimero Docs" />
-    <meta name="twitter:description" content="Official documentation for the Calimero network — core concepts, SDKs, node operations, tooling, and the app registry." />
-    <meta name="twitter:image" content="https://docs.calimero.network/og-image.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    />
-    <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      html { height: 100%; }
-      body {
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1.5rem;
-        padding: 2rem;
-        background: #09090b;
-        color: #e4e4e7;
-        font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-        text-align: center;
-      }
-      .code {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 5rem;
-        font-weight: 600;
-        line-height: 1;
-        color: #fff;
-        letter-spacing: -0.04em;
-      }
-      h1 {
-        font-size: 1.25rem;
-        font-weight: 500;
-        color: #a1a1aa;
-      }
-      .actions {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 0.5rem;
-      }
-      a.btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.5rem 1.25rem;
-        border-radius: 0.375rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: opacity 0.15s;
-      }
-      a.btn:hover { opacity: 0.8; }
-      a.btn-primary { background: #fff; color: #09090b; }
-      a.btn-secondary { background: #27272a; color: #e4e4e7; }
-    </style>
-  </head>
-  <body>
-    <p class="code">404</p>
-    <h1>Page not found</h1>
-    <div class="actions">
-      <a href="/" class="btn btn-primary">Go home</a>
-      <a href="/getting-started/" class="btn btn-secondary">Getting started</a>
-    </div>
-  </body>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>404 – Page not found | Calimero Docs</title>
+		<link rel="icon" href="/favicon.svg" />
+		<meta name="description" content={DESCRIPTION} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Calimero Docs" />
+		<meta property="og:title" content="Calimero Docs" />
+		<meta property="og:description" content={DESCRIPTION} />
+		<meta property="og:url" content="https://docs.calimero.network" />
+		<meta property="og:image" content="https://docs.calimero.network/og-image.png" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@CalimeroNetwork" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&family=JetBrains+Mono:wght@500;600&display=swap"
+		/>
+		<style>
+			/* The landing's "Sealed" tokens: paper and ink with one seal red. */
+			:root {
+				--paper: #f4f1ea;
+				--card: #fffdf8;
+				--ink: #111111;
+				--ink-2: #3a3935;
+				--rule: #d6d0c3;
+				--seal: #b8261a;
+				color-scheme: light;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--paper: #121211;
+					--card: #1c1b18;
+					--ink: #f1ede4;
+					--ink-2: #cdc7ba;
+					--rule: #34322d;
+					--seal: #ef6150;
+					color-scheme: dark;
+				}
+			}
+			*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+			html { height: 100%; }
+			body {
+				min-height: 100%;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				gap: 1.25rem;
+				padding: 2rem max(16px, 8vw);
+				background: var(--paper);
+				color: var(--ink);
+				font-family: 'Inter Tight', system-ui, sans-serif;
+			}
+			.k {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
+				font: 600 0.8rem/1 'JetBrains Mono', ui-monospace, monospace;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				color: var(--seal);
+			}
+			.k::before { content: ''; width: 22px; height: 2px; background: var(--seal); }
+			h1 {
+				font-weight: 800;
+				font-size: clamp(2.5rem, 7vw, 4.5rem);
+				line-height: 0.98;
+				letter-spacing: -0.045em;
+			}
+			h1 em { display: block; font-style: normal; color: var(--seal); }
+			p { color: var(--ink-2); font-size: 1.1rem; max-width: 40ch; }
+			.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 0.5rem; }
+			a.btn {
+				display: inline-flex;
+				align-items: center;
+				padding: 13px 20px;
+				font: 600 15px/1 'Inter Tight', system-ui, sans-serif;
+				text-decoration: none;
+				border: 1px solid var(--ink);
+				color: var(--ink);
+			}
+			a.btn.ink { background: var(--ink); color: var(--paper); }
+			a.btn.ink:hover { background: var(--seal); border-color: var(--seal); }
+			a.btn.line:hover { background: var(--ink); color: var(--paper); }
+		</style>
+	</head>
+	<body>
+		<span class="k">404</span>
+		<h1>Page not found.<em>It may have moved.</em></h1>
+		<p>The docs were reorganized around building, deploying and connecting. Start from the home page or the quickstart.</p>
+		<div class="actions">
+			<a href="/" class="btn ink">Docs home</a>
+			<a href="/getting-started/" class="btn line">Quickstart</a>
+		</div>
+	</body>
 </html>
