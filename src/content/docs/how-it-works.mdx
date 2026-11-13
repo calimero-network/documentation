@@ -12,7 +12,7 @@ import UseCases from '../../components/UseCases.astro';
 <EndToEnd />
 
 1. **Build.** You write the app's logic in Rust and bundle it with its frontend into one signed package
-   (`cargo mero bundle`). The signature covers the UI too. See [Build an app](/build/).
+   (`meroctl app pack`). The signature covers the UI too. See [Build an app](/build/).
 2. **Publish.** You publish the package to the app registry, private to your Cloud organization or public. The
    registry checks the signature on upload. See [Package & publish](/build/publish/).
 3. **Deploy.** From the Cloud console you make a version available on a shared cluster (pay per request) or a

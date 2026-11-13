@@ -7,15 +7,16 @@ import { Steps } from '@astrojs/starlight/components';
 
 <Steps>
 
-1. **Scaffold** a crate with `cargo mero`:
+1. **Scaffold** a project with `meroctl app new`:
 
    ```bash
-   cargo mero new my-app
+   meroctl app new my-app
    cd my-app
    ```
 
-   It writes `Cargo.toml` (the SDK pins, your package id under `[package.metadata.calimero]`, and the build profiles),
-   a working `src/lib.rs` with a test, and `GUIDE.md`, the guide the registry asks every package for.
+   It starts the project from the [apps repository](https://github.com/calimero-network/apps)'s `kv-store` app
+   (`--template` picks another), with the shared packages and tools it builds with and a fresh git repository. The app
+   lives in `apps/kv-store/`: its crate in `logic/`, its frontend in `app/`. Its README says how to run it.
 
 2. **Write the state and methods.** Every app has the same shape: one state struct built from CRDT collections, an
    `init` constructor, calls that take `&mut self`, and views that take `&self`.
@@ -101,14 +102,18 @@ import { Steps } from '@astrojs/starlight/components';
    cargo test
    ```
 
-5. **Build** to WASM. One command compiles, optimizes and embeds the app's ABI (its methods, events and types):
+5. **Build** to WASM. One command compiles the crate into a `calimero:app` component and embeds the app's ABI (its
+   methods, events and types):
 
    ```bash
-   cargo mero build
+   meroctl app build apps/kv-store/logic
    ```
 
-   The module lands at `res/<crate_name>.wasm`. To run it, install it on a [local cluster](/getting-started/) or
-   [package and publish it](/build/publish/).
+   The component lands at `apps/kv-store/logic/app.component.wasm` (`--out` names another file). To run it, install it
+   on a [local cluster](/getting-started/) or [package and publish it](/build/publish/).
+
+   While you work, `meroctl local dev apps/kv-store` does it all in one loop: it starts a local cluster, builds and
+   uploads the app, runs the frontend on `http://localhost:5173`, and rebuilds and uploads on every save.
 
 </Steps>
 
