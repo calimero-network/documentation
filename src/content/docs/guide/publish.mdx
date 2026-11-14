@@ -1,0 +1,94 @@
+---
+title: Package & publish
+description: Turn the built app and its frontend into a signed .mpk release with meroctl app pack, check it, and publish it to the Calimero app registry.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+So far the app ran on a development cluster as a raw component (`--path`). A real cluster installs only **signed
+packages** from a registry. A release of your app is a **`.mpk`**: a gzip-compressed archive with the app's
+component, its built frontend and a signed `manifest.json` naming the package and version. Every node that runs it
+checks the signature and the digest of each file before it runs anything.
+
+<Steps>
+
+1. **Build the frontend.** The crate's `frontend-dir` (`../app/dist`) is packed into the release, and the cluster
+   serves it from the package's own origin, so build it first (after `pnpm install` at the project's root):
+
+   ```bash
+   pnpm -F kv-store build
+   ```
+
+2. **Create a signing key, once.** The key is your app's identity: a new version must be signed by the same key, or
+   it is a different app.
+
+   ```bash
+   meroctl app signer new release.key
+   # Generated new keypair: release.key
+   #   signerId: did:key:z6Mk...
+   ```
+
+   `meroctl app signer id release.key` prints the signer id again. Keep the file secret and out of version control.
+
+3. **Pack and sign** the release, from the app's crate:
+
+   ```bash
+   meroctl app pack apps/kv-store/logic --key release.key --app-version 1.0.0
+   ```
+
+   `pack` reads the crate's `[package.metadata.calimero]`: `package`, `min-runtime-version`, `frontend-dir`, and the
+   display metadata the registry lists a new package by (`name`, `description`, `icon`, `category`, `tags`, `author`,
+   ...). It builds the component, checks the frontend against the node's rules, writes and signs `manifest.json`, and
+   writes `apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk`. The version is `--app-version`, else the crate's
+   `version`.
+
+   For every release after the first, pass `--previous <last .mpk>`: `pack` then compares the two ABIs, warns about
+   changes that break callers, and refuses a state change made without a state version bump.
+
+4. **Check it** as a node does:
+
+   ```bash
+   meroctl app inspect apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk
+   ```
+
+   It opens the bundle, checks the signature and every file's hash, and prints `verified`, the `signerId`, the
+   `bundleHash` and the manifest.
+
+5. **Publish** it to the [Calimero app registry](https://apps.calimero.network) with a registry API key:
+
+   ```bash
+   export CALIMERO_REGISTRY_API_KEY=...
+   meroctl app publish apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk
+   ```
+
+   With `--org ORG`, the key is a Calimero Cloud organization's API key instead (`ck_live_…`, scope
+   `registry:publish`), which `meroctl` trades at the Cloud for a short publish token. A refusal comes back with the
+   registry's code (`version_not_allowed`, `invalid_signature`, ...). You can also upload a `.mpk` from the Calimero
+   Cloud console's Registry page.
+
+</Steps>
+
+<Aside type="caution">
+`meroctl app pack` without `--key` signs with a well-known development key. That is fine for a local cluster, and the
+registry refuses it: anyone holds that key, so it proves nothing.
+</Aside>
+
+## Private and public packages
+
+A new package is **private** by default: only the organization that publishes it can deploy it. `--public` lists it
+for everyone:
+
+```bash
+meroctl app publish apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk --public
+```
+
+## The signer is the update authority
+
+A package's identity is its package id **and** its signer. A new release signed by the same key under the same
+package is an upgrade of the existing app; signed by another key, it is a different app, and existing instances do
+not pick it up. A node also pins a package to the signer of its first release.
+
+The manifest format and the exact checks a node runs on install are in the core reference's
+[Packaging & signing](https://calimero-network.github.io/core/build/packaging-signing/).
+
+**Next →** [Deploy & install](/guide/deploy/): run the published package on Calimero Cloud or on a node.

@@ -7,51 +7,37 @@ hero:
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import Flow from '../../components/Flow.astro';
-import ClusterDiagram from '../../components/ClusterDiagram.astro';
-import WhyCalimero from '../../components/WhyCalimero.astro';
-import UseCases from '../../components/UseCases.astro';
 
-## Why Calimero
+Calimero is a confidential cloud for collaborative apps. You write an app's state and methods in Rust, and it runs as
+a WebAssembly component inside attested Intel TDX nodes. Each instance of the app has its own replicated log, so every
+write is applied in one order and the app keeps serving while most of its replicas run.
 
-Customers want their data on their terms. Delivering that usually means an on-prem edition and everything that comes
-with it, and the admins can still see everything. Calimero takes that off your plate.
+Clients check what a node runs before they send it anything, then talk to it over a sealed channel. People sign in
+with passkeys. Nobody operating the nodes, Calimero included, can read the app's data.
 
-<WhyCalimero />
+You write no database, sync, encryption or server code. Two lines install the tools and start a three-node cluster on
+your machine:
 
-## From code to a running app
+```bash
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+meroctl local up
+```
 
-<Flow
-	steps={[
-		{ k: 'Write', title: 'A Rust app', text: 'State and methods, with the Calimero SDK. No database, no server.' },
-		{ k: 'Sign', title: 'meroctl app pack', text: 'Compile to WASM, embed the ABI, sign it into an .mpk.' },
-		{ k: 'Publish', title: 'App registry', text: 'apps.calimero.network checks the signature on upload.' },
-		{ k: 'Deploy', title: 'Calimero Cloud', text: 'Make the version available on a shared or dedicated cluster.' },
-		{ k: 'Run', title: 'An instance per org', text: 'Each organization gets its own instance and starting state.', accent: true },
-	]}
+<LinkCard
+	title="Quickstart →"
+	href="/getting-started/"
+	description="From those two lines to a running app you call from the terminal, in five steps."
 />
 
-## How a request is served
-
-<ClusterDiagram />
-
-## Who it's for
-
-<UseCases />
-
-The whole path, and who can see what, is on [How it works](/how-it-works/).
-
-## Where to go
+## The guide, in order
 
 <CardGrid>
-	<LinkCard title="What is Calimero" href="/what-is-calimero/" description="The model in five minutes: clusters, apps, instances, organizations, and what nobody can see." />
-	<LinkCard title="How it works" href="/how-it-works/" description="End to end on one diagram, and who can see what." />
-	<LinkCard title="Quickstart" href="/getting-started/" description="Run a local cluster, deploy an app and call it from the terminal, JavaScript and Python." />
-	<LinkCard title="Build an app" href="/build/" description="Write a Rust app on the SDK, test it, and package it as a signed .mpk." />
-	<LinkCard title="Calimero Cloud" href="/cloud/" description="Deploy to a shared or dedicated cluster and create an instance for each organization." />
-	<LinkCard title="Connect clients" href="/clients/" description="mero-js, Python, Rust and meroctl: sign in with passkeys, call apps, stream events." />
-	<LinkCard title="Security model" href="/security/" description="What is trusted, who can do what, and how a user checks it." />
+	<LinkCard title="Quickstart" href="/getting-started/" description="Run a node, clone the example app, build it, deploy it and call it." />
+	<LinkCard title="1. The example, line by line" href="/guide/example/" description="The KV Store's crate, state, methods, events, errors, ABI and tests, and the edit-rebuild loop." />
+	<LinkCard title="2. Call it from code" href="/guide/clients/" description="mero-js in the example's frontend: passkeys, the generated typed client, live events. Then Python, Rust and meroctl." />
+	<LinkCard title="3. Package & publish" href="/guide/publish/" description="Sign a release into an .mpk and publish it to the app registry." />
+	<LinkCard title="4. Deploy & install" href="/guide/deploy/" description="Run a published package on Calimero Cloud, or install it on a node from the registry." />
 </CardGrid>
 
-For the protocol in depth, running your own nodes, and contributing to Calimero itself, see the
-[core reference](https://calimero-network.github.io/core/).
+Then the background: [how Calimero works](/concepts/), [what an app sees](/concepts/app-model/),
+[organizations](/concepts/organizations/), the [security model](/security/) and the [reference](/reference/).

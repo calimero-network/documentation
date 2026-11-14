@@ -1,0 +1,189 @@
+---
+title: Call it from code
+description: The KV Store's frontend on mero-js — passkey sign-in, the typed KvStoreClient that meroctl app codegen generates, calls, views and live events — then the Python client, the Rust client and meroctl.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Every Calimero client does the same three things before your first call: it **verifies** the node's TDX attestation
+against a signed mero-tee release, opens a **sealed channel** to the key that attestation binds, and signs the caller
+in, a person with a **passkey** or a machine with an **API key** (`cal_…`). There is no way to call an app without
+them, which is why you use a Calimero client rather than plain HTTP.
+
+| Client | For | Install |
+| --- | --- | --- |
+| **mero-js** | Browser and Node 18+ | `npm install @calimero-network/mero-js` |
+| **calimero-client-py** | Python 3.9+ | `pip install --pre calimero-client-py` |
+| **calimero-client** | Rust | the `calimero-client` crate in core |
+| **meroctl** | The command line | the installer from the [Quickstart](/getting-started/) |
+
+## The example's frontend
+
+`apps/kv-store/app/` is a Vite and React app on mero-js's `CalimeroClient`. Run it with `meroctl local dev apps/kv-store`
+([the development loop](/guide/example/#the-development-loop)) and open `http://localhost:5173`.
+
+### Connect and sign in
+
+```ts
+import { CalimeroClient, browserPasskey } from '@calimero-network/mero-js';
+
+// The local cluster. Its quotes are mock ones, trusted only because you say so.
+const client = new CalimeroClient({ baseUrl: 'http://127.0.0.1:2501', policy: { allowMock: true } });
+
+await client.signUp(browserPasskey(), 'ada'); // or client.signIn(browserPasskey())
+```
+
+For a Calimero Cloud cluster, `CalimeroClient.connect` reads the cluster's nodes from the public directory and attests
+each under your policy before it sends anything:
+
+```ts
+const client = await CalimeroClient.connect({
+	cluster: 'eu-shared-1',
+	// Trust the signed mero-tee release the node names, from this one up.
+	policy: { release: { minReleaseVersion: '2.3.109' } },
+});
+```
+
+The example does not write this by hand. It takes it from the apps repository's shared packages:
+`@calimero-apps/connect` picks the target from the build (`merod local` under `vite`, Calimero Cloud under
+`vite build`), and `@calimero-apps/passkey` gives the sign-in screens and keeps the session (`useSession` in
+`src/session.ts`).
+
+### The typed client
+
+`src/generated/client.ts` is generated from the app's ABI by `meroctl app codegen`, the app's `codegen` script:
+
+```json
+"codegen": "meroctl app codegen --abi ../logic/res/abi.json --lang ts --name kv-store -o src/generated"
+```
+
+It writes `KvStoreClient`: one typed method per app method, each sending a call (`client.apps.call`) or a view
+(`client.apps.view`) over the sealed channel, plus the app's events and error codes as types. `App.tsx` builds one for
+the store that is open:
+
+```ts
+import { KvStoreClient } from './generated/client';
+
+const kv = new KvStoreClient(client, appId, { after });
+```
+
+`after` runs after every call and view; the example uses it to store a session the client refreshed meanwhile. After
+a contract change, rebuild `logic/res/abi.json` ([The ABI](/guide/example/#the-abi)), run `pnpm -F kv-store codegen`,
+and `tsc -b` shows every call site to fix.
+
+### Calls and views
+
+```ts
+await kv.set({ key: 'a', value: '1' });        // a call: Promise<null>
+const value = await kv.get({ key: 'a' });      // a view: Promise<string | null>
+const count = await kv.len();                  // a u64, so a string: "1"
+```
+
+`kv.raw` has the same methods answering whole: `{ result, index, events }` for a call, `{ result, index }` for a view.
+A refusal is thrown as a typed error: the app's `NotFound` is an `AppError`, a trap a `TrapError`.
+
+### Live events
+
+```ts
+const stop = new AbortController();
+for await (const { kind, data } of kv.events(0, stop.signal)) {
+	console.log(kind, data); // "Inserted" { key: "a", value: "1" }
+}
+```
+
+`kv.events(from, signal)` is the instance's event stream from log index `from`, then live, until `signal` aborts. The
+example refreshes its list of entries on each event, so a second member's writes appear at once.
+
+### Without the generated client
+
+`KvStoreClient` is a thin layer. The same calls on `CalimeroClient` directly:
+
+```ts
+await client.apps.call({ app, method: 'set', args: { key: 'a', value: '1' } });
+const { result } = await client.apps.view({ app, method: 'get', args: { key: 'a' } });
+for await (const event of client.events(app)) console.log(event);
+```
+
+Creating an instance from code is `client.apps.create`: from a published package
+(`{ name, package, version }`), with `initArgs` for the app's `init` and `org` for the organization it goes in.
+
+## Python, Rust and meroctl
+
+<Tabs>
+<TabItem label="Python">
+
+```python
+from calimero_client_py import Client
+
+client = Client("http://127.0.0.1:2501", allow_mock=True)   # or Client.connect("eu-shared-1", tee_profiles=[...])
+client.use_api_key("cal_...")
+client.apps.call(app=app_id, method="set", args={"key": "a", "value": "1"})
+print(client.apps.view(app=app_id, method="get", args={"key": "a"}).to_dict()["result"])
+for e in client.events(app_id, start=0, limit=10, timeout=5):
+    print(e["kind"], e["data"])
+```
+
+</TabItem>
+<TabItem label="Rust">
+
+```rust
+use calimero_client::{Client, Measurements, Policy};
+use serde_json::json;
+
+let policy = Policy {
+    measurements: Measurements::Release {
+        allowed_profiles: vec!["<profile>".to_owned()],
+        min_version: None, // 2.3.109 when none is given
+    },
+    ..Policy::default()   // allow_mock: true for a development cluster
+};
+let client = Client::connect("https://node1.example.com", policy)?;
+client.use_api_key(&std::env::var("CALIMERO_API_KEY")?).await;
+client.apps().call(&app, "set", Some(json!({ "key": "a", "value": "1" })), None, None).await?;
+let got = client.apps().view(&app, "get", Some(json!({ "key": "a" })), None, None).await?;
+```
+
+</TabItem>
+<TabItem label="meroctl">
+
+```bash
+meroctl node add eu1 https://eu1.cloud.calimero.network/
+export CALIMERO_API_KEY=cal_...   # made in the console
+meroctl call --context <app> set --args '{"key":"a","value":"1"}'
+meroctl call --context <app> get --args '{"key":"a"}' --view
+meroctl context watch <app>
+```
+
+Name the images you trust with `--tee-profiles <profile>` and, if you need a newer floor than the default,
+`--min-release <version>`.
+
+</TabItem>
+</Tabs>
+
+`meroctl app codegen --lang python` (also `swift`, `kotlin` and `openapi`) generates a typed client for the other
+languages from the same ABI.
+
+## What the clients cover
+
+- **Sign-in:** sign up and sign in with a passkey, refresh and sign out, add and remove passkeys (a person's devices),
+  create and revoke scoped API keys.
+- **Instances:** create one from a package release (with init arguments, an organization and an access rule), list,
+  upgrade, change access, transfer, delete.
+- **Calls:** calls, views, calls that need a fresh passkey assertion (`#[app::confirm]` methods), and the instance's
+  event stream. A call carries an idempotency key, so a retry is answered once.
+- **Blobs and presence:** upload and download an instance's blobs; publish and stream presence.
+- **Organizations:** create them, manage members, roles, capabilities and teams, invite and redeem.
+- **Owner decisions:** upgrade runs and approvals that need the owner's passkey.
+
+<Aside type="caution" title="Development clusters">
+A local cluster sends mock quotes. Clients accept them only when told to: `allowMock: true` in mero-js,
+`allow_mock=True` in Python, `allow_mock` in the Rust policy, `--allow-mock` in meroctl (`meroctl local up` saves the
+local node that way). Nothing is read from the environment.
+</Aside>
+
+Full references: [mero-js](https://calimero-network.github.io/mero-js/),
+[calimero-client-py](https://calimero-network.github.io/calimero-client-py/), core's
+[Call your app from a client](https://calimero-network.github.io/core/build/guides/calling-your-app/) and
+[meroctl](https://calimero-network.github.io/core/operate/meroctl/).
+
+**Next →** [Package & publish](/guide/publish/): turn the app into a signed release.
