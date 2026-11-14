@@ -3,15 +3,15 @@ title: Quickstart
 description: Run a local Calimero node, clone the example app, build it, deploy it and call it, in five steps.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 Five steps, from nothing to a running app you call from the terminal. The app is the KV Store, the apps repository's
 reference app: a string key-value store.
 
 ## Before you start
 
-- **Linux** (x86_64 or aarch64) with glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later. On a Mac, see
-  [On macOS](#on-macos).
+- **Linux** (x86_64 or aarch64) with glibc 2.35 or newer (Ubuntu 22.04, Debian 12 and later), or **macOS** on Apple
+  silicon. See [On macOS](#on-macos) for releases before 1.0.0-rc.25.
 - **`curl` and `git`.**
 - **Rust**, from [rustup](https://rustup.rs), with the WebAssembly target the build uses:
 
@@ -20,11 +20,44 @@ reference app: a string key-value store.
   ```
 
 Then install `merod` (the node) and `meroctl` (the command line). The installer checks each against the release's
-`SHA256SUMS` and puts them in `~/.local/bin`; put that on your `PATH` (and in your shell's profile, so it stays):
+`SHA256SUMS` and puts them in `~/.local/bin`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+```
+
+Put `~/.local/bin` on your `PATH`, now and for every new terminal:
+
+<Tabs syncKey="shell">
+<TabItem label="bash">
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 export PATH="$HOME/.local/bin:$PATH"
+```
+
+</TabItem>
+<TabItem label="zsh">
+
+```zsh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+</TabItem>
+<TabItem label="fish">
+
+```fish
+fish_add_path ~/.local/bin
+```
+
+</TabItem>
+</Tabs>
+
+Or with [Homebrew](https://brew.sh), on Linux or macOS, which puts them on your `PATH` itself:
+
+```bash
+brew install calimero-network/tap/meroctl calimero-network/tap/merod
 ```
 
 ## Five steps
@@ -136,18 +169,11 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 
 ## On macOS
 
-`merod` is released for Linux only; on a Mac (Apple silicon) the node runs in the release's
-[Docker](https://www.docker.com/) image, so have Docker running. Install `meroctl` alone, and start the cluster with
-`--docker`; everything after step 1 is the same:
+On a Mac with Apple silicon the same commands work: from core 1.0.0-rc.25, releases ship `merod` for macOS.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
-export PATH="$HOME/.local/bin:$PATH"
-meroctl local up --docker
-```
-
-From 1.0.0-rc.25 the Linux commands work unchanged: the installer skips `merod` with a note, and `meroctl local up`,
-finding no `merod`, uses the image by itself.
+With an older release, which has no macOS `merod`, the node runs in the release's
+[Docker](https://www.docker.com/) image instead: have Docker running, install `meroctl` alone (`... | sh`), and start
+the cluster with `meroctl local up --docker`. Everything after step 1 is the same.
 
 ## With 1.0.0-rc.24
 
