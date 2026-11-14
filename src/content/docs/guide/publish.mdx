@@ -73,6 +73,35 @@ checks the signature and the digest of each file before it runs anything.
 registry refuses it: anyone holds that key, so it proves nothing.
 </Aside>
 
+## A package of several services
+
+An app can ship several services in one package: each app instance runs one of them, picked with
+`meroctl context create --service NAME`. A directory of rooms, for example, is a `directory` service and a `room`
+service. Name each service and its crate with `--service NAME=PATH` (a crate directory, which `pack` builds, or a
+built component), and the manifest declares `services` instead of a single `wasm`:
+
+```bash
+meroctl app pack --service directory=crates/directory --service room=crates/room \
+  --package com.example.rooms --app-version 1.0.0 --key my-signing-key.json
+```
+
+Or list them in the crate's `[package.metadata.calimero]` (a workspace root with no `[package]` of its own uses
+`[workspace.metadata.calimero]`, and its release is `[workspace.package] version`), and `meroctl app pack DIR` packs
+them with no flags:
+
+```toml
+[workspace.metadata.calimero]
+package = "com.example.rooms"
+services = [
+  { name = "directory", path = "crates/directory" },
+  { name = "room", path = "crates/room" },
+]
+```
+
+Each service is packed as `services/<name>.wasm`, with its compute component and pipelines beside it
+(`--service-compute`, `--service-pipeline`). From core 1.0.0-rc.25; the full rules are in the
+[packaging reference](https://calimero-network.github.io/core/build/packaging-signing/).
+
 ## Private and public packages
 
 A new package is **private** by default: only the organization that publishes it can deploy it. `--public` lists it
