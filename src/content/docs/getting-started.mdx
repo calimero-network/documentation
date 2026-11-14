@@ -11,7 +11,10 @@ reference app: a string key-value store.
 ## Before you start
 
 - **Linux** (x86_64 or aarch64) with glibc 2.35 or newer (Ubuntu 22.04, Debian 12 and later), or **macOS** on Apple
-  silicon. See [On macOS](#on-macos) for releases before 1.0.0-rc.25.
+  silicon.
+- **[Docker](https://docs.docker.com/get-docker/)**, installed and running: the local cluster runs in the release's
+  Docker image. On Linux, your user must be able to run `docker` (in the `docker` group); on a Mac, start Docker
+  Desktop.
 - **`curl` and `git`.**
 - **Rust**, from [rustup](https://rustup.rs), with the WebAssembly target the build uses:
 
@@ -19,11 +22,11 @@ reference app: a string key-value store.
   rustup target add wasm32-wasip2
   ```
 
-Then install `merod` (the node) and `meroctl` (the command line). The installer checks each against the release's
-`SHA256SUMS` and puts them in `~/.local/bin`:
+Then install `meroctl`, the command line. The installer checks it against the release's `SHA256SUMS` and puts it in
+`~/.local/bin`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
 ```
 
 Put `~/.local/bin` on your `PATH`, now and for every new terminal:
@@ -57,7 +60,7 @@ fish_add_path ~/.local/bin
 Or with [Homebrew](https://brew.sh), on Linux or macOS, which puts them on your `PATH` itself:
 
 ```bash
-brew install calimero-network/tap/meroctl calimero-network/tap/merod
+brew install calimero-network/tap/meroctl
 ```
 
 ## Five steps
@@ -70,8 +73,9 @@ brew install calimero-network/tap/meroctl calimero-network/tap/merod
    meroctl local up
    ```
 
-   This starts `merod local` in the background: a development cluster of three nodes on
-   `http://127.0.0.1:2501`-`2503`, in one process, ready in a few seconds. It keeps its state in
+   This starts `merod local`, the node, in the release's Docker image, in the background: a development cluster of
+   three nodes on `http://127.0.0.1:2501`-`2503`, in one container, ready in a few seconds (the first time, after
+   Docker pulls the image). It keeps its state in
    `~/.calimero/meroctl/local/`, saves the cluster as the `meroctl` node `local`, and prints the node URLs and an
    operator token. `meroctl local down`, from any directory, stops it; the state stays for the next `up`.
 
@@ -167,19 +171,21 @@ brew install calimero-network/tap/meroctl calimero-network/tap/merod
 
 That is the whole loop: a node, an app, a build, an instance, a call.
 
-## On macOS
+## Without Docker
 
-On a Mac with Apple silicon the same commands work: from core 1.0.0-rc.25, releases ship `merod` for macOS.
-
-With an older release, which has no macOS `merod`, the node runs in the release's
-[Docker](https://www.docker.com/) image instead: have Docker running, install `meroctl` alone (`... | sh`), and start
-the cluster with `meroctl local up --docker`. Everything after step 1 is the same.
+`meroctl local up --local` runs the `merod` binary from your `PATH` instead of the image. Install it with
+`... | sh -s -- merod meroctl` (Linux, and macOS from core 1.0.0-rc.25) or `brew install calimero-network/tap/merod`.
 
 ## With 1.0.0-rc.24
 
-Two differences in the release before 1.0.0-rc.25. `meroctl local up` keeps its state in `.merod-local/` in the
-directory you ran it from, so run `meroctl local down` from that directory. And `meroctl app build` with a path, as
-in step 3, also leaves an empty `apps/kv-store/logic/apps/` directory behind; delete it.
+Three differences in the release before 1.0.0-rc.25:
+
+- `meroctl local up` runs the `merod` on `PATH` unless you pass `--docker`, and macOS has no `merod`: there, use
+  `meroctl local up --docker`.
+- It keeps its state in `.merod-local/` in the directory you ran it from, so run `meroctl local down` from that
+  directory.
+- `meroctl app build` with a path, as in step 3, also leaves an empty `apps/kv-store/logic/apps/` directory behind;
+  delete it.
 
 <Aside type="caution" title="A development cluster is not a real one">
 `meroctl local up` runs with mock attestation and a development storage key, and accepts file passkeys and raw
