@@ -47,7 +47,7 @@ caller that cannot reach the cluster cannot write, so there are no offline edits
 
 `env::emit(event, audience)` sends an `#[app::event]` value to an audience (`Audience::All`, the caller, named
 accounts, a team, the organization or its admins), delivered only if the call succeeds. Clients stream an instance's
-events (`client.events(app)` in mero-js, `meroctl context watch`).
+events (`client.events(app)` in mero-js, `meroctl instance watch`).
 
 ## Blobs and search
 

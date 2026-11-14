@@ -129,21 +129,21 @@ brew install calimero-network/tap/meroctl
    Then create an instance of the app from the component:
 
    ```bash
-   meroctl context create --name kv --path apps/kv-store/logic/app.component.wasm --alias kv
+   meroctl instance create --name kv --path apps/kv-store/logic/app.component.wasm --alias kv
    ```
 
    ```json
    { "appId": "…", "contextId": "…", "group": 2, "replicas": [1, 2, 3], "compute": false }
    ```
 
-   `meroctl` calls an app instance a *context*. The instance runs on all three nodes (`replicas`), with its own log.
+   The instance runs on all three nodes (`replicas`), with its own log.
    Its `init` ran once, as you, and it lives in your personal organization, which the sign-up made. `--alias kv` names
    it for your account.
 
 5. **Call it.** A call writes; the cluster's leader for the instance runs it and appends it to the log:
 
    ```bash
-   meroctl call --context kv set --args '{"key":"a","value":"1"}'
+   meroctl call --instance kv set --args '{"key":"a","value":"1"}'
    ```
 
    ```json
@@ -158,7 +158,7 @@ brew install calimero-network/tap/meroctl
    `index` is the log index the call committed at, and `events` what it emitted. A view reads without writing:
 
    ```bash
-   meroctl call --context kv get --args '{"key":"a"}' --view
+   meroctl call --instance kv get --args '{"key":"a"}' --view
    ```
 
    ```json
