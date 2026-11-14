@@ -6,11 +6,10 @@ Live at **[docs.calimero.network](https://docs.calimero.network)**
 
 ## Contents
 
-- **Start here** — what Calimero is, and a quickstart on a local cluster
-- **Build** — your first app on the Rust SDK, what an app sees on a cluster, packaging and publishing to the registry
-- **Calimero Cloud** — shared and dedicated clusters, deploying a version, an instance per organization, organizations and access
-- **Connect** — the clients (mero-js, Python, Rust, meroctl) and verifying a cluster
-- **Security** — the security model and attestation
+- **Start here** — the home page (what Calimero is, two lines to a local cluster) and the quickstart: run a node, clone the example app, build, deploy, call
+- **Guide**, one path in order — 1. the example (the KV Store) line by line, 2. calling it from code (mero-js, Python, Rust, meroctl), 3. packaging and publishing to the registry, 4. deploying on Calimero Cloud and installing on a node from the registry
+- **Concepts** — how Calimero works, what an app sees on a cluster, organizations and access
+- **Security** — verifying a cluster, the security model and attestation
 - **Reference** — glossary, and links to the [core reference](https://calimero-network.github.io/core/) for the protocol, the full SDK and running nodes
 
 ## Local development
@@ -27,7 +26,7 @@ npm run preview    # preview production build locally
 ```
 src/
 ├── assets/          # images and icons
-├── components/      # the home hero and the diagrams (Flow, ClusterDiagram, OrgDiagram)
+├── components/      # the home hero and the diagrams (Flow, ClusterDiagram, EndToEnd, OrgDiagram, ...)
 ├── content/
 │   └── docs/        # all documentation pages (.md)
 ├── pages/           # custom pages (e.g. 404)

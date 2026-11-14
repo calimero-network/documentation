@@ -1,10 +1,13 @@
 ---
-title: What is Calimero
-description: A confidential cloud for collaborative apps — WASM apps replicated across attested Intel TDX nodes, reached through a sealed channel, signed in with passkeys.
+title: How Calimero works
+description: A confidential cloud for collaborative apps — the pieces, the whole path from a signed package to an instance per organization, how a request is served, and who can see what.
 ---
 
-import ClusterDiagram from '../../components/ClusterDiagram.astro';
-import WhyCalimero from '../../components/WhyCalimero.astro';
+import ClusterDiagram from '../../../components/ClusterDiagram.astro';
+import WhyCalimero from '../../../components/WhyCalimero.astro';
+import EndToEnd from '../../../components/EndToEnd.astro';
+import TrustMatrix from '../../../components/TrustMatrix.astro';
+import UseCases from '../../../components/UseCases.astro';
 
 Calimero is a **confidential cloud** for collaborative apps. You write an app in Rust and compile it to WASM. Every
 instance of it runs inside attested Intel TDX nodes that Calimero (or you, on a dedicated cluster) operates, and
@@ -28,6 +31,28 @@ replicates, encrypts and serves them.
 | **Organization** | Members with a role (`guest`, `member`, `admin`, `owner`) and nested teams. An instance created in an organization is reachable by its members, or by one team's. |
 | **Operator** | Whoever runs the machines. It sees counts and replication status, never app data. |
 
+## End to end
+
+<EndToEnd />
+
+1. **Build.** You write the app's logic in Rust and bundle it with its frontend into one signed package
+   (`meroctl app pack`). The signature covers the UI too. See [the example](/guide/example/).
+2. **Publish.** You publish the package to the app registry, private to your Cloud organization or public. The
+   registry checks the signature on upload. See [Package & publish](/guide/publish/).
+3. **Deploy.** From the Cloud console you make a version available on a shared cluster (pay per request) or a
+   dedicated one (a flat fee). Every node that installs it checks the publisher's signature. See
+   [Deploy & install](/guide/deploy/).
+4. **An instance per organization.** Each organization that uses the app gets its own instance, with its own state
+   and its own init arguments, replicated by its own Raft log across three attested nodes. Your frontend can create
+   them as customers sign up.
+5. **Keys only after proof.** A node gets its storage key from mero-kms only after its quote matches the signed
+   release. Everything it writes to disk is sealed under that key.
+6. **Verify, then talk.** People and agents verify a node's quote against the signed release before sending anything,
+   open a sealed channel to the key the quote binds, and sign in: a passkey for a person, a scoped API key for an agent.
+   Every answer carries a receipt. See [Verify a cluster](/security/verify/).
+7. **Decisions with a name on them.** Who approves new node images, app upgrades and outbound hosts is fixed when the
+   cluster is created, and attested with every receipt: the app's owner, or the operator.
+
 ## How a request is served
 
 <ClusterDiagram />
@@ -45,15 +70,24 @@ replicates, encrypts and serves them.
 Each node gets its storage key from mero-kms only after proving its image, and keeps everything on disk sealed under
 that key.
 
+## Who can see what
+
+<TrustMatrix />
+
+The full table, and what stops each attack, is on the [security model](/security/) page.
+
 ## What this gives you
 
 - **Nobody sees the data.** The host, the network and the operator see encrypted traffic, sealed disks and counts.
 - **Users can check it.** Any client can verify every replica of an instance and the rules the cluster runs under, and
-  every answer carries a receipt. See [Verify a cluster](/clients/verify/).
+  every answer carries a receipt. See [Verify a cluster](/security/verify/).
 - **Calls are ordered.** Calls to one instance apply in one order, and strong reads go through the leader. An instance
   keeps serving while a majority of its replicas run.
 - **One model, two places.** The same app runs on Calimero Cloud's shared clusters, on a dedicated cluster, or on
   nodes you run yourself.
 
-Next: see the whole path on [How it works](/how-it-works/), run it locally in the [Quickstart](/getting-started/), or
-start [building an app](/build/).
+## Who it's for
+
+<UseCases />
+
+More on each in the [use cases](https://calimero.network/use-cases/) on calimero.network.

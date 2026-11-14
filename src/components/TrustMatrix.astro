@@ -105,7 +105,7 @@ const label = { yes: 'Yes', no: 'No', if: 'Depends' };
 	</div>
 	<figcaption>
 		● yes · ◐ depends on the cluster's rules or the instance's access rule · ○ no. Everything on disk and on the wire is
-		sealed; the app's own code decides finer rules with <code>env::caller_org()</code>.
+		sealed; the app's own code decides finer rules with <code>env::caller()</code>, <code>env::org_role()</code> and <code>env::in_team()</code>.
 	</figcaption>
 </figure>
 

@@ -1,0 +1,343 @@
+---
+title: The example, line by line
+description: The KV Store that meroctl app new clones — its crate and metadata, its state, methods, events and errors, its ABI, its tests, and the edit-rebuild loop.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The [Quickstart](/getting-started/) built and ran the KV Store, the reference app of the
+[apps repository](https://github.com/calimero-network/apps) and the template `meroctl app new` starts from. This page
+reads it top to bottom: the project, the crate, the code, the ABI it produces, its tests, and the loop you work in.
+
+## The project
+
+`meroctl app new my-app` makes a sparse copy of the apps repository: the app in `apps/kv-store/`, the shared `packages/`
+and `tools/` it builds with, and the root files (`Cargo.toml`, `package.json`, `pnpm-*`) that pin their versions, with
+a fresh `git init`. `--template` picks another app of the repository. The app itself:
+
+```text
+apps/kv-store/
+├── logic/                   a standalone crate (own [workspace] + Cargo.lock)
+│   ├── src/lib.rs           #[app::state], #[app::logic], #[app::event], #[app::error]
+│   ├── tests/harness.rs     TestApp: the built component on core's real engine
+│   ├── tests/scenarios.rs   every scenarios/*.json in the harness
+│   ├── scenarios/           simple-store, converge, access (+ .org.json)
+│   └── res/abi.json         the component's ABI (committed)
+└── app/                     Vite + React; @calimero-apps/connect + mero-js CalimeroClient
+    └── src/generated/       KvStoreClient: `meroctl app codegen` from res/abi.json (committed)
+```
+
+`logic/` is the app. `app/` is its frontend, covered in [Call it from code](/guide/clients/).
+
+## The crate
+
+`logic/Cargo.toml` is an ordinary Rust crate with three things specific to Calimero:
+
+```toml
+[package]
+name = "kv-store"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+# A `calimero:app` component.
+crate-type = ["cdylib"]
+
+[dependencies]
+calimero-sdk = { git = "https://github.com/calimero-network/core", tag = "1.0.0-rc.23" }
+
+# The harness (`TestApp`, `run_scenario`) and the builder the tests build this
+# crate with, for `cargo test` on the host only.
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+calimero-sdk       = { git = "https://github.com/calimero-network/core", tag = "1.0.0-rc.23", features = ["testing"] }
+calimero-app-build = { git = "https://github.com/calimero-network/core", tag = "1.0.0-rc.23" }
+serde_json = "1"
+
+[package.metadata.calimero]
+package = "com.calimero.kv-store"
+name = "KV Store"
+description = "The reference Calimero app: a string key-value store on the component SDK, from contract to frontend."
+author = "Calimero"
+icon = "../app/public/icon-512.png"
+category = "developer-tools"
+tags = ["example", "reference", "kv"]
+min-runtime-version = "1.0.0-rc.20"
+frontend-dir = "../app/dist"
+
+[workspace]
+```
+
+- **`crate-type = ["cdylib"]`**: the crate compiles to one WebAssembly component.
+- **`calimero-sdk`** is the only Calimero dependency. It is not on crates.io: take it from core's git repository, at
+  the release your cluster runs. The `testing` feature and `calimero-app-build` are for host tests only.
+- **`[package.metadata.calimero]`** is what `meroctl app pack` reads when it makes a release: the package id
+  (`package`), the oldest node release the app needs (`min-runtime-version`), the built frontend to ship
+  (`frontend-dir`), and the registry listing (`name`, `description`, `icon`, `category`, `tags`, ...). See
+  [Package & publish](/guide/publish/).
+- **`[workspace]`** makes the crate its own workspace, with its own `Cargo.lock`.
+
+When you make the app yours, change `package` first: it is the app's identity in the registry, with your signing key.
+
+## The code
+
+`logic/src/lib.rs` is the whole app. Every app has the same shape: one state struct, one `#[app::logic]` block with an
+`init`, calls and views, and the events and errors those methods use.
+
+### State
+
+```rust
+use calimero_sdk::prelude::*;
+
+/// The store.
+#[app::state(version = 1)]
+pub struct KvStore {
+    /// Every value by key, in key order, with its count kept alongside.
+    items: UnorderedMap<String, String>,
+}
+```
+
+State is a struct of storage handles, built from the SDK's collections (`UnorderedMap`, `Table`, `Counter`, ...).
+Loading it reads nothing: each field names its own range of keys in the instance's storage, and a method reads and
+writes through the handles. `version = 1` is the state's version, recorded in the app's ABI.
+
+<Aside type="note" title="No CRDTs">
+An instance runs on its cluster's leader, which applies every write in one replicated log. A later write to a key
+replaces an earlier one, so values are plain types: there is nothing to merge.
+</Aside>
+
+### Init
+
+```rust
+#[app::logic]
+impl KvStore {
+    /// The empty store. The node runs it once, when the app is created.
+    #[app::init]
+    pub fn init() -> app::Result<Self> {
+        Ok(Self::load())
+    }
+```
+
+`init` runs once, as the instance's owner, when the instance is created. If it fails, nothing is created and the
+caller gets `422 INIT_FAILED` with the app's error. An `init` may take arguments: they are the instance's *init
+arguments* (`meroctl context create --params JSON`), so two instances of one app can start differently.
+
+### Calls
+
+A method that takes `&mut self` is a **call**: a write. The leader runs it, and on success appends it, with its state
+change and events, to the instance's log.
+
+```rust
+    /// Stores `value` under `key`, replacing any value already there. Emits
+    /// `Inserted` for a new key and `Updated` for an existing one.
+    pub fn set(&mut self, key: String, value: String) -> app::Result<()> {
+        env::log(&format!("set {key:?} = {value:?}"));
+        let event = match self.items.insert(&key, &value)? {
+            Some(_) => Event::Updated { key, value },
+            None => Event::Inserted { key, value },
+        };
+        env::emit(event, Audience::All)?;
+        Ok(())
+    }
+```
+
+- Every method returns `app::Result<T>`, and `?` works on every SDK call.
+- Callers pass arguments as a JSON object keyed by parameter name: `{"key": "a", "value": "1"}`. Unknown keys and
+  missing parameters are refused (`BadArgs`) before the method runs.
+- A call that fails writes nothing and emits nothing.
+
+The other calls are `updateIfExists`, `getOrInsert`, `remove` and `clear`. Method and argument names reach the ABI in
+camelCase: the Rust `update_if_exists` is called as `updateIfExists`.
+
+### Views
+
+A method marked `#[app::view]` that takes `&self` is a **view**: a read that never writes and never touches the log.
+
+```rust
+    /// The value under `key`, or `null` when it is absent.
+    #[app::view]
+    pub fn get(&self, key: String) -> app::Result<Option<String>> {
+        Ok(self.items.get(&key)?)
+    }
+
+    /// How many keys the store holds (a stored count, not a scan). A `u64`, so a
+    /// decimal string on the wire: `"0"` for an empty store.
+    #[app::view]
+    pub fn len(&self) -> app::Result<u64> {
+        Ok(self.items.len()?)
+    }
+```
+
+`u64` and `i64` travel as decimal strings, so no JavaScript client loses precision: `len` answers `"2"`, not `2`.
+`entries` returns at most 1,000 entries, one page of the map. Calling a call as a view is refused with `NotAView`.
+
+### Events
+
+```rust
+/// A change to the store, emitted after the write that caused it.
+#[app::event]
+pub enum Event {
+    /// A key that was absent now holds `value`.
+    Inserted { key: String, value: String },
+    /// An existing key's value was replaced by `value`.
+    Updated { key: String, value: String },
+    /// A key and its value were removed.
+    Removed { key: String },
+    /// Every key was removed from a store that was not empty.
+    Cleared,
+}
+```
+
+`env::emit(event, Audience::All)` sends an event to everyone the instance reaches. It is delivered only if the call
+succeeds, and it comes back in the call's answer (`events`) and on the instance's event stream
+(`meroctl context watch kv`). `remove` and `clear` emit nothing when there was nothing to remove: an event announces a
+change that happened.
+
+### Errors
+
+```rust
+/// A typed failure: `422 APP_ERROR` with `{ code, fields }` on the wire.
+#[app::error]
+pub enum Error {
+    /// No value is stored under `key` (`getResult`).
+    NotFound { key: String },
+}
+
+    /// The value under `key`; `NotFound { key }` when it is absent.
+    #[app::view]
+    pub fn get_result(&self, key: String) -> app::Result<String> {
+        match self.items.get(&key)? {
+            Some(value) => Ok(value),
+            None => Err(Error::NotFound { key }.into()),
+        }
+    }
+```
+
+A caller of `getResult` on a missing key gets `422 APP_ERROR` with `{ "code": "NotFound", "fields": { "key": "k" } }`.
+Its counterpart `getUnchecked` panics instead, which the node reports as `422 TRAP`, committing nothing: it exists to
+show why `getResult` does. `#[app::event]` and `#[app::error]` live in the same module as `#[app::logic]`, where the
+ABI picks them up.
+
+### Logging
+
+`env::log(..)` writes a line to the run's log. `set`, `remove` and the other calls log what they do.
+
+### Who may call
+
+Nothing in the code checks the caller. The instance's organization decides who reaches it: its members, admins and
+guests and its owner may call every method; anyone else gets `404`, and a caller who is not signed in `401`. Rules
+inside an app use `env::caller()` and `env::org_role(..)`: see [What an app sees](/concepts/app-model/#who-is-calling).
+
+## The ABI
+
+`meroctl app build` lifts the app's ABI into the component, where the node reads it to dispatch calls, check their
+arguments and refuse a call sent as a view. The app keeps a copy as JSON in `logic/res/abi.json`, which
+`meroctl app abi show` prints from the built component:
+
+```bash
+meroctl app abi show apps/kv-store/logic/app.component.wasm > apps/kv-store/logic/res/abi.json
+```
+
+```json
+{
+  "abiVersion": 1,
+  "errors": { "NotFound": { "key": "string" } },
+  "events": {
+    "Cleared": {},
+    "Inserted": { "key": "string", "value": "string" },
+    …
+  },
+  "methods": {
+    "clear": { "kind": "call", "params": [], "returns": null, … },
+    "entries": { "kind": "view", "params": [], "returns": "BTreeMap<String,String>", … },
+    …
+  }
+}
+```
+
+Clients read the ABI to build typed calls: `meroctl app codegen` turns `res/abi.json` into the frontend's
+`KvStoreClient` ([next page](/guide/clients/)). `meroctl app abi diff OLD NEW` says what changed between two releases.
+
+## The tests
+
+The tests run the **built component** on core's real wasmtime engine, in an organization you describe, as named
+accounts, with the node's own checks. No node is needed.
+
+`tests/common/mod.rs` builds the crate once per test process and wraps it in a `TestApp`:
+
+```rust
+use calimero_app_build::build_component;
+use calimero_sdk::testing::{Org, TestApp};
+
+/// The app in an org with these accounts besides the owner.
+pub fn app(org: Org) -> TestApp {
+    TestApp::new(component(), org, T0)
+}
+```
+
+`tests/harness.rs` calls and reads as those accounts and checks results and events:
+
+```rust
+#[test]
+fn set_emits_inserted_then_updated() {
+    let mut t = app(); // the owner and one member, `bob`
+    call(&mut t, "set", json!({ "key": "k", "value": "v" }));
+    call(&mut t, "set", json!({ "key": "k", "value": "w" }));
+    assert_eq!(
+        t.events_for("bob"),
+        [
+            ("Inserted".to_owned(), json!({ "key": "k", "value": "v" })),
+            ("Updated".to_owned(), json!({ "key": "k", "value": "w" })),
+        ]
+    );
+}
+```
+
+The same steps can live in a **scenario**: a JSON file of calls and views, each as an account, with the result and the
+events each account should see. `tests/scenarios.rs` runs every `scenarios/*.json` with `run_scenario`, in the
+organization its `.org.json` names. From `scenarios/simple-store.json`:
+
+```json
+[
+  { "as": "owner", "op": "call", "method": "set", "args": { "key": "greeting", "value": "hello" },
+    "expect": { "ok": null }, "events": { "bob": ["Inserted"] } },
+  { "as": "bob", "op": "view", "method": "get", "args": { "key": "greeting" },
+    "expect": { "ok": "hello" } }
+]
+```
+
+and `scenarios/simple-store.org.json`:
+
+```json
+{ "members": ["bob"] }
+```
+
+`access.json` checks who reaches the store (a guest may, an outsider and an anonymous caller may not), typed errors, a
+trap and malformed arguments. Run them all:
+
+```bash
+meroctl local test apps/kv-store
+# or: cargo test --manifest-path apps/kv-store/logic/Cargo.toml
+```
+
+## The development loop
+
+With the frontend's dependencies installed once (`pnpm install`, at the project's root), one command runs everything:
+
+```bash
+pnpm install
+meroctl local dev apps/kv-store
+```
+
+`meroctl local dev` starts the local cluster unless one runs, signs up a deployer, builds the crate and uploads it,
+writes `apps/kv-store/app/.env.development.local`, and runs the frontend on `http://localhost:5173`, the origin the
+cluster trusts. On every save it rebuilds and uploads again. Ctrl-C stops the frontend, and the cluster if `local dev`
+started it.
+
+In the browser, create an account (a passkey), create a store, and use it. A second browser profile with its own
+passkey, opening the store's invitation link, is a second member.
+
+To go further with the SDK (tables, counters, timers, blobs, cross-app calls), see the core reference's
+[Build](https://calimero-network.github.io/core/build/) section and its
+[tutorial](https://calimero-network.github.io/core/build/tutorial/).
+
+**Next →** [Call it from code](/guide/clients/): the frontend, and the clients it is built on.

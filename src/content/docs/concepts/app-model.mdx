@@ -1,0 +1,89 @@
+---
+title: What an app sees
+description: What a Calimero app instance sees once it runs on a cluster — init arguments, callers, organizations and teams, events, blobs, upgrades, outbound requests, confirmations and limits.
+---
+
+An **app instance** is one running copy of your package: its own state, its owner, an access rule, and its own Raft
+log on (by default) three nodes. This page covers what your code sees inside one. The complete list is in the core
+reference's [Writing apps for a cluster](https://calimero-network.github.io/core/cloud/apps/).
+
+## Creation and init
+
+An instance is created from a package release, with **init arguments** (JSON) that your `#[app::init]` receives.
+`init` runs once, on the instance's first leader, as the instance's owner. If it fails, the instance is not left
+half-made: creation answers `422 INIT_FAILED` with your error.
+
+Each organization that uses your app gets its own instance, so init arguments are per organization. See
+[Deploy & install](/guide/deploy/).
+
+## Who is calling
+
+- **The caller.** `env::caller()` is who is calling: an account, an API key (with its account), another app, or the
+  node itself (timers). A person's devices are passkeys on one account, so there is one id per person, whichever
+  device they use.
+- **The organization.** Every instance is in an organization. `env::org_role(account)` is that account's role in it
+  (`Guest < Member < Admin < Owner`), and `env::in_team(account, team)` whether they are in a team. The node already
+  keeps non-members out; use these for rules inside the app. `guards::require_member()` and
+  `guards::require_admin()` do the common checks:
+
+  ```rust
+  #[app::confirm]
+  pub fn remove_member_item(&mut self, id: String) -> app::Result<()> {
+      guards::require_admin()?;
+      self.items.remove(&id)?;
+      Ok(())
+  }
+  ```
+
+- **The instance.** `env::app_id()` is the instance's id, and `env::app_owner()` the account that owns it.
+
+## Calls, views and ordering
+
+Calls to one instance apply in one order on its leader, so a write never races another write. Views read state
+without changing it. Strong reads go through the leader; a client may ask for a faster read from any replica. A
+caller that cannot reach the cluster cannot write, so there are no offline edits to reconcile later.
+
+## Events
+
+`env::emit(event, audience)` sends an `#[app::event]` value to an audience (`Audience::All`, the caller, named
+accounts, a team, the organization or its admins), delivered only if the call succeeds. Clients stream an instance's
+events (`client.events(app)` in mero-js, `meroctl context watch`).
+
+## Blobs and search
+
+A blob belongs to the instance that holds it, through a `BlobRef` in its state, which can hand out a time-limited
+grant; clients upload and download blobs through the same sealed channel. A table names its text fields
+(`#[table(search = [..])]`), and views query the instance's own index with `Table::search`.
+
+## Cross-app calls and timers
+
+`env::xcall` sends a call into another app of the same organization, delivered after this call commits; the target's
+ABI says which apps may reach which method. `#[app::every("1m")]` methods are timers the node runs on the leader.
+
+## Outbound HTTPS
+
+A call may send an HTTPS request under a URL prefix your signed manifest declares, once that prefix is approved for
+your package by whoever the cluster's rules give that decision (the instance's owner, or the operator). Until then
+the request is refused with `NotApproved`, which your app can show.
+
+## Confirmations
+
+A method marked `#[app::confirm]` needs a fresh passkey assertion over the exact call
+(`client.apps.call(..., { confirm: passkeyConfirm(passkey) })` in mero-js). Use it for anything a person must
+explicitly agree to, such as a payment or a deletion. An API key cannot answer it.
+
+## Upgrades
+
+A new version upgrades an instance in place: the state carries over as it is, and the new code reads it. There are no
+state migrations in this version (`#[app::migrate]` does not exist yet), so a new version only adds fields, tables and
+methods beside the old ones. `#[app::state(version = ..)]` records the state's version in the ABI, and
+`meroctl app pack --previous` refuses a state change made without a version bump. Who may upgrade is decided per
+cluster: the instance's owner (with a passkey step-up) or the operator.
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Package size | 16 MiB |
+| One call's log entry (arguments, state change and events) | 1 MiB |
+| Instances, package bytes, API keys and organizations per account | Quotas set by the operator (`429 QUOTA_EXCEEDED`) |
