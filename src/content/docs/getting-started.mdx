@@ -6,15 +6,28 @@ description: Run a local Calimero node, clone the example app, build it, deploy 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
 Five steps, from nothing to a running app you call from the terminal. The app is the KV Store, the apps repository's
-reference app: a string key-value store. You need `git` and a Rust toolchain with the `wasm32-wasip2` target
-(`rustup target add wasm32-wasip2`).
+reference app: a string key-value store.
 
-First, install `merod` (the node) and `meroctl` (the command line). The installer puts them in `~/.local/bin`, checked
-against the release's `SHA256SUMS`:
+## Before you start
+
+- **Linux** (x86_64 or aarch64) with glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later. On a Mac, see
+  [On macOS](#on-macos).
+- **`curl` and `git`.**
+- **Rust**, from [rustup](https://rustup.rs), with the WebAssembly target the build uses:
+
+  ```bash
+  rustup target add wasm32-wasip2
+  ```
+
+Then install `merod` (the node) and `meroctl` (the command line). The installer checks each against the release's
+`SHA256SUMS` and puts them in `~/.local/bin`; put that on your `PATH` (and in your shell's profile, so it stays):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+export PATH="$HOME/.local/bin:$PATH"
 ```
+
+## Five steps
 
 <Steps>
 
@@ -25,9 +38,9 @@ curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/script
    ```
 
    This starts `merod local` in the background: a development cluster of three nodes on
-   `http://127.0.0.1:2501`-`2503`, in one process, ready in a few seconds. It keeps its state in `.merod-local/`, saves
-   the cluster as the `meroctl` node `local`, and prints the node URLs and an operator token. `meroctl local down`
-   stops it.
+   `http://127.0.0.1:2501`-`2503`, in one process, ready in a few seconds. It keeps its state in
+   `~/.calimero/meroctl/local/`, saves the cluster as the `meroctl` node `local`, and prints the node URLs and an
+   operator token. `meroctl local down`, from any directory, stops it; the state stays for the next `up`.
 
 2. **Clone an app.**
 
@@ -35,17 +48,18 @@ curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/script
    meroctl app new my-app && cd my-app
    ```
 
-   `app new` starts a project from the [apps repository](https://github.com/calimero-network/apps)'s `kv-store` app,
-   with the shared `packages/` and `tools/` it builds with and a fresh git repository:
+   `app new` starts a project from the [apps repository](https://github.com/calimero-network/apps)'s `kv-store` app:
+   the app, the shared `packages/` and `scripts/` it builds with, and the root files that pin their versions, in a new
+   git repository with one commit:
 
    ```text
    my-app/
-   ├── Cargo.toml  README.md  package.json  pnpm-*
+   ├── Cargo.toml  README.md  package.json  pnpm-*  tsconfig.base.json
    ├── apps/kv-store/
    │   ├── logic/    the app: a Rust crate
    │   └── app/      its frontend
-   ├── packages/
-   └── tools/
+   ├── packages/     shared frontend packages
+   └── scripts/      component-build.sh: build the app and write its ABI
    ```
 
 3. **Build it.**
@@ -55,19 +69,25 @@ curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/script
    ```
 
    This compiles the crate for `wasm32-wasip2` into a `calimero:app` component, with the app's ABI (its methods,
-   events and types) embedded, and writes `apps/kv-store/logic/app.component.wasm`. On a warm toolchain it takes
-   about 30 seconds; the first build also fetches and compiles the SDK.
+   events and types) embedded, and writes `apps/kv-store/logic/app.component.wasm`. The first build fetches and
+   compiles the SDK and takes a few minutes; after that, about 30 seconds.
 
-4. **Deploy it.** Sign up first. On a development cluster a passkey can live in a file, and `login` creates the file
-   and the account when they do not exist yet:
+4. **Deploy it.** Sign up first:
 
    ```bash
-   meroctl login --dev-passkey ./me.json --name me
+   meroctl login --dev-passkey ~/.calimero/me.json --name me
    ```
 
    ```json
-   { "accountId": "…", "passkey": "./me.json" }
+   { "accountId": "…", "passkey": "/home/you/.calimero/me.json" }
    ```
+
+   People sign in to Calimero with passkeys. A development cluster also takes a passkey kept in a file, so you can sign
+   in from a terminal: when `me.json` does not exist, `meroctl` creates a new passkey (a software one, made the way a
+   phone or security key makes one), signs up an account named `me` with it, and saves it in the file, readable only by
+   you. Next time, the same command signs in with it. The file is your development account: keep it out of your
+   project (here it lives in `~/.calimero`), and delete it to start over with a new account. A real cluster refuses a
+   file passkey; there you sign in with a real one, or use an API key from the console.
 
    Then create an instance of the app from the component:
 
@@ -116,11 +136,24 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 
 ## On macOS
 
-`merod` is released for Linux only. On a Mac the same commands work, with [Docker](https://www.docker.com/) running:
-the installer installs `meroctl` and skips `merod` with a note, and `meroctl local up`, finding no `merod`, runs the
-node in the release's Docker image on the same ports. Everything after step 1 is the same.
+`merod` is released for Linux only; on a Mac (Apple silicon) the node runs in the release's
+[Docker](https://www.docker.com/) image, so have Docker running. Install `meroctl` alone, and start the cluster with
+`--docker`; everything after step 1 is the same:
 
-With a release before 1.0.0-rc.25, start the cluster with `meroctl local up --docker`.
+```bash
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+meroctl local up --docker
+```
+
+From 1.0.0-rc.25 the Linux commands work unchanged: the installer skips `merod` with a note, and `meroctl local up`,
+finding no `merod`, uses the image by itself.
+
+## With 1.0.0-rc.24
+
+Two differences in the release before 1.0.0-rc.25. `meroctl local up` keeps its state in `.merod-local/` in the
+directory you ran it from, so run `meroctl local down` from that directory. And `meroctl app build` with a path, as
+in step 3, also leaves an empty `apps/kv-store/logic/apps/` directory behind; delete it.
 
 <Aside type="caution" title="A development cluster is not a real one">
 `meroctl local up` runs with mock attestation and a development storage key, and accepts file passkeys and raw

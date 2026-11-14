@@ -12,8 +12,8 @@ reads it top to bottom: the project, the crate, the code, the ABI it produces, i
 ## The project
 
 `meroctl app new my-app` makes a sparse copy of the apps repository: the app in `apps/kv-store/`, the shared `packages/`
-and `tools/` it builds with, and the root files (`Cargo.toml`, `package.json`, `pnpm-*`) that pin their versions, with
-a fresh `git init`. `--template` picks another app of the repository. The app itself:
+and `scripts/` it builds with, and the root files (`Cargo.toml`, `package.json`, `pnpm-*`) that pin their versions, in a
+new git repository with one commit. `--template` picks another app of the repository. The app itself:
 
 ```text
 apps/kv-store/
@@ -236,6 +236,9 @@ arguments and refuse a call sent as a view. The app keeps a copy as JSON in `log
 ```bash
 meroctl app abi show apps/kv-store/logic/app.component.wasm > apps/kv-store/logic/res/abi.json
 ```
+
+`scripts/component-build.sh apps/kv-store/logic` does both at once, as the apps repository's CI does: it builds the
+component into `logic/res/kv_store.wasm` and writes `logic/res/abi.json` beside it.
 
 ```json
 {
