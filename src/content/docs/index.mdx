@@ -15,11 +15,11 @@ write is applied in one order and the app keeps serving while most of its replic
 Clients check what a node runs before they send it anything, then talk to it over a sealed channel. People sign in
 with passkeys. Nobody operating the nodes, Calimero included, can read the app's data.
 
-You write no database, sync, encryption or server code. Two lines install the tools and start a three-node cluster on
-your machine:
+You write no database, sync, encryption or server code. With [Docker](https://docs.docker.com/get-docker/) running,
+two lines install the command line and start a three-node cluster on your machine:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
 meroctl local up
 ```
 

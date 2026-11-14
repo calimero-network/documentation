@@ -107,16 +107,25 @@ the publisher's signature and each file's digest. With `meroctl`, signed in to t
 
 ```bash
 meroctl app install com.calimero.kv-store@1.0.0
-meroctl context create --name kv --package com.calimero.kv-store --version 1.0.0 --alias kv
+meroctl context create --name kv-release --package com.calimero.kv-store --version 1.0.0 --alias kv-release
 ```
 
 `app install` takes the version as `@VERSION` or `--version`, and requires it. `context create --package` creates an
 instance of an installed package: `--version` picks the release (default the newest installed), `--params JSON` gives
 `init` its arguments, and `--namespace ORG` creates it in an organization (`--group TEAM` for one team's members).
-Then call it as in the [Quickstart](/getting-started/): `meroctl call --context kv ...`.
+Then call it as in the [Quickstart](/getting-started/): `meroctl call --context kv-release ...`. (A new alias:
+`kv` is the Quickstart's instance, and giving it to another one moves it there.)
 
-On a development cluster, `meroctl app install --path FILE.mpk` uploads a signed package from a file instead; a real
-cluster installs only from the registry. Every command and flag is in the
+A node installs from the registry it was started with. `meroctl local up` starts the local cluster with the public
+registry from core 1.0.0-rc.26 (`--registry-url` names another); with 1.0.0-rc.25 it has none, and `app install`
+answers `400 NO_REGISTRY`. On a development cluster, `meroctl app install --path FILE.mpk` uploads a signed package
+from a file instead, the one you packed:
+
+```bash
+meroctl app install --path apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk
+```
+
+A real cluster installs only from the registry. Every command and flag is in the
 [meroctl reference](https://calimero-network.github.io/core/operate/meroctl/).
 
 **Next →** the background: [how Calimero works](/concepts/), then [what an app sees](/concepts/app-model/).
