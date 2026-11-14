@@ -15,28 +15,32 @@ runs one checks its signature and the digest of each WASM file before it runs.
    it is a different app.
 
    ```bash
-   mero-sign generate-key --output my-signing-key.json
+   meroctl app signer new my-signing-key.json
    #   signerId: did:key:z6Mk...
    ```
 
    Keep the file secret and out of version control.
 
-2. **Bundle and sign** the release:
+2. **Pack and sign** the release, from your app's crate:
 
    ```bash
-   cargo mero bundle --key my-signing-key.json
+   meroctl app pack . --key my-signing-key.json
+   meroctl app inspect dist/com.example.my-app-1.0.0.mpk   # check it as a node does
    ```
 
-   It builds every service, writes and signs `manifest.json`, and writes `dist/<package>-<version>.mpk`. It also wants
-   an icon: `icon = "<path>"` under `[package.metadata.calimero]`, or `--no-icon`. The version comes from your crate's
-   version; `--bump patch|minor|major` takes the next one.
+   It builds the components, writes and signs `manifest.json`, and writes `dist/<package>-<version>.mpk`. The package
+   id and display metadata (`name`, `description`, `icon`, ...) come from `[package.metadata.calimero]`, and the version
+   from your crate's `version`. For every release after the first, pass `--previous <last .mpk>`: `pack` then warns
+   about changes that break callers.
 
 3. **Publish** it to the [Calimero app registry](https://apps.calimero.network) with an API key:
 
    ```bash
-   export CALIMERO_API_KEY=...
-   cargo mero publish dist/com.example.my-app-1.0.0.mpk
+   export CALIMERO_REGISTRY_API_KEY=...
+   meroctl app publish dist/com.example.my-app-1.0.0.mpk
    ```
+
+   With `--org ORG`, the key is a Calimero Cloud organization's API key (scope `registry:publish`) instead.
 
    The registry checks the signature on upload, and that the package's `author` matches your registry account. You can
    also upload a `.mpk` from the Calimero Cloud console's Registry page.
@@ -44,14 +48,15 @@ runs one checks its signature and the digest of each WASM file before it runs.
 </Steps>
 
 <Aside type="caution">
-`cargo mero bundle --dev` signs with a well-known development key. That is fine for a local cluster, and the registry
+`meroctl app pack` without `--key` signs with a well-known development key. That is fine for a local cluster, and the registry
 refuses it: anyone holds that key, so it proves nothing.
 </Aside>
 
 ## Private and public packages
 
 A package belongs to the Cloud organization that publishes it and is **private** by default: only that
-organization can deploy it. Making it **public** lists it for everyone, after a registry review.
+organization can deploy it. Making it **public** (`meroctl app publish --public`) lists it for everyone, after a
+registry review.
 
 ## Next
 

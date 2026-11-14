@@ -6,7 +6,8 @@ description: Run a local Calimero cluster, deploy an app, and call it from the t
 import { Steps, Aside } from '@astrojs/starlight/components';
 
 This runs a three-node development cluster on your machine, deploys the key-value example, and calls it. You need a
-Rust toolchain and a checkout of [calimero-network/core](https://github.com/calimero-network/core).
+Rust toolchain with the `wasm32-wasip2` target (`rustup target add wasm32-wasip2`) and a checkout of
+[calimero-network/core](https://github.com/calimero-network/core).
 
 <Aside type="tip">
 Prefer not to run anything locally? [Sign in to Calimero Cloud](https://cloud.calimero.network/signin) and follow
@@ -15,15 +16,20 @@ Prefer not to run anything locally? [Sign in to Calimero Cloud](https://cloud.ca
 
 ## 1. Start a local cluster
 
+Install `merod` (the node) and `meroctl` (the command line), then start the cluster:
+
 ```bash
-# in your core checkout
-cargo build -p kv-store --target wasm32-unknown-unknown --profile app-release
-cargo run -p merod -- local
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh -s -- merod meroctl
+meroctl local up
 ```
 
-`merod local` starts three nodes on `http://127.0.0.1:2501-2503/` in one process, with mock attestation and a
-development storage key, and keeps their state in `.merod-local/` (`--fresh` starts over). It prints an operator
-token. Browser apps on `http://localhost:3000` and `http://localhost:5173` may call it.
+`meroctl local up` runs `merod local` in the background: three nodes on `http://127.0.0.1:2501-2503/` in one process,
+with mock attestation and a development storage key, keeping their state in `.merod-local/` (`--fresh` starts over).
+It saves the cluster as the `meroctl` node `local` and prints the node URLs and an operator token; `meroctl local down`
+stops it. Browser apps on `http://localhost:3000` and `http://localhost:5173` may call it.
+
+`merod` runs on Linux. On macOS, install only `meroctl` (drop `-s -- merod meroctl`) and run
+`meroctl local up --docker`, which runs the node in the release's Docker image.
 
 <Aside type="caution">
 A development cluster sends mock quotes and accepts development passkeys. Clients trust it only when you say so
@@ -34,30 +40,24 @@ A development cluster sends mock quotes and accepts development passkeys. Client
 
 <Steps>
 
-1. Install `meroctl` and point it at the local cluster:
-
-   ```bash
-   cargo install --path crates/meroctl
-   meroctl node add local http://127.0.0.1:2501/ --allow-mock
-   ```
-
-2. Sign up. On a development cluster a passkey can live in a file:
+1. Sign up. On a development cluster a passkey can live in a file:
 
    ```bash
    meroctl login --dev-passkey ./dev-passkey.json --name ada
    ```
 
-3. Install the app and create an instance of it:
+2. Build the app and create an instance of it:
 
    ```bash
-   meroctl app install --path target/wasm32-unknown-unknown/app-release/kv_store.wasm
-   meroctl context create --bundle <hash> --name kv --alias kv
+   # in your core checkout
+   meroctl app build apps/kv-store --out kv_store.wasm
+   meroctl context create --name kv --path kv_store.wasm --alias kv
    ```
 
-   `meroctl` calls an app instance a *context*. A raw WASM bundle installs only on a development cluster; a real
-   cluster installs signed packages (`meroctl app install PACKAGE@VERSION`).
+   `meroctl` calls an app instance a *context*. `--path` uploads a raw component, which only a development cluster
+   takes; a real cluster installs signed packages (`meroctl app install PACKAGE@VERSION`).
 
-4. Call a method, read a view, and watch the instance's events:
+3. Call a method, read a view, and watch the instance's events:
 
    ```bash
    meroctl call --context kv set --args '{"key":"a","value":"1"}'

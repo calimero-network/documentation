@@ -13,16 +13,20 @@ signed-in callers over a sealed channel.
 
 <Flow
 	steps={[
-		{ k: 'cargo mero new', title: 'Scaffold', text: 'A crate with SDK pins, the package id and a test.' },
+		{ k: 'meroctl app new', title: 'Scaffold', text: 'An app crate and its frontend, from the apps template.' },
 		{ k: 'cargo test', title: 'Test', text: 'TestHost runs your logic in-process, no node needed.' },
-		{ k: 'cargo mero build', title: 'Build', text: 'WASM with its ABI embedded.' },
-		{ k: 'cargo mero bundle', title: 'Sign', text: 'A signed .mpk, your release.' },
-		{ k: 'cargo mero publish', title: 'Publish', text: 'Upload it to the app registry.', accent: true },
+		{ k: 'meroctl app build', title: 'Build', text: 'WASM with its ABI embedded.' },
+		{ k: 'meroctl app pack', title: 'Sign', text: 'A signed .mpk, your release.' },
+		{ k: 'meroctl app publish', title: 'Publish', text: 'Upload it to the app registry.', accent: true },
 	]}
 />
 
-The toolchain is [`cargo mero`](https://calimero-network.github.io/core/build/cargo-mero/), which ships in the core
-repository. Install it with `cargo install cargo-mero`.
+The toolchain is [`meroctl`](https://calimero-network.github.io/core/operate/meroctl/), Calimero's one command line,
+which ships with every core release. [Install it](https://calimero-network.github.io/core/operate/install/) with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
+```
 
 <CardGrid>
 	<LinkCard title="Your first app" href="/build/first-app/" description="Scaffold, write state and methods, test, build." />
