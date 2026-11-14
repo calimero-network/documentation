@@ -116,15 +116,11 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 
 ## On macOS
 
-On a Mac with Apple silicon, the same commands work: releases ship `merod` for macOS from core 1.0.0-rc.25.
+`merod` is released for Linux only. On a Mac the same commands work, with [Docker](https://www.docker.com/) running:
+the installer installs `meroctl` and skips `merod` with a note, and `meroctl local up`, finding no `merod`, runs the
+node in the release's Docker image on the same ports. Everything after step 1 is the same.
 
-With an older release, run the node in the release's Docker image instead: install only `meroctl`, then start the
-cluster with `--docker`. Everything after step 1 is the same.
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
-meroctl local up --docker
-```
+With a release before 1.0.0-rc.25, start the cluster with `meroctl local up --docker`.
 
 <Aside type="caution" title="A development cluster is not a real one">
 `meroctl local up` runs with mock attestation and a development storage key, and accepts file passkeys and raw

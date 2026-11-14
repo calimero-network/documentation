@@ -48,7 +48,7 @@ Every instance carries one access rule, set when it is created and changed by it
 | `public` | Anyone, signed in or not. |
 
 Someone who does not reach an instance gets `404`: its existence is not disclosed. Finer rules, such as who may
-edit which record, are your app's own code, which reads the caller's role and teams with `env::caller_org()`.
+edit which record, are your app's own code, which reads the caller with `env::caller()` and their role and teams with `env::org_role()` and `env::in_team()`.
 
 ## Invites
 
