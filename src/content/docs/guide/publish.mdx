@@ -23,17 +23,18 @@ checks the signature and the digest of each file before it runs anything.
    it is a different app.
 
    ```bash
-   meroctl app signer new release.key
-   # Generated new keypair: release.key
+   meroctl app signer new ~/.calimero/release.key
+   # Generated new keypair: /home/you/.calimero/release.key
    #   signerId: did:key:z6Mk...
    ```
 
-   `meroctl app signer id release.key` prints the signer id again. Keep the file secret and out of version control.
+   `meroctl app signer id ~/.calimero/release.key` prints the signer id again. Keep the file secret and out of
+   version control: here it lives in `~/.calimero`, outside the project, where `git add .` cannot pick it up.
 
 3. **Pack and sign** the release, from the app's crate:
 
    ```bash
-   meroctl app pack apps/kv-store/logic --key release.key --app-version 1.0.0
+   meroctl app pack apps/kv-store/logic --key ~/.calimero/release.key --app-version 1.0.0
    ```
 
    `pack` reads the crate's `[package.metadata.calimero]`: `package`, `min-runtime-version`, `frontend-dir`, and the
