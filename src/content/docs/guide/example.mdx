@@ -119,7 +119,7 @@ impl KvStore {
 
 `init` runs once, as the instance's owner, when the instance is created. If it fails, nothing is created and the
 caller gets `422 INIT_FAILED` with the app's error. An `init` may take arguments: they are the instance's *init
-arguments* (`meroctl context create --params JSON`), so two instances of one app can start differently.
+arguments* (`meroctl instance create --params JSON`), so two instances of one app can start differently.
 
 ### Calls
 
@@ -189,7 +189,7 @@ pub enum Event {
 
 `env::emit(event, Audience::All)` sends an event to everyone the instance reaches. It is delivered only if the call
 succeeds, and it comes back in the call's answer (`events`) and on the instance's event stream
-(`meroctl context watch kv`). `remove` and `clear` emit nothing when there was nothing to remove: an event announces a
+(`meroctl instance watch kv`). `remove` and `clear` emit nothing when there was nothing to remove: an event announces a
 change that happened.
 
 ### Errors

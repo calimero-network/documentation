@@ -149,9 +149,9 @@ let got = client.apps().view(&app, "get", Some(json!({ "key": "a" })), None, Non
 ```bash
 meroctl node add eu1 https://eu1.cloud.calimero.network/
 export CALIMERO_API_KEY=cal_...   # made in the console
-meroctl call --context <app> set --args '{"key":"a","value":"1"}'
-meroctl call --context <app> get --args '{"key":"a"}' --view
-meroctl context watch <app>
+meroctl call --instance <app> set --args '{"key":"a","value":"1"}'
+meroctl call --instance <app> get --args '{"key":"a"}' --view
+meroctl instance watch <app>
 ```
 
 Name the images you trust with `--tee-profiles <profile>` and, if you need a newer floor than the default,

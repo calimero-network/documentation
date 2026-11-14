@@ -77,7 +77,7 @@ registry refuses it: anyone holds that key, so it proves nothing.
 ## A package of several services
 
 An app can ship several services in one package: each app instance runs one of them, picked with
-`meroctl context create --service NAME`. A directory of rooms, for example, is a `directory` service and a `room`
+`meroctl instance create --service NAME`. A directory of rooms, for example, is a `directory` service and a `room`
 service. Name each service and its crate with `--service NAME=PATH` (a crate directory, which `pack` builds, or a
 built component), and the manifest declares `services` instead of a single `wasm`:
 
