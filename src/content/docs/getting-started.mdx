@@ -178,12 +178,19 @@ On Calimero Cloud every instance runs on several nodes: a leader runs each write
 local cluster of three shows that on your machine (a read behind the leader with `--min-index`, a node stopped while
 the app keeps answering):
 
+A cluster keeps the node count it was made with, so going to three starts over: stop the one you have, start three
+nodes with `--fresh`, then sign in and create the instance again, as in steps 4 and 5:
+
 ```bash
+meroctl local down
 meroctl local up --nodes 3 --fresh
+meroctl login --dev-passkey ~/.calimero/me.json --name me
+meroctl instance create --name kv --path apps/kv-store/logic/app.component.wasm --alias kv
 ```
 
-A cluster keeps the node count it was made with; another count needs `--fresh`, which starts over. Your app's code
-is the same either way.
+`--fresh` starts with empty state: no account, no instances. `login` signs up again with the same passkey file (on
+1.0.0-rc.28, delete `~/.calimero/me.json` first, or `login` answers `PASSKEY_UNKNOWN_HERE`). The answer now names
+three replicas, `"replicas": [1, 2, 3]`. Your app's code is the same either way.
 
 ## Without Docker
 
