@@ -74,8 +74,9 @@ brew install calimero-network/tap/meroctl
    ```
 
    This starts `merod local`, the node, in the release's Docker image, in the background: a development cluster of
-   three nodes on `http://127.0.0.1:2501`-`2503`, in one container, ready in a few seconds (the first time, after
-   Docker pulls the image). It keeps its state in
+   one node on `http://127.0.0.1:2501`, ready in a few seconds (the first time, after Docker pulls the image). One
+   node is all you need to build an app; `--nodes 3` runs three, as Calimero Cloud replicates every instance (see
+   [below](#three-nodes)). It keeps its state in
    `~/.calimero/meroctl/local/`, saves the cluster as the `meroctl` node `local`, and prints the node URLs and an
    operator token. `meroctl local down`, from any directory, stops it; the state stays for the next `up`.
 
@@ -133,10 +134,10 @@ brew install calimero-network/tap/meroctl
    ```
 
    ```json
-   { "appId": "…", "contextId": "…", "group": 2, "replicas": [1, 2, 3], "compute": false }
+   { "appId": "…", "contextId": "…", "group": 2, "replicas": [1], "compute": false }
    ```
 
-   The instance runs on all three nodes (`replicas`), with its own log.
+   The instance runs on the cluster's node (`replicas`), with its own log.
    Its `init` ran once, as you, and it lives in your personal organization, which the sign-up made. `--alias kv` names
    it for your account.
 
@@ -171,6 +172,19 @@ brew install calimero-network/tap/meroctl
 
 That is the whole loop: a node, an app, a build, an instance, a call.
 
+## Three nodes
+
+On Calimero Cloud every instance runs on several nodes: a leader runs each write and the others follow its log. A
+local cluster of three shows that on your machine (a read behind the leader with `--min-index`, a node stopped while
+the app keeps answering):
+
+```bash
+meroctl local up --nodes 3 --fresh
+```
+
+A cluster keeps the node count it was made with; another count needs `--fresh`, which starts over. Your app's code
+is the same either way.
+
 ## Without Docker
 
 `meroctl local up --local` runs the `merod` binary from your `PATH` instead of the image. Install it with
@@ -180,6 +194,8 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 
 The quickstart follows the newest release. Before it:
 
+- **1.0.0-rc.27 and earlier** start three nodes in `meroctl local up` (`2501`-`2503`, `"replicas": [1, 2, 3]`). A
+  cluster an earlier meroctl made keeps its three nodes and its data after you update.
 - **1.0.0-rc.25 and earlier** call an app instance a *context*: `meroctl context create` and
   `meroctl call --context kv ...` (or `-c kv`), where this page has `instance create` and `--instance`. 1.0.0-rc.26
   still takes the old spelling, hidden, for one release.
