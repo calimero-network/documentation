@@ -176,16 +176,17 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 `meroctl local up --local` runs the `merod` binary from your `PATH` instead of the image. Install it with
 `... | sh -s -- merod meroctl` (Linux, and macOS from core 1.0.0-rc.25) or `brew install calimero-network/tap/merod`.
 
-## With 1.0.0-rc.24
+## With an older release
 
-Three differences in the release before 1.0.0-rc.25:
+The quickstart follows the newest release. Before it:
 
-- `meroctl local up` runs the `merod` on `PATH` unless you pass `--docker`, and macOS has no `merod`: there, use
-  `meroctl local up --docker`.
-- It keeps its state in `.merod-local/` in the directory you ran it from, so run `meroctl local down` from that
-  directory.
-- `meroctl app build` with a path, as in step 3, also leaves an empty `apps/kv-store/logic/apps/` directory behind;
-  delete it.
+- **1.0.0-rc.25 and earlier** call an app instance a *context*: `meroctl context create` and
+  `meroctl call --context kv ...` (or `-c kv`), where this page has `instance create` and `--instance`. 1.0.0-rc.26
+  still takes the old spelling, hidden, for one release.
+- **1.0.0-rc.24** also runs the `merod` on `PATH` in `meroctl local up` unless you pass `--docker` (macOS has no
+  `merod` there: use `meroctl local up --docker`), keeps its state in `.merod-local/` in the directory you ran it from
+  (run `meroctl local down` from there), and leaves an empty `apps/kv-store/logic/apps/` directory behind after
+  step 3's build; delete it.
 
 <Aside type="caution" title="A development cluster is not a real one">
 `meroctl local up` runs with mock attestation and a development storage key, and accepts file passkeys and raw
