@@ -55,10 +55,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in /api/v2/bundles /api/v2/bundles/com.calimero.kv-store /api/v2/bundles?package=com.calimero.kv-store /api/packages /artifacts/com.calimero.kv-store/1.0.0/com.calimero.kv-store-1.0.0.mpk; do
-            echo "== $u"; curl -sS -m 30 -o /tmp/out -w 'HTTP %{http_code}\n' "https://apps.calimero.network$u"; head -c 4000 /tmp/out | tr -d '\0'; echo
+          R=https://apps.calimero.network
+          for u in /api/healthz /api/stats /api/v2/bundles/index /api/v2/bundles/com.calimero.kv-store/1.0.0 /api/v2/packages/com.calimero.kv-store "/api/v2/bundles?fresh=1"; do
+            echo "== $u"; curl -sS -m 30 -o /tmp/out -w 'HTTP %{http_code}\n' "$R$u"; head -c 1500 /tmp/out; echo
           done
-          curl -sS -m 30 https://apps.calimero.network/api/v2/bundles | jq -r '.. | objects | select(has("package")) | "\(.package) \(.version // .latestVersion // "")"' 2>/dev/null | sort -u | head -100 || true
+          for v in 0.1.0 0.2.0 0.3.0 1.0.0 1.0.1 1.0.2 1.0.3 1.0.4 1.0.5 1.0.6 1.0.7 1.0.8 1.0.9 1.0.10 1.1.0 1.2.0 2.0.0; do
+            c=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$R/artifacts/com.calimero.kv-store/$v/com.calimero.kv-store-$v.mpk"); echo "kv-store $v: $c"
+          done
 
   walkthrough:
     name: Walkthrough (latest release)
