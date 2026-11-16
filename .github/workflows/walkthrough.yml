@@ -1,0 +1,90 @@
+name: Docs walkthrough
+
+# Runs every shell command on the site, in page order, as a brand-new user, against the latest
+# published core release (scripts/walkthrough.sh), and checks that every internal link resolves
+# (scripts/check-links.mjs), so the pages cannot drift from meroctl unnoticed. Nightly, because a
+# new core release can break the pages without any change here; and on any change to the pages.
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/content/docs/**'
+      - 'astro.config.mjs'
+      - 'scripts/walkthrough.sh'
+      - 'scripts/check-links.mjs'
+      - '.github/workflows/walkthrough.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: walkthrough-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Internal links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The core reference's pages, for its calimero-network.github.io/core/... links.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: calimero-network/core
+          path: core
+          persist-credentials: false
+          sparse-checkout: |
+            docs/src/content/docs
+            docs/astro.config.mjs
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Check internal links
+        run: node scripts/check-links.mjs core/docs/src/content/docs
+
+  walkthrough:
+    name: Walkthrough (latest release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The example's frontend: pnpm at the version its package.json pins (packageManager),
+      # through corepack.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      # Rust from rustup, as the Quickstart asks; the script adds wasm32-wasip2 itself, as the
+      # page does.
+      - name: Rust (stable)
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+
+      - name: Walkthrough
+        env:
+          WALKTHROUGH_DIR: ${{ runner.temp }}/walkthrough
+        run: scripts/walkthrough.sh
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: walkthrough-logs
+          path: ${{ runner.temp }}/walkthrough/logs
+          retention-days: 14
