@@ -13,7 +13,9 @@ checks the signature and the digest of each file before it runs anything.
 <Steps>
 
 1. **Build the frontend.** The crate's `frontend-dir` (`../app/dist`) is packed into the release, and the cluster
-   serves it from the package's own origin, so build it first (after `pnpm install` at the project's root):
+   serves it from the package's own origin, so build it first (after `pnpm install` at the project's root). Only
+   that copy, or an origin you register, can sign people in with passkeys: see
+   [Serving your app's frontend](/guide/frontend/).
 
    ```bash
    pnpm -F kv-store build
@@ -64,7 +66,8 @@ checks the signature and the digest of each file before it runs anything.
 
    With `--org ORG`, the key is a Calimero Cloud organization's API key instead (`ck_live_…`, scope
    `registry:publish`), which `meroctl` trades at the Cloud for a short publish token. A refusal comes back with the
-   registry's code (`version_not_allowed`, `invalid_signature`, ...). You can also upload a `.mpk` from the Calimero
+   registry's code (`version_not_allowed`, `invalid_signature`, ...; see
+   [Troubleshooting](/guide/troubleshooting/#publishing)). You can also upload a `.mpk` from the Calimero
    Cloud console's Registry page.
 
 </Steps>

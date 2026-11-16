@@ -1,0 +1,301 @@
+---
+title: Troubleshooting
+description: The errors you meet installing meroctl, running a local cluster, calling an app and publishing it, with what each one means and what to do.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The errors on this page are the ones developers hit most. Each one is quoted as the tool prints it.
+
+A refusal from a node reaches `meroctl` as one line, `STATUS CODE: message`:
+
+```text
+Error: 401 UNAUTHENTICATED: sign in first
+```
+
+The code (`UNAUTHENTICATED`) is what to search this page for. `meroctl` prints a source location and a backtrace
+after it; the first line is the error. mero-js throws the same status and code as a `CalimeroError`
+(`err.status`, `err.code`, `err.details`).
+
+## Install and setup
+
+### The installer says a release is still being published
+
+```text
+1.0.0-rc.30 is still being published (no SHA256SUMS yet): looking at the release before it
+```
+
+A release is listed on GitHub as soon as the release workflow creates it, before its archives are uploaded. Without
+`--version`, the installer skips a release that is not complete yet and installs the one before it. Nothing is wrong;
+run it again in a few minutes for the newest one.
+
+With `--version`, it stops instead:
+
+```text
+install.sh: release 1.0.0-rc.30 has no meroctl_x86_64-unknown-linux-gnu.tar.gz yet: it is still being published; try again in a few minutes
+install.sh: release 1.0.0-rc.99 has no SHA256SUMS at https://github.com/calimero-network/core/releases/download/1.0.0-rc.99 (is the version right?)
+```
+
+The first is a release still uploading: wait. The second is usually a tag that does not exist: check it on the
+[releases page](https://github.com/calimero-network/core/releases).
+
+### The binary will not start: `GLIBC_… not found`
+
+```text
+meroctl: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.34' not found (required by meroctl)
+```
+
+The Linux builds need glibc 2.35 or newer (Ubuntu 22.04, Debian 12 and later), and there is no static build.
+`ldd --version` shows yours. Use a newer distribution, or macOS on Apple silicon. See
+[Before you start](/getting-started/#before-you-start).
+
+### `meroctl app build` fails: the `wasm32-wasip2` target may not be installed
+
+```text
+error[E0463]: can't find crate for `std`
+  = note: the `wasm32-wasip2` target may not be installed
+  = help: consider downloading the target with `rustup target add wasm32-wasip2`
+```
+
+This is the Rust compiler's message, which `meroctl app build` passes through. Add the target, once per toolchain:
+
+```bash
+rustup target add wasm32-wasip2
+```
+
+If Rust itself is missing, `meroctl` says so:
+
+```text
+cargo not found: building an app needs Rust (https://rustup.rs) on PATH, with `rustup target add wasm32-wasip2`
+```
+
+### `meroctl local up`: Docker is not installed, or not running
+
+```text
+Error: the development cluster runs in Docker, which is not installed (https://docs.docker.com/get-docker/); or pass --local to run merod from PATH
+Error: Docker is installed but not running: start Docker Desktop or the docker service; or pass --local to run merod from PATH
+```
+
+The local cluster runs in the release's Docker image. Start Docker Desktop (macOS) or the `docker` service (Linux),
+check that `docker info` works as your user, and run `meroctl local up` again. To run without Docker, install `merod`
+and pass `--local` ([Without Docker](/getting-started/#without-docker)).
+
+### `meroctl local up`: a port is taken
+
+```text
+Error: http://127.0.0.1:2501/ is taken by another process: stop it, or pass --base-port
+```
+
+Node `i` listens on `127.0.0.1:` base port `+ i`, so the first node is on `2501`. Something else is on that port:
+often a cluster started from another `--dir`, or another `merod`. Stop it, or move this cluster with
+`meroctl local up --base-port 2600` (nodes on `2601` and up).
+
+## The local cluster
+
+### A different `--nodes` for a kept cluster is refused
+
+```text
+Error: the cluster in /home/you/.calimero/meroctl/local has 1 node: pass --nodes 1, or --fresh to start over with 3
+```
+
+A stopped cluster keeps the node count it was made with: with fewer nodes it would never reach a majority. Start it
+as it was (`--nodes 1`, or no `--nodes`), or start over with `--fresh`, which throws away its accounts and instances.
+A cluster that is already running is answered as it is, whatever `--nodes` says: `meroctl local down` first. See
+[Three nodes](/getting-started/#three-nodes).
+
+### After `--fresh`: `401 UNAUTHENTICATED: sign in first`
+
+```text
+Error: 401 UNAUTHENTICATED: sign in first
+```
+
+`--fresh` starts with empty state: no accounts. `meroctl local up` forgets the sessions it saved for the old cluster,
+so the next command that needs an account has none. Sign up again (next item).
+
+With meroctl 1.0.0-rc.28 and earlier, `local up` kept the old session, and the next command answered
+`401 UNAUTHENTICATED: signature does not verify`. The fix is the same: sign in again.
+
+### `login` with the old passkey file: `PASSKEY_UNKNOWN_HERE`
+
+```text
+Error: 401 PASSKEY_UNKNOWN_HERE: this passkey belongs to another Calimero cluster or was removed from this one; sign up here, or open the app from the link for the cluster your account is on
+If this cluster started over (`meroctl local up --fresh`), it has no account for /home/you/.calimero/me.json: sign up again with a new passkey file (delete it, or pass another path to --dev-passkey).
+```
+
+The passkey file belongs to an account on the old cluster, and every cluster has its own accounts. `login` never signs
+up with a file that exists, so delete it and sign up again:
+
+```bash
+rm ~/.calimero/me.json
+meroctl login --dev-passkey ~/.calimero/me.json --name me
+```
+
+The second line of the message is from meroctl 1.0.0-rc.29.
+
+### `app install` answers `400 NO_REGISTRY`
+
+```text
+Error: 400 NO_REGISTRY: this node has no registry configured (--registry-url)
+```
+
+The node was started without a registry. `meroctl local up` gives the local cluster the public registry from core
+1.0.0-rc.26; with 1.0.0-rc.25 and earlier (or `--registry-url ""`) it has none. Update meroctl, or install your own
+package from its file: `meroctl app install --path FILE.mpk`. See
+[On a node, from the registry](/guide/deploy/#on-a-node-from-the-registry).
+
+## Calls
+
+### `412 CONFIRM_REQUIRED`
+
+```text
+Error: 412 CONFIRM_REQUIRED: approve this call with your passkey
+```
+
+The request needs a fresh passkey assertion over exactly this request. Two kinds of request ask for one:
+
+- **A `#[app::confirm]` method.** Every call needs the caller's passkey ([Confirmations](/concepts/app-model/#confirmations)).
+- **An owner's decision**, such as approving an upgrade or registering a web origin for a package.
+
+On a development cluster, pass the passkey file: `meroctl call --instance kv pay --args '…' --dev-passkey ~/.calimero/me.json`,
+and the same flag on the other commands that ask. A real cluster refuses file passkeys: a person confirms in the
+browser (mero-js: `client.apps.call(..., { confirm: passkeyConfirm(passkey) })`), and an owner's decision is made in
+the Calimero Cloud console. An API key never answers it.
+
+### `404 NOT_FOUND` or `401 UNAUTHENTICATED` for an instance that exists
+
+```text
+Error: 404 NOT_FOUND: no such app
+Error: 401 UNAUTHENTICATED: sign in to use this app
+```
+
+An instance's access rule decides who reaches it, and the node does not tell anyone else that it exists. Signed in
+without access, you get `404 no such app`, exactly as for an id that was never used. Not signed in, you get
+`401 sign in to use this app`. So check who you are signed in as (`meroctl whoami`) and the instance's access before
+you look for a missing instance. A session opened on another package's frontend also gets `404` (see
+[Serving your app's frontend](/guide/frontend/#sessions-are-bound-to-the-package)). See
+[Who reaches an instance](/concepts/organizations/#who-reaches-an-instance).
+
+### `422 APP_ERROR`: the app refused the call
+
+```text
+Error: 422 APP_ERROR: the app refused the call
+```
+
+The answer's `details` say why: `code` and `fields`. `meroctl` prints only the line above; mero-js throws an `AppError`
+with `appCode` and `fields`. The code is one of:
+
+- **Your app's own error**, from an `#[app::error]` enum: `NotFound`, with `fields` `{ "key": "k" }` for the KV Store's
+  `getResult` ([Errors](/guide/example/#errors)). A failed call changes nothing.
+- **A refusal before your method ran**, by the node or the SDK's dispatcher:
+  - `BadArgs`: the arguments do not match the method. They are a JSON object keyed by the parameters' camelCase names,
+    with no unknown keys; a `u64` or `i64` is a decimal string, and bytes are base64url.
+  - `NotAView`: the method is a call, sent as a view (`--view`). Send it without `--view`.
+  - `UnknownMethod`: no method of that name. Method names are camelCase on the wire.
+  - `Forbidden`, `LoginRequired`: the method or the app's own guard does not allow this caller.
+
+`meroctl app abi show FILE` prints the app's methods, their parameters and its error codes, from a built component
+or a `.mpk`.
+
+### `422 TRAP`: the run trapped
+
+```text
+Error: 422 TRAP: the run trapped
+```
+
+The method panicked, ran out of fuel or memory, or broke a host rule. `details.kind` names which (`Fault`,
+`OutOfFuel`, `OutOfMemory`, `StackOverflow`, `HostDenied`, ...) and `details.detail` says more. The call changes nothing.
+A panic is a bug: return an `#[app::error]` for anything a caller should handle. See the core reference's
+[Error handling](https://calimero-network.github.io/core/build/error-handling/).
+
+### `422 INIT_FAILED` when creating an instance
+
+```text
+Error: 422 INIT_FAILED: the app's init failed
+```
+
+`#[app::init]` returned an error or trapped. `details.error` is what it ended with. Check the init arguments
+(`--params` on `meroctl instance create`, `initArgs` in mero-js) against the parameters `init` takes.
+
+### `409 FEATURE_NOT_ACTIVE`
+
+```text
+Error: 409 FEATURE_NOT_ACTIVE: … needs cluster version 1.0.0-rc.29, and the cluster is on 1.0.0-rc.28: every node must run 1.0.0-rc.29 or newer first
+```
+
+The request uses something newer than the oldest node of the cluster runs. While a cluster is being upgraded, its
+nodes run two releases, and a new command is refused until every node runs the release it ships in, so no node meets
+a log entry it cannot read. It goes away by itself when every node runs the newer release. See
+[The cluster version](https://calimero-network.github.io/core/protocol/upgrades/#the-cluster-version).
+
+### `429 QUOTA_EXCEEDED`
+
+```text
+Error: 429 QUOTA_EXCEEDED: quota exceeded: …
+```
+
+The account is at a quota the cluster's operator set: instances, package bytes, API keys or organizations per
+account, or the fuel your apps may burn in a day, among others. The message names which. Delete what you no longer
+use, or ask the cluster's operator for more. See
+[Limits](/concepts/app-model/#limits).
+
+### `413 ARGS_TOO_LARGE` and `413 TOO_LARGE`
+
+```text
+Error: 413 ARGS_TOO_LARGE: arguments are limited to 524288 bytes
+Error: 413 TOO_LARGE: a blob is limited to 47 MiB (what reaches the other nodes)
+```
+
+A call's arguments are at most 512 KiB, refused before the app runs. Put large data in a blob or a file and pass its
+id. `TOO_LARGE` is a body over its own limit: a package or a blob (47 MiB), a raw component on a development cluster
+(16 MiB), or a file. One call's log entry (arguments, state change and events) is at most 1 MiB. See the core
+reference's [Limits](https://calimero-network.github.io/core/protocol/limits/).
+
+## Publishing
+
+### The registry refuses the development key
+
+```text
+Error: the registry refused the bundle: 400 Bad Request dev_signing_key: This bundle is signed with, or lists as an owner, the shared development key …
+```
+
+`meroctl app pack` without `--key` signs with a development key whose private half is public, and says so when it
+packs (`signing with the development key (a public registry refuses it; --key for yours)`). It is fine for a local
+cluster and proves nothing to anyone else. Create your own key once and pack again:
+
+```bash
+meroctl app signer new ~/.calimero/release.key
+meroctl app pack apps/kv-store/logic --key ~/.calimero/release.key --app-version 1.0.0
+```
+
+Keep that key: every later release of the package must be signed with it ([Package & publish](/guide/publish/)).
+
+### `version_not_allowed`, `invalid_signature`
+
+```text
+Error: the registry refused the bundle: 400 Bad Request version_not_allowed: New version (1.0.0) must be greater than latest (1.0.0).
+```
+
+- `version_not_allowed`: the version is not greater than the newest one published. The version is inside the signed
+  manifest, so raise it (`--app-version`, or the crate's `version`) and pack again.
+- `invalid_signature`: the manifest's signature does not verify, usually because the `.mpk` or its `manifest.json` was
+  changed after signing. Pack it again. `meroctl app inspect FILE.mpk` checks a bundle as a node does.
+- `not_owner` (`403`): the package was published with another key. A package's signer cannot change; a different key
+  is a different app.
+
+## The CLI's old spellings
+
+From 1.0.0-rc.30, meroctl names the old spelling of a command and its replacement on stderr:
+
+```text
+warning: `meroctl context` is now `meroctl instance`; the old spelling will be removed in a later release
+```
+
+An app instance was a *context*, an organization a *namespace* and a team a *group*. The old commands and flags
+(`context`, `--context`/`-c`, `namespace`, `group`, `--namespace`, `--group`, ...) still work, and the answer on stdout
+is the same. Use the new ones (`instance`, `--instance`/`-i`, `org`, `team`, `--org`, `--team`) in scripts. See
+[With an older release](/getting-started/#with-an-older-release).
+
+<Aside>
+The core reference's [Troubleshooting](https://calimero-network.github.io/core/operate/troubleshooting/) covers what
+an operator meets running `merod`: startup, attestation, backups and recovery.
+</Aside>

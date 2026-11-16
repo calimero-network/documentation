@@ -85,7 +85,9 @@ creating a second one.
 
 Your app's own frontend can create instances the same way with mero-js (`client.orgs.create`, then
 `client.apps.create` with `package`, `version`, `initArgs` and `org`), for example when a new customer signs up. See
-[Call it from code](/guide/clients/).
+[Call it from code](/guide/clients/). That frontend signs people in only where the cluster serves it from your package,
+or on an origin you registered for it, never from a copy on another host: see
+[Serving your app's frontend](/guide/frontend/).
 
 ### Upgrades
 
