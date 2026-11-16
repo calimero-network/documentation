@@ -57,7 +57,7 @@ fish_add_path ~/.local/bin
 </TabItem>
 </Tabs>
 
-Or with [Homebrew](https://brew.sh), on Linux or macOS, which puts them on your `PATH` itself:
+Or with [Homebrew](https://brew.sh), on Linux or macOS, which puts it on your `PATH` itself:
 
 ```bash
 brew install calimero-network/tap/meroctl
@@ -175,11 +175,11 @@ That is the whole loop: a node, an app, a build, an instance, a call.
 ## Three nodes
 
 On Calimero Cloud every instance runs on several nodes: a leader runs each write and the others follow its log. A
-local cluster of three shows that on your machine (a read behind the leader with `--min-index`, a node stopped while
-the app keeps answering):
+local cluster of three nodes (in one process) shows that on your machine: each instance is placed on all three, and a
+view with `--min-index N` may be answered by whichever node has applied index `N`, not only the leader.
 
 A cluster keeps the node count it was made with, so going to three starts over: stop the one you have, start three
-nodes with `--fresh`, then sign in and create the instance again, as in steps 4 and 5:
+nodes with `--fresh`, then sign up and create the instance again, as in step 4:
 
 ```bash
 meroctl local down
@@ -189,10 +189,10 @@ meroctl login --dev-passkey ~/.calimero/me.json --name me
 meroctl instance create --name kv --path apps/kv-store/logic/app.component.wasm --alias kv
 ```
 
-`--fresh` starts with empty state: no account, no instances. The old cluster's passkey file is no account here, and
-the cluster refuses it as it refuses a passkey removed from an account (`PASSKEY_UNKNOWN_HERE`), so delete it and
-sign up again with a new one. `instance create` now names three replicas, `"replicas": [1, 2, 3]`. Your app's code is
-the same either way.
+`--fresh` starts with empty state: no account and no instances. The passkey in `me.json` belonged to an account on
+the old cluster, so the new one refuses it (`PASSKEY_UNKNOWN_HERE`, as for a passkey removed from an account): delete
+the file and `login` signs up a new account. `instance create` now answers `"replicas": [1, 2, 3]`. Your app's code
+is the same either way.
 
 ## Without Docker
 
