@@ -41,10 +41,10 @@ Every instance carries one access rule, set when it is created and changed by it
 
 | Access | Who reaches the instance |
 | --- | --- |
-| `org` | Every member of its organization. The default inside an organization. |
+| `org` | Every member of its organization. The default. |
 | `team` | The team's members. |
 | `accounts` | The owner and the listed accounts. |
-| `owner` | The owner only. The default outside an organization. |
+| `owner` | The owner only. |
 | `public` | Anyone, signed in or not. |
 
 Someone who does not reach an instance gets `404`: its existence is not disclosed. Finer rules, such as who may
@@ -53,12 +53,18 @@ edit which record, are your app's own code, which reads the caller with `env::ca
 ## Invites
 
 An admin, or a member with `INVITE_MEMBERS`, creates an invite: a token (`inv_…`) with a role and, optionally, the
-teams it adds to. Only its hash is stored. It expires after 7 days and admits one account unless set otherwise. The
-person opens it, signs up with a passkey on the cluster and redeems it.
+teams it adds to. The cluster keeps only a key derived from the token, so whoever holds the token redeems it. It
+expires after 7 days and admits one account unless set otherwise (`ttlSecs`, `uses`). Making one needs the creator's
+passkey. The person opens it, signs up with a passkey on the cluster and redeems it.
 
 ```ts
-const token = await client.invite(org, 'member');   // send it to them
-await theirClient.redeemInvite(token);               // after they sign up
+import { passkeyConfirm } from '@calimero-network/mero-js';
+
+const { token } = await client.orgs.inviteCreate(
+  { org, role: 'member', teams: [] },
+  { confirm: passkeyConfirm(passkey) },
+); // send it to them
+await theirClient.orgs.inviteRedeem({ token }); // after they sign up
 ```
 
 In the console, adding someone to a project invites them to the project's organization the same way.
