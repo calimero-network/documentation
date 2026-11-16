@@ -21,6 +21,11 @@ reference app: a string key-value store.
   ```bash
   rustup target add wasm32-wasip2
   ```
+- **[Node.js](https://nodejs.org) 20 or newer, and [pnpm](https://pnpm.io)**, for the app's frontend: the five steps
+  below do not need them, but [the example](/guide/example/)'s development loop (`pnpm install`, `meroctl local dev`)
+  and [packaging](/guide/publish/) (`pnpm -F kv-store build`) do. The project pins its pnpm version (`packageManager`
+  in its `package.json`); `corepack enable` (Node.js 20 to 24) uses that one, or install pnpm with
+  `npm install -g pnpm`.
 
 Then install `meroctl`, the command line. The installer checks it against the release's `SHA256SUMS` and puts it in
 `~/.local/bin`:
