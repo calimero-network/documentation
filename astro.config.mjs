@@ -122,6 +122,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Home', slug: '' },
 						{ label: 'Quickstart', slug: 'getting-started' },
+						{ label: 'Build with an AI agent', slug: 'build-with-an-agent' },
 					],
 				},
 				{
