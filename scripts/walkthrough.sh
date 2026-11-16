@@ -108,11 +108,16 @@ step() {
 # output: the last step's output (its log, without the command line it starts with).
 output() { tail -n +2 "$OUT"; }
 
-# expect NAME REGEX: the last step's output matches REGEX (grep -E). Not checked when that
-# step failed (its failure is already reported).
+# expect NAME REGEX: the last step's output matches REGEX (grep -E), line by line or with all
+# spaces and newlines removed (pretty-printed JSON). Not checked when that step failed (its
+# failure is already reported).
 expect() {
 	[ "$LAST_OK" = 1 ] || return 0
-	if output | grep -Eq -- "$2"; then pass "$1"; else fail "$1: no match for /$2/" "$OUT"; fi
+	if output | grep -Eq -- "$2" || output | tr -d ' \n' | grep -Eq -- "$2"; then
+		pass "$1"
+	else
+		fail "$1: no match for /$2/" "$OUT"
+	fi
 }
 
 # show REGEX: print the lines of the last step's output that match, for the log.
@@ -195,7 +200,8 @@ expect "one node, on :2501" '127\.0\.0\.1:2501'
 section "2. Clone an app"
 step "meroctl app new my-app" meroctl app new my-app || abort "app new failed"
 cd my-app || abort "no my-app directory"
-step "a git repository with one commit" test "$(git rev-list --count HEAD)" = 1
+step "git rev-list --count HEAD" git rev-list --count HEAD
+expect "a git repository with one commit" '^1$'
 
 section "3. Build it"
 step "meroctl app build apps/kv-store/logic" meroctl app build apps/kv-store/logic ||
