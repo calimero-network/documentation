@@ -1,0 +1,204 @@
+---
+title: Serving your app's frontend
+description: Why passkeys sign people in only on a frontend the cluster serves from your package, or on an origin you registered for it; where the cluster serves it, what a session opened there may do, and how to develop it locally.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+People sign in to a Calimero cluster with passkeys, and a cluster runs a passkey ceremony only for pages it knows. For
+your app's frontend, that means one of two places:
+
+- **The frontend the cluster serves** from your package: the built files you packed into the `.mpk`, on a host of
+  the package's own.
+- **A web origin you registered** for the package, such as your own domain.
+
+<Aside type="caution" title="A copy on a static host cannot sign anyone in">
+The same build deployed to Vercel, Netlify, GitHub Pages or any other host is neither. The node's CORS does not admit
+its origin, so the browser blocks the page's requests to the cluster, and a sign-in from it is refused
+`403 ORIGIN_NOT_REGISTERED`. The page loads and looks right; nobody can sign in. Ship the frontend in the package, or
+register the origin.
+</Aside>
+
+## Put the frontend in the package
+
+The crate's `[package.metadata.calimero]` names the built frontend with `frontend-dir`, relative to the crate. The
+KV Store's:
+
+```toml
+[package.metadata.calimero]
+package = "com.calimero.kv-store"
+frontend-dir = "../app/dist"
+```
+
+Build the frontend, then pack as in [Package & publish](/guide/publish/):
+
+```bash
+pnpm -F kv-store build
+meroctl app pack apps/kv-store/logic --key ~/.calimero/release.key --app-version 1.0.0
+```
+
+`meroctl app pack` puts every file of that directory in the archive under `frontend/`, lists each with its SHA-256 in
+the signed manifest, and serves `index.html` at `/` (`--frontend-entry` names another). `--frontend DIR` names the
+directory on the command line instead. If the directory does not exist, `pack` goes on without a frontend and says so:
+
+```text
+note: no frontend packed: apps/kv-store/logic/../app/dist (frontend-dir) does not exist; build the frontend first, or pass --no-frontend
+```
+
+The node serves the files under a strict content security policy, and `pack` refuses a build that would break under
+it, before it signs:
+
+- **Relative URLs.** Each release is served under `/{version}/`, so an absolute `/assets/app.js` misses. Build with a
+  relative base (Vite: `base: './'`, as the example does).
+- **No inline scripts, and nothing from another origin.** Scripts, styles, fonts and images ship in the package. The
+  page may connect to its own origin, the cluster's nodes and the attestation mirror mero-js verifies nodes with.
+- **At most 32 MiB** for all the files together, of the common web file types.
+
+```text
+Error: --frontend: [FRONTEND_ESCAPING_URL] frontend file 'frontend/index.html' loads '/assets/app.js', outside the bundle's own folder; build with a relative base (Vite `base: './'`)
+```
+
+The full rules, with the policy and the codes, are in the core reference's
+[Ship a frontend](https://calimero-network.github.io/core/build/guides/frontends/).
+
+A frontend change is a new release, like any other: pack it with a new version, publish it, and upgrade the instances.
+
+## Where the cluster serves it
+
+A cluster started with an apps domain serves each package's frontend on a host of its own:
+
+```text
+https://{label}.apps.calimero.network/
+```
+
+`apps.calimero.network` is Calimero Cloud's apps domain. `{label}` is 52 lowercase base32 characters derived from
+the package id (`app_host::label` in core): the SHA-256 of `calimero.app-host.v1`, a zero byte and the package id. It
+depends only on the package id, so you can work it out before you publish:
+
+```bash
+python3 -c "import hashlib,base64,sys;print(base64.b32encode(hashlib.sha256(b'calimero.app-host.v1\0'+sys.argv[1].encode()).digest()).decode().rstrip('=').lower())" com.calimero.kv-store
+```
+
+On the host:
+
+| Path | Serves |
+| --- | --- |
+| `/` | A redirect to the newest release, `/{version}/` |
+| `/{version}/…` | That release's files. A path with no file is the entry page, so a single-page app's routes survive a reload. |
+| `/app/{instance}/` | A redirect to the release that instance runs, so a link you give a customer opens the frontend that matches their instance |
+| `/d/{deployment}/` | A redirect to the release a deployment offers, with `?deployment={id}` added, so the page knows which deployment to create instances from |
+| `/.well-known/calimero.json` | The package, its releases, the deployments offering it and the cluster's API URLs |
+
+Every redirect keeps the query, so an invite link such as `/?invite=…` reaches the page with its token. The host
+serves only `GET` and `HEAD` of these, never the node's API. The well-known file is fetched in the clear and only
+says where the API is, for example:
+
+```json
+{ "package": "com.example.notes", "deployment": null, "versions": ["1.0.0"], "deployments": [], "api": ["https://…"] }
+```
+
+The page reads it with mero-js's `frontendManifest()` and connects to `api`; the client still verifies the node's
+attestation before it sends anything. The same site is also served on the package's host for its cluster (for
+Calimero Cloud's routing) and on each deployment's own host. See
+[Where it is served](https://calimero-network.github.io/core/build/guides/frontends/#where-it-is-served) in the core
+reference.
+
+## Sessions are bound to the package
+
+A passkey ceremony on your package's host opens a session **bound to that package** (`Principal::within` in core).
+It acts as the person, but only inside your app:
+
+| It may | It may not |
+| --- | --- |
+| Call and read instances of the package, and list them | Reach any other app of the account: those answer `404 NOT_FOUND: no such app` |
+| Create instances of the package | Manage passkeys, API keys or sessions |
+| Upload blobs and files to its instances, and follow their events | Approve releases, outbound hosts or upgrades; install or uninstall packages |
+| Answer a `#[app::confirm]` method's passkey step-up | Create, rename or delete organizations; invite, redeem invites or change members |
+| Manage the teams below the package's own app team, for things like a chat's channels | Change the app team itself, or delete an app |
+
+What it may not do is refused, whatever the person's own rights:
+
+```text
+403 FORBIDDEN: a session opened on an app's frontend can use that app only; do this on the cluster's own page
+```
+
+The person still holds those rights. To use one, your page sends them to the node's own consent page, which shows
+what they approve and takes their passkey there, then returns them to your page (mero-js's `openConsentPage`). That
+is how an app's frontend creates an organization or invites someone. For a bad or stolen frontend, this is the limit
+of the damage: it reaches its own package's instances and nothing else of the account. See
+[Package-bound sessions](https://calimero-network.github.io/core/protocol/identities/#package-bound-sessions) and
+[What a frontend session may do](https://calimero-network.github.io/core/build/guides/frontends/#what-a-frontend-session-may-do).
+
+## Your own domain: registered origins
+
+To sign people in on your own site, the package's manager registers the origin. The manager is the publisher
+organization's members with the right to manage applications, or else the account that installed the package's first
+release.
+
+```bash
+meroctl app origins add com.example.notes https://notes.example.com
+meroctl app origins list com.example.notes
+meroctl app origins remove com.example.notes https://notes.example.com
+```
+
+Registering is approved with the manager's passkey. On a development cluster pass `--dev-passkey FILE`; without one
+the node answers `412 CONFIRM_REQUIRED`, and on a real cluster you make the change in the Calimero Cloud console (Web
+addresses).
+
+There are two kinds:
+
+- **A registered origin** (`https://notes.example.com`): your own hosting serves the page. Sessions opened there are
+  bound to the package, as on the package's host.
+- **A served origin** (`--served`): the cluster also serves the package's frontend there, from the signed package,
+  the same site as on `{label}.apps.calimero.network`. It is your custom domain. Browsers reach it once Calimero Cloud
+  holds its certificate and routes the name to the cluster.
+
+The rules:
+
+- **Passkeys belong to the domain.** Each origin has its own relying-party id: the origin's host, or a parent domain
+  of it with `--rp-id` (`https://app.example.com` with `--rp-id example.com`), never the cluster's own. A passkey made
+  on your domain works only there, and one made on the cluster's pages does not work on your domain.
+- **`https` only.** `http` is taken only for a `localhost` name, on a development node. An origin is written as a
+  browser writes it: `https://host` or `https://host:port`, no path.
+- **Limits.** 8 origins per package, and one package per origin. A served origin has no port and is not under the apps
+  domain or the cluster's own relying-party domain; at most 4 per package and 64 per cluster. A cluster with no apps domain refuses
+  it (`400 NOT_SERVING`), and so does one with a node on an older release (`409 CLUSTER_NOT_UPGRADED`).
+- **Removing an origin ends its sessions.** Their next request is `401`. Move people first.
+
+The `frontend` link in `[package.metadata.calimero]` (the registry listing's link) is not a registered origin: a page
+there cannot sign anyone in. See
+[Registered origins](https://calimero-network.github.io/core/protocol/identities/#registered-origins) in the core
+reference.
+
+## Develop it locally
+
+`meroctl local dev` runs the frontend's dev server on `http://localhost:5173`, an origin the local cluster trusts
+(with `http://localhost:3000`):
+
+```bash
+meroctl local dev apps/kv-store
+```
+
+It uploads the app as a raw component, not a package, and a sign-in there opens an ordinary session, not one bound to
+a package. So a page that works under `local dev` can still be refused once it is served: a call to another app, an
+organization change made directly instead of through the consent page. Before you publish, run the build the way the
+cluster serves it. The local cluster serves frontends under `localhost` on the node's port:
+
+```bash
+pnpm -F kv-store build
+meroctl app pack apps/kv-store/logic --app-version 1.0.0
+meroctl app install --path apps/kv-store/logic/dist/com.calimero.kv-store-1.0.0.mpk
+```
+
+Then open `http://{label}.localhost:2501/`, with the label from the command above, and sign in there. A local package may be signed with the development key; the registry refuses it
+([Troubleshooting](/guide/troubleshooting/#the-registry-refuses-the-development-key)).
+
+## When sign-in fails
+
+| What you see | Why |
+| --- | --- |
+| A CORS error in the browser console, or `403 ORIGIN_NOT_REGISTERED` (`OriginNotRegistered` in mero-js) | The page is on an origin the cluster does not know: a static copy, or an origin not registered for the package |
+| `403 FORBIDDEN: a session opened on an app's frontend can use that app only` | A package-bound session tried what only the cluster's own pages may do: use the consent page |
+| `404 NOT_FOUND: no such app` from the served page, for an instance that works in `meroctl` | The instance runs another package |
+| `401 PASSKEY_UNKNOWN_HERE` | The passkey belongs to an account on another cluster, or was removed from its account: sign up here |
+| A blank page, and a resource the content security policy refused in the console | A remote script, style, font or image, or an absolute URL the code builds at run time: see the rules [above](#put-the-frontend-in-the-package) |

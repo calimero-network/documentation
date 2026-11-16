@@ -131,6 +131,8 @@ export default defineConfig({
 						{ label: '2. Call it from code', slug: 'guide/clients' },
 						{ label: '3. Package & publish', slug: 'guide/publish' },
 						{ label: '4. Deploy & install', slug: 'guide/deploy' },
+						{ label: "Serving your app's frontend", slug: 'guide/frontend' },
+						{ label: 'Troubleshooting', slug: 'guide/troubleshooting' },
 					],
 				},
 				{
