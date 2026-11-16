@@ -198,6 +198,9 @@ printf '      nodes: %s\n' "$(nodes)"
 expect "one node, on :2501" '127\.0\.0\.1:2501'
 
 section "2. Clone an app"
+# A reader's git has a name and email; without them `app new` makes no first commit.
+git config --global user.name "Docs Walkthrough"
+git config --global user.email "walkthrough@example.invalid"
 step "meroctl app new my-app" meroctl app new my-app || abort "app new failed"
 cd my-app || abort "no my-app directory"
 step "git rev-list --count HEAD" git rev-list --count HEAD
