@@ -1,0 +1,156 @@
+---
+title: Build with an AI agent
+description: Set up Claude Code (or another coding agent) to build a Calimero app for you, and know what it does and what stays with you.
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Most apps start as a sentence: "build me a shared shopping list on Calimero". A coding agent such as
+[Claude Code](https://claude.com/claude-code) can take that sentence to a working app, if it has three things: the
+tools on your machine, Calimero's skills, and a project to start from. This page sets those up, says how to ask, and
+says which steps stay with you.
+
+The [Quickstart](/getting-started/) is the same path by hand; read it when you want to see each step yourself.
+
+## 1. Your machine
+
+The agent runs the commands, but the tools must be installed. The same as the Quickstart's
+[Before you start](/getting-started/#before-you-start):
+
+- **Docker**, installed and running (the local cluster runs in it).
+- **Rust** from [rustup](https://rustup.rs), with `rustup target add wasm32-wasip2`.
+- **Node.js 20 or newer and pnpm**, for the app's frontend.
+- **`git`**, with your name and email set (`git config --global user.name`/`user.email`).
+- **`meroctl`**:
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
+  ```
+
+Ask the agent to check them first; these four commands say whether you are ready:
+
+```bash
+meroctl --version
+docker info --format '{{.ServerVersion}}'
+rustup target list --installed | grep wasm32-wasip2
+pnpm --version
+```
+
+## 2. Calimero's skills
+
+Calimero is new to any model, and older Calimero code (SDK 0.x, merobox, `cargo mero`) is still on the internet. The
+[Calimero skills](https://github.com/calimero-network/calimero-skills) teach the agent the current SDK, client,
+command line and their rules, pinned to a core release. Install them in your project:
+
+<Tabs syncKey="agent">
+<TabItem label="Claude Code">
+
+```bash
+npx @calimero-network/agent-skills app --claude-skills
+```
+
+This writes the skills an app needs to `.claude/skills/` (the core model, the Rust SDK, the JavaScript client,
+`meroctl`, typed clients and publishing). Claude Code loads each one when a task needs it. Add `--global` to install
+them for every project.
+
+</TabItem>
+<TabItem label="Cursor">
+
+```bash
+npx @calimero-network/agent-skills app --cursor
+```
+
+</TabItem>
+<TabItem label="GitHub Copilot">
+
+```bash
+npx @calimero-network/agent-skills app --copilot
+```
+
+</TabItem>
+</Tabs>
+
+`npx @calimero-network/agent-skills --list` lists every skill; operators of a cluster also want `calimero-node` and
+`calimero-merod`.
+
+## 3. A project to start from
+
+Start from the example app, not an empty folder:
+
+```bash
+meroctl app new my-app && cd my-app
+```
+
+Besides the app, its frontend and the files that pin their versions, the project has an `AGENTS.md` (and a
+`CLAUDE.md` that imports it): the layout, the commands to test, build and run the app, the rules a change follows,
+and which steps the agent must leave to you. An agent reads it before anything else. Install the skills (step 2) in
+this directory, then open your agent here.
+
+## 4. Ask
+
+Describe the app the way you would to a colleague, and say who uses it and who may see or change what: that maps
+straight onto Calimero's [organizations, teams and access rules](/concepts/organizations/).
+
+```text
+Build a shared shopping list on Calimero, starting from this project. A household is an organization;
+every member can add and tick items, only the person who added an item can delete it, and guests can
+only read. Keep the frontend simple. Write scenarios for each rule and run them.
+```
+
+```text
+Turn this project into a meeting-room booking app: rooms, time slots, one booking per slot. Teams own
+rooms; anyone in the organization can book, only a team's lead can change its rooms. Test the
+double-booking case.
+```
+
+A good prompt names the users and their roles, what each may do, what must never happen (a double booking, someone
+reading another team's data), and asks for tests.
+
+## 5. What the agent does, and what it leaves to you
+
+<Steps>
+
+1. **The agent writes the app**: the state, methods, events and typed errors in `apps/<app>/logic/src/lib.rs`, with
+   the access checks in each method.
+
+2. **It tests it without a node**: scenario files in `logic/scenarios/` for each rule, run with
+   `meroctl local test apps/<app>/logic`.
+
+3. **It runs it**: `meroctl local dev apps/<app>` starts a local cluster, builds and deploys the app and serves the
+   frontend on `http://localhost:5173`, rebuilding on every save. After a change to a method's signature it refreshes
+   the ABI and the typed client (`AGENTS.md` has the three commands).
+
+4. **You sign in and try it.** The frontend signs you in with a passkey, in your browser: an agent cannot press
+   your fingerprint reader. A second browser profile with its own passkey is a second user, to try an invitation.
+
+5. **You ship it.** Creating and keeping the signing key (`meroctl app signer new`), publishing to the registry with
+   your registry key, and deploying on Calimero Cloud are yours: [Package & publish](/guide/publish/) and
+   [Deploy & install](/guide/deploy/). An agent can prepare the commands; run them yourself.
+
+</Steps>
+
+<Aside type="caution" title="Keys stay with you">
+Never paste a registry key, a Cloud API key or a signing key file into the conversation. A key that signs your app
+is its identity: whoever holds it can publish releases of it.
+</Aside>
+
+## Check the agent's work
+
+The app works when:
+
+- `meroctl local test apps/<app>/logic` passes, with a scenario for each rule you asked for;
+- `meroctl local dev apps/<app>` serves the frontend, and you can sign in, use it and invite a second user;
+- `apps/<app>/logic/res/abi.json` and the generated client in `app/src/generated/` match the build (the agent
+  refreshed them after its last change to a method).
+
+When the agent is stuck, these are the usual causes:
+
+| What you see | Why, and what to tell the agent |
+| --- | --- |
+| It writes `calimero-storage`, CRDT types, `cargo mero` or merobox commands | Code for SDK 0.x, which core 1.0 refuses. Install the skills (step 2) and point it at them. |
+| It tries to sync state between nodes | There is nothing to sync: the instance's leader runs each call and the other nodes apply it. |
+| `422 APP_ERROR` from a call | The app refused the call on purpose: the answer's `details.code` is the app's own error. Often it is the access check the agent just wrote. |
+| `meroctl local up` fails | Docker is not running, or a port is taken: [Troubleshooting](/guide/troubleshooting/). |
+| It waits at a passkey prompt | Signing in is yours: do it in the browser, then tell the agent to go on. |
+
+[Troubleshooting](/guide/troubleshooting/) has every error with what to do about it.
