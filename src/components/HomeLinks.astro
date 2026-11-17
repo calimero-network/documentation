@@ -1,0 +1,105 @@
+---
+/** The home page's index: every page of the docs, in four columns, so the whole site is one screen from the top. */
+type Item = { title: string; href: string; external?: boolean };
+type Column = { heading: string; items: Item[] };
+
+const columns: Column[] = [
+	{
+		heading: 'Start',
+		items: [
+			{ title: 'Quickstart', href: '/getting-started/' },
+			{ title: 'Build with an AI agent', href: '/build-with-an-agent/' },
+			{ title: 'Troubleshooting', href: '/guide/troubleshooting/' },
+		],
+	},
+	{
+		heading: 'The guide, in order',
+		items: [
+			{ title: '1. The example, line by line', href: '/guide/example/' },
+			{ title: '2. Call it from code', href: '/guide/clients/' },
+			{ title: '3. Package & publish', href: '/guide/publish/' },
+			{ title: '4. Deploy & install', href: '/guide/deploy/' },
+			{ title: "Serving your app's frontend", href: '/guide/frontend/' },
+		],
+	},
+	{
+		heading: 'Concepts',
+		items: [
+			{ title: 'How Calimero works', href: '/concepts/' },
+			{ title: 'What an app sees', href: '/concepts/app-model/' },
+			{ title: 'Organizations & access', href: '/concepts/organizations/' },
+		],
+	},
+	{
+		heading: 'Security & reference',
+		items: [
+			{ title: 'Security model', href: '/security/' },
+			{ title: 'Verify a cluster', href: '/security/verify/' },
+			{ title: 'Attestation', href: '/security/attestation/' },
+			{ title: 'Glossary & further reading', href: '/reference/' },
+			{ title: 'Core reference ↗', href: 'https://calimero-network.github.io/core/', external: true },
+		],
+	},
+];
+---
+
+<nav class="cal-home-links not-content" aria-label="All docs">
+	{
+		columns.map((col) => (
+			<div class="col">
+				<h2>{col.heading}</h2>
+				<ul>
+					{col.items.map((item) => (
+						<li>
+							<a href={item.href} {...(item.external ? { rel: 'noopener' } : {})}>
+								{item.title}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		))
+	}
+</nav>
+
+<style>
+	.cal-home-links {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.25rem 1.5rem;
+	}
+	@media (min-width: 64rem) {
+		.cal-home-links {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 2rem;
+		}
+	}
+	h2 {
+		font: 500 0.72rem/1 var(--sl-font-mono);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--cal-seal);
+		margin: 0 0 0.75rem;
+		padding-bottom: 0.6rem;
+		border-bottom: 1px solid var(--cal-rule);
+	}
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	li + li {
+		margin-top: 0.35rem;
+	}
+	a {
+		font-size: 0.95rem;
+		line-height: 1.4;
+		color: var(--cal-ink);
+		text-decoration: none;
+	}
+	a:hover {
+		color: var(--cal-seal);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+</style>

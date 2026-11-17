@@ -26,7 +26,7 @@ npm run preview    # preview production build locally
 ```
 src/
 ├── assets/          # images and icons
-├── components/      # the home hero and the diagrams (Flow, ClusterDiagram, EndToEnd, OrgDiagram, ...)
+├── components/      # the home hero and link index (Hero, HomeLinks), the diagrams (Flow, ClusterDiagram, EndToEnd, OrgDiagram, ...)
 ├── content/
 │   └── docs/        # all documentation pages (.md)
 ├── pages/           # custom pages (e.g. 404)
