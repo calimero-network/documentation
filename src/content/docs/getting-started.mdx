@@ -214,13 +214,11 @@ is the same either way.
 The quickstart follows the newest release. Before it:
 
 - **1.0.0-rc.28 and earlier** spell an organization `meroctl namespace` and a team `meroctl group`
-  (`--namespace`/`--group`), where these docs have `org`, `team`, `--org` and `--team`. 1.0.0-rc.29 still takes
-  the old spelling, hidden, for one release.
+  (`--namespace`/`--group`), where these docs have `org`, `team`, `--org` and `--team`.
 - **1.0.0-rc.27 and earlier** start three nodes in `meroctl local up` (`2501`-`2503`, `"replicas": [1, 2, 3]`). A
   cluster an earlier meroctl made keeps its three nodes and its data after you update.
 - **1.0.0-rc.25 and earlier** call an app instance a *context*: `meroctl context create` and
-  `meroctl call --context kv ...` (or `-c kv`), where this page has `instance create` and `--instance`. 1.0.0-rc.26
-  still takes the old spelling, hidden, for one release.
+  `meroctl call --context kv ...` (or `-c kv`), where this page has `instance create` and `--instance`.
 - **1.0.0-rc.24** also runs the `merod` on `PATH` in `meroctl local up` unless you pass `--docker` (macOS has no
   `merod` there: use `meroctl local up --docker`), keeps its state in `.merod-local/` in the directory you ran it from
   (run `meroctl local down` from there), and leaves an empty `apps/kv-store/logic/apps/` directory behind after

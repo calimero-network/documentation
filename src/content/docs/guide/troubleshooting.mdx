@@ -282,19 +282,6 @@ Error: the registry refused the bundle: 400 Bad Request version_not_allowed: New
 - `not_owner` (`403`): the package was published with another key. A package's signer cannot change; a different key
   is a different app.
 
-## The CLI's old spellings
-
-From 1.0.0-rc.30, meroctl names the old spelling of a command and its replacement on stderr:
-
-```text
-warning: `meroctl context` is now `meroctl instance`; the old spelling will be removed in a later release
-```
-
-An app instance was a *context*, an organization a *namespace* and a team a *group*. The old commands and flags
-(`context`, `--context`/`-c`, `namespace`, `group`, `--namespace`, `--group`, ...) still work, and the answer on stdout
-is the same. Use the new ones (`instance`, `--instance`/`-i`, `org`, `team`, `--org`, `--team`) in scripts. See
-[With an older release](/getting-started/#with-an-older-release).
-
 <Aside>
 The core reference's [Troubleshooting](https://calimero-network.github.io/core/operate/troubleshooting/) covers what
 an operator meets running `merod`: startup, attestation, backups and recovery.
