@@ -1,36 +1,78 @@
 ---
-/** The home page's opening, in the landing's type: eyebrow, two-line headline with a red second line, lede, two buttons. */
+/**
+ * The home page's opening, sized to fit one screen with the link index below it (index.mdx):
+ * the eyebrow and the two-line headline with a red second line across the top, then a short lede and
+ * the buttons on the left and the two lines that start a development cluster on the right.
+ */
+import { Code } from '@astrojs/starlight/components';
+
+const install = `curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
+meroctl local up`;
 ---
 
 <section class="cal-hero not-content">
-	<span class="cal-eyebrow">Calimero docs</span>
-	<h1>
-		Ship the app.
-		<em>Skip the infrastructure.</em>
-	</h1>
-	<p class="lede">
-		Write your app once and run it sealed on Calimero Cloud. Every node proves what it runs before it gets keys, every
-		client checks that proof before it sends anything, and nobody operating the nodes, Calimero included, can read the
-		data inside.
-	</p>
-	<div class="ctas">
-		<a class="btn ink" href="/getting-started/">Quickstart</a>
-		<a class="btn line" href="/guide/example/">The guide</a>
+	<div class="head">
+		<span class="cal-eyebrow">Calimero docs</span>
+		<h1>
+			Ship the app.
+			<em>Skip the infrastructure.</em>
+		</h1>
+	</div>
+	<div class="pitch">
+		<p class="lede">
+			A confidential cloud for collaborative apps. Write your app's state and methods in Rust; it runs as a WebAssembly
+			component on attested Intel TDX nodes, replicated by its own log. Clients verify each node before they send it
+			anything, and nobody operating the nodes, Calimero included, can read the data.
+		</p>
+		<div class="ctas">
+			<a class="btn ink" href="/getting-started/">Quickstart</a>
+			<a class="btn line" href="/guide/example/">The guide</a>
+			<a class="btn line" href="/build-with-an-agent/">Build with an AI agent</a>
+		</div>
+	</div>
+	<div class="try">
+		<span class="label">Start a cluster on your machine</span>
+		<Code code={install} lang="bash" />
+		<p class="note">
+			Needs <a href="https://docs.docker.com/get-docker/">Docker</a> running. You write no database, sync, encryption or
+			server code. Next: <a href="/getting-started/">deploy and call an app in five steps →</a>
+		</p>
 	</div>
 </section>
 
 <style>
 	.cal-hero {
-		padding: 1.5rem 0 2.25rem;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0 1.75rem;
+		padding: 0.5rem 0 1.75rem;
 		border-bottom: 1px solid var(--cal-rule);
-		margin-bottom: 2rem;
+		margin-bottom: 1.5rem;
+	}
+	@media (min-width: 64rem) {
+		.cal-hero {
+			grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+			column-gap: 3rem;
+			align-items: end;
+		}
+		.head {
+			grid-column: 1 / -1;
+		}
+	}
+	.try {
+		margin-top: 1.75rem;
+	}
+	@media (min-width: 64rem) {
+		.try {
+			margin-top: 0;
+		}
 	}
 	h1 {
 		font-weight: 800;
-		font-size: clamp(2.5rem, 6vw, 4.25rem);
+		font-size: clamp(2.25rem, 4.6vw, 3.5rem);
 		line-height: 0.98;
 		letter-spacing: -0.045em;
-		margin: 1.1rem 0 1.25rem;
+		margin: 0.85rem 0 1rem;
 		color: var(--cal-ink);
 	}
 	h1 em {
@@ -39,21 +81,21 @@
 		color: var(--cal-seal);
 	}
 	.lede {
-		font-size: 1.15rem;
-		line-height: 1.55;
+		font-size: 1.05rem;
+		line-height: 1.5;
 		color: var(--cal-ink-2);
-		max-width: 40ch;
-		margin: 0 0 1.75rem;
+		max-width: 52ch;
+		margin: 0 0 1.25rem;
 	}
 	.ctas {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12px;
+		gap: 10px;
 	}
 	.btn {
 		display: inline-flex;
 		align-items: center;
-		padding: 13px 20px;
+		padding: 11px 18px;
 		font: 600 15px/1 var(--sl-font);
 		text-decoration: none;
 		border: 1px solid var(--cal-ink);
@@ -70,5 +112,25 @@
 	.btn.line:hover {
 		background: var(--cal-ink);
 		color: var(--cal-paper);
+	}
+	.label {
+		display: block;
+		font: 500 0.72rem/1 var(--sl-font-mono);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--cal-muted);
+		margin-bottom: 0.6rem;
+	}
+	.note {
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--cal-muted);
+		margin: 0.75rem 0 0;
+	}
+	.note a {
+		color: var(--cal-ink-2);
+	}
+	.note a:hover {
+		color: var(--cal-seal);
 	}
 </style>

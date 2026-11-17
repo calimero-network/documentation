@@ -4,49 +4,13 @@ description: Build, publish and run apps on Calimero, the confidential cloud for
 template: splash
 hero:
   title: Calimero Docs
+# The home page is one screen; no pager under it.
+prev: false
+next: false
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import HomeLinks from '../../components/HomeLinks.astro';
 
-Calimero is a confidential cloud for collaborative apps. You write an app's state and methods in Rust, and it runs as
-a WebAssembly component inside attested Intel TDX nodes. Each instance of the app has its own replicated log, so every
-write is applied in one order and the app keeps serving while most of its replicas run.
+{/* The hero (src/components/Hero.astro) carries the pitch and the two install lines; this is every page, one screen from the top. */}
 
-Clients check what a node runs before they send it anything, then talk to it over a sealed channel. People sign in
-with passkeys. Nobody operating the nodes, Calimero included, can read the app's data.
-
-You write no database, sync, encryption or server code. With [Docker](https://docs.docker.com/get-docker/) running,
-two lines install the command line and start a development cluster on your machine:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/calimero-network/core/master/scripts/install.sh | sh
-meroctl local up
-```
-
-<CardGrid>
-	<LinkCard
-		title="Quickstart →"
-		href="/getting-started/"
-		description="From those two lines to a running app you call from the terminal, in five steps."
-	/>
-	<LinkCard
-		title="Build with an AI agent →"
-		href="/build-with-an-agent/"
-		description="Set up Claude Code or another coding agent with Calimero's skills, then ask it for the app you want."
-	/>
-</CardGrid>
-
-## The guide, in order
-
-<CardGrid>
-	<LinkCard title="Quickstart" href="/getting-started/" description="Run a node, clone the example app, build it, deploy it and call it." />
-	<LinkCard title="1. The example, line by line" href="/guide/example/" description="The KV Store's crate, state, methods, events, errors, ABI and tests, and the edit-rebuild loop." />
-	<LinkCard title="2. Call it from code" href="/guide/clients/" description="mero-js in the example's frontend: passkeys, the generated typed client, live events. Then Python, Rust and meroctl." />
-	<LinkCard title="3. Package & publish" href="/guide/publish/" description="Sign a release into an .mpk and publish it to the app registry." />
-	<LinkCard title="4. Deploy & install" href="/guide/deploy/" description="Run a published package on Calimero Cloud, or install it on a node from the registry." />
-	<LinkCard title="Serving your app's frontend" href="/guide/frontend/" description="Why passkeys work only on the frontend the cluster serves from your package, or on an origin you register." />
-	<LinkCard title="Troubleshooting" href="/guide/troubleshooting/" description="The errors you meet installing, running a local cluster, calling and publishing, and what to do." />
-</CardGrid>
-
-Then the background: [how Calimero works](/concepts/), [what an app sees](/concepts/app-model/),
-[organizations](/concepts/organizations/), the [security model](/security/) and the [reference](/reference/).
+<HomeLinks />
